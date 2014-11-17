@@ -14,16 +14,15 @@
 		<isset property="eclipse.pdebuild.home"/>
 	</condition>
 		
-	<!-- this target is not executed when inside eclipse -->
+	<!-- this target is NOT executed from inside eclipse -->
 	<!-- handler is not supported -->
 	<target name="askpwdsecure" unless="${eclipse.running}">
         <input message="Enter password :" addproperty="pwd">
         	<handler type="secure"/>
         </input>
-    	<echo message="${pwd}"/>
     </target>
 
-	<!-- this target is executed when inside eclipse -->
+	<!-- this target is executed from inside eclipse -->
     <target name="askpwde" if="eclipse.running">
         <input message="Enter password :" addproperty="pwd"/>
     </target>
@@ -31,7 +30,7 @@
 	<target name="askpwd" depends="askpwde,askpwdsecure"></target>
 	
     <target name="encrypt" depends="askpwd">
-		<apply executable="openssl" dest="${root.dir}" inputstring="${pwd}${line.separator}${pwd}${line.separator}" failonerror="true">
+		<apply executable="openssl" dest="${root.dir}" inputstring="${pwd}" failonerror="true">
 			<arg value="cast5-cbc"/>
 			<arg value="-e"/>
 			<arg value="-pass"/><arg value="stdin"/>
