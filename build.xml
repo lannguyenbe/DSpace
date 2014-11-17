@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<project name="metam-4.2" basedir="." default="configure-eclipse" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+  
+  <property environment="env"/>
+
+  <target name="package">
+    <artifact:mvn pom="pom.xml" mavenHome="${env.M2_HOME}" fork="true">
+      <sysproperty key="db.name" value="oracle"/>
+      <sysproperty key="env" value="myhome"/>
+      <arg value="package"/>
+    </artifact:mvn>
+  </target>
+  
+  <target name="confiureg-eclipse" depends="package">
+    <artifact:mvn pom="pom.xml" mavenHome="${env.M2_HOME}" fork="true">
+      <sysproperty key="eclipse.workspace" value="${env.PWD}"/>
+      <arg value="eclipse:configure-workspace"/>
+    </artifact:mvn>
+    <artifact:mvn pom="pom.xml" mavenHome="${env.M2_HOME}" fork="true">
+     <arg value="eclipse:eclipse"/>
+    </artifact:mvn>
+  </target>
+ 
+</project>

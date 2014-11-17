@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
    <modelVersion>4.0.0</modelVersion>
    <groupId>org.dspace</groupId>
@@ -21,7 +21,7 @@
         <groupId>org.sonatype.oss</groupId>
         <artifactId>oss-parent</artifactId>
         <version>7</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <!--Force UTF-8 encoding during build on all platforms-->
@@ -41,7 +41,12 @@
            (NOTE: individual POMs can override specific settings). -->
       <pluginManagement>
           <plugins>
-	      <plugin>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-eclipse-plugin</artifactId>
+                <version>2.6</version>
+              </plugin>          
+              <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
         	  <artifactId>maven-javadoc-plugin</artifactId>
         	  <configuration>
@@ -131,7 +136,7 @@
                <configuration>
                  <target name="Encode any UTF-8 chars in properties">
                    <!-- Run 'native2ascii' to encode UTF-8 characters in properties files. Place the resulting file(s) in /target -->
-                   <native2ascii encoding="UTF8" src="${root.basedir}" dest="${root.basedir}/target" includes="*.properties" />
+                   <native2ascii encoding="UTF8" src="${root.basedir}" dest="${root.basedir}/target" includes="*.properties"/>
                  </target>
                </configuration>
                <goals>
@@ -535,8 +540,20 @@
             <maven.test.skip>true</maven.test.skip>
         </properties>
       </profile>
-    
-   </profiles>
+      
+      <!-- rtdb-devutils contains only files for dev environment,
+          not activate as it does not include any java source code -->
+      <profile>
+        <id>rtbf-devutils</id>
+        <activation>
+          <activeByDefault>false</activeByDefault>
+        </activation>
+        <modules>
+          <module>rtbf-devutils</module>
+        </modules>
+      </profile>
+  
+</profiles>
 
    <!--
       Dependency management provides a means to control which
@@ -1242,7 +1259,7 @@
       </developer>
       <developer>
          <name>Jeffrey Trimble</name>
-         <email />
+         <email/>
          <roles>
            <role>commiter</role>
         </roles>
@@ -1279,8 +1296,8 @@
          <name>Pere Villega</name>
          <email>pere.villega@gmail.com</email>
          <url>http://www.perevillega.com</url>
-         <organization />
-         <organizationUrl />
+         <organization/>
+         <organizationUrl/>
          <roles>
             <role>developer</role>
          </roles>
