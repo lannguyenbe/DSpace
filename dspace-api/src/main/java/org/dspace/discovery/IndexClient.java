@@ -123,7 +123,7 @@ public class IndexClient {
             checkRebuildSpellCheck(line, indexer);
         } else if (line.hasOption("B")) { /* Lan 20.11.2014 */
             log.info("(Re)building index from scratch TEST.");
-            SolrServiceImpl myindexer = (SolrServiceImpl) dspace.getServiceManager().getServiceByName(SolrServiceImpl.class.getName(),SolrServiceImpl.class);           
+            SolrServiceImpl myindexer = (SolrServiceImpl) dspace.getServiceManager().getServiceByName(IndexingService.class.getName(),IndexingService.class);
             myindexer.updateIndexCC(context, true);
 //            checkRebuildSpellCheck(line, indexer);
         } else if (line.hasOption("o")) {

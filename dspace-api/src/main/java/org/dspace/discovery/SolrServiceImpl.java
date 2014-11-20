@@ -60,6 +60,7 @@ import org.apache.solr.handler.extraction.ExtractingParams;
 import org.dspace.content.Bitstream;
 import org.dspace.content.Bundle;
 import org.dspace.content.Collection;
+import org.dspace.content.CollectionIterator;
 import org.dspace.content.Community;
 import org.dspace.content.CommunityIterator;
 import org.dspace.content.DCValue;
@@ -236,8 +237,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                     break;
 
                 default:
-                    log
-                            .error("Only Items, Collections and Communities can be Indexed");
+                    log.error("Only Items, Collections and Communities can be Indexed");
             }
 
         } catch (Exception e)
@@ -436,6 +436,36 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 if (communities != null)
                 {
                     communities.close();
+                }
+            }
+
+            CollectionIterator collections = null;
+            try {
+                for (collections = Collection.findAllCursor(context); collections.hasNext();)
+                {
+                    Collection collection = collections.next();
+                    indexContent(context, collection, force);
+                    context.removeCached(collection, collection.getID());
+                }
+            } finally {
+                if (collections != null)
+                {
+                    collections.close();
+                }
+            }
+            
+            ItemIterator items = null;
+            try {
+                for (items = Item.findAllUnfiltered(context); items.hasNext();)
+                {
+                    Item item = items.next();
+                    indexContent(context, item, force);
+                    item.decache();
+                }
+            } finally {
+                if (items != null)
+                {
+                    items.close();
                 }
             }
 
