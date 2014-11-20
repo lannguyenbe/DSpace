@@ -339,6 +339,16 @@ public class Collection extends DSpaceObject
 
         return collectionArray;
     }
+    
+    public static CollectionIterator findAllCursor(Context context) throws SQLException
+    {
+        String myQuery = "SELECT * FROM collection ORDER BY name";
+
+        TableRowIterator rows = DatabaseManager.queryTable(context, "collection", myQuery);
+
+        return new CollectionIterator(context, rows);
+    }
+
 
     /**
      * Get all collections in the system. Adds support for limit and offset.

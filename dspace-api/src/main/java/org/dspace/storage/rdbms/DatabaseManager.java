@@ -76,6 +76,9 @@ public class DatabaseManager
     /** DataSource (retrieved from jndi */
     private static DataSource dataSource = null;
     private static String sqlOnBorrow = null;
+    
+    /** For bulk query */
+    private static Integer BULK_FETCH_SIZE = 1000;
 
     /** Name to use for the pool */
     private static String poolName = "dspacepool";
@@ -239,6 +242,52 @@ public class DatabaseManager
             throw sqle;
         }
     }
+
+    public static TableRowIterator queryTableBulk(Context context, String table, String query, Object... parameters ) throws SQLException
+    {
+        if (log.isDebugEnabled())
+        {
+            StringBuilder sb = new StringBuilder("Running query \"").append(query).append("\"  with parameters: ");
+            for (int i = 0; i < parameters.length; i++)
+            {
+                if (i > 0)
+               {
+                       sb.append(",");
+               }
+                sb.append(parameters[i].toString());
+            }
+            log.debug(sb.toString());
+        }
+        
+        /* Lan 20.11.2014 : use cursor based resultset */
+        PreparedStatement statement = context.getDBConnection().prepareStatement(query,
+        		ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        statement.setFetchSize(BULK_FETCH_SIZE);
+        try
+        {
+            loadParameters(statement, parameters);
+
+            TableRowIterator retTRI = new TableRowIterator(statement.executeQuery(), canonicalize(table));
+
+            retTRI.setStatement(statement);
+            return retTRI;
+        }
+        catch (SQLException sqle)
+        {
+            if (statement != null)
+            {
+                try
+                {
+                    statement.close();
+                }
+                catch (SQLException s)
+                {
+                }
+            }
+
+            throw sqle;
+        }
+    }
     
     /**
      * Return an iterator with the results of the query.
@@ -299,6 +348,53 @@ public class DatabaseManager
         }
     }
 
+    public static TableRowIterator queryBulk(Context context, String query,
+            Object... parameters) throws SQLException    
+    {
+        if (log.isDebugEnabled())
+        {
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < parameters.length; i++)
+            {
+                if (i > 0)
+               {
+                       sb.append(",");
+               }
+                sb.append(parameters[i].toString());
+            }
+            log.debug("Running query \"" + query + "\"  with parameters: " + sb.toString());
+        }
+
+        /* Lan 20.11.2014 : use cursor based resultset */
+        PreparedStatement statement = context.getDBConnection().prepareStatement(query,
+        		ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        statement.setFetchSize(BULK_FETCH_SIZE);
+        try
+        {
+            loadParameters(statement,parameters);
+
+            TableRowIterator retTRI = new TableRowIterator(statement.executeQuery());
+
+            retTRI.setStatement(statement);
+            return retTRI;
+        }
+        catch (SQLException sqle)
+        {
+            if (statement != null)
+            {
+                try
+                {
+                    statement.close();
+                }
+                catch (SQLException s)
+                {
+                }
+            }
+
+            throw sqle;
+        }
+    }
+    
     /**
      * Return the single row result to this query, or null if no result. If more
      * than one row results, only the first is returned.

@@ -2,8 +2,12 @@
 <project name="metam-4.2" basedir="." default="ptg_configure-eclipse" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
   
   <property environment="env"/>
+
+  <target name="input-fileprefix" unless="fileprefix">
+    <input message="Enter properties fileprefix :" addproperty="fileprefix"/>
+  </target>
   
-  <target name="package" if="fileprefix">
+  <target name="package" depends="input-fileprefix">
     <artifact:mvn pom="pom.xml" mavenHome="${env.M2_HOME}" fork="true">
       <sysproperty key="db.name" value="oracle"/>
       <sysproperty key="env" value="${fileprefix}"/>
@@ -11,7 +15,7 @@
     </artifact:mvn>
   </target>
   
-  <target name="configure-eclipse" if="fileprefix" depends="package">
+  <target name="configure-eclipse" depends="package">
     <artifact:mvn pom="pom.xml" mavenHome="${env.M2_HOME}" fork="true">
       <sysproperty key="eclipse.workspace" value="${env.DSSRC}"/>
       <arg value="eclipse:configure-workspace"/>
@@ -36,16 +40,5 @@
         <target name="configure-eclipse"/>
      </antcall>
    </target>
-   
 
-  <!-- public target -->
-  <target name="dev3-configure-eclipse">
-     <antcall>
-        <param name="fileprefix" value="dev3"/>
-        <target name="configure-eclipse"/>
-     </antcall>
-   </target>
-   
-
- 
 </project>

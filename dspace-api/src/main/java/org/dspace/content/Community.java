@@ -298,6 +298,15 @@ public class Community extends DSpaceObject
         return communityArray;
     }
 
+    public static CommunityIterator findAllCursor(Context context) throws SQLException
+    {
+        String myQuery = "SELECT * FROM community ORDER BY name";
+
+        TableRowIterator rows = DatabaseManager.queryTable(context, "community", myQuery);
+
+        return new CommunityIterator(context, rows);
+    }
+    
     /**
      * Get a list of all top-level communities in the system. These are
      * alphabetically sorted by community name. A top-level community is one

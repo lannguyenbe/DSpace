@@ -65,6 +65,11 @@ public class IndexClient {
         options.addOption(OptionBuilder.isRequired(false).withDescription(
                 "(re)build index, wiping out current one if it exists").create(
                 "b"));
+        
+        /* Lan 20.11.2014 : add option -B */        
+        options.addOption(OptionBuilder.isRequired(false).withDescription(
+                "(re)build index TEST").create(
+                "B"));        
 
         options.addOption(OptionBuilder.isRequired(false).withDescription(
                 "Rebuild the spellchecker, can be combined with -b and -f.").create(
@@ -116,6 +121,11 @@ public class IndexClient {
             log.info("(Re)building index from scratch.");
             indexer.createIndex(context);
             checkRebuildSpellCheck(line, indexer);
+        } else if (line.hasOption("B")) { /* Lan 20.11.2014 */
+            log.info("(Re)building index from scratch TEST.");
+            SolrServiceImpl myindexer = (SolrServiceImpl) dspace.getServiceManager().getServiceByName(SolrServiceImpl.class.getName(),SolrServiceImpl.class);           
+            myindexer.updateIndexCC(context, true);
+//            checkRebuildSpellCheck(line, indexer);
         } else if (line.hasOption("o")) {
             log.info("Optimizing search core.");
             indexer.optimize();

@@ -61,6 +61,7 @@ import org.dspace.content.Bitstream;
 import org.dspace.content.Bundle;
 import org.dspace.content.Collection;
 import org.dspace.content.Community;
+import org.dspace.content.CommunityIterator;
 import org.dspace.content.DCValue;
 import org.dspace.content.DSpaceObject;
 import org.dspace.content.Item;
@@ -420,6 +421,35 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
     }
 
+    public void updateIndexCC(Context context, boolean force)
+    {
+        try {
+            CommunityIterator communities = null;
+            try {
+                for (communities = Community.findAllCursor(context); communities.hasNext();)
+                {
+                    Community community = communities.next();
+                    indexContent(context, community, force);
+                    context.removeCached(community, community.getID());
+                }
+            } finally {
+                if (communities != null)
+                {
+                    communities.close();
+                }
+            }
+
+            if(getSolr() != null)
+            {
+                getSolr().commit();
+            }
+
+        } catch (Exception e)
+        {
+            log.error(e.getMessage(), e);
+        }
+    }
+    
     /**
      * Iterates over all documents in the Lucene index and verifies they are in
      * database, if not, they are removed.
