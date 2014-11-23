@@ -349,6 +349,17 @@ public class Collection extends DSpaceObject
         return new CollectionIterator(context, rows);
     }
 
+    public static CollectionIterator findByCommunity(Context context, int community_id) throws SQLException
+    {
+        String myQuery = "SELECT collection.* FROM collection, community2collection"
+        		+ "WHERE collection.collection_id = community2collection.collection_id"
+        		+ "AND community2collection.community_id =" + community_id
+        		+ "ORDER BY collection.name";
+
+        TableRowIterator rows = DatabaseManager.queryTable(context, "collection", myQuery);
+
+        return new CollectionIterator(context, rows);
+    }
 
     /**
      * Get all collections in the system. Adds support for limit and offset.

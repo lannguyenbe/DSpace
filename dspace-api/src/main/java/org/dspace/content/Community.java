@@ -307,6 +307,16 @@ public class Community extends DSpaceObject
         return new CommunityIterator(context, rows);
     }
     
+    public static CommunityIterator findSubcommunities(Context context, int id) throws SQLException
+    {
+        String myQuery = "SELECT community.* FROM community, community2community WHERE community_id = child_comm_id AND parent_comm_id ="
+        		+ id;
+
+        TableRowIterator rows = DatabaseManager.queryTable(context, "community", myQuery);
+
+        return new CommunityIterator(context, rows);
+    }
+    
     /**
      * Get a list of all top-level communities in the system. These are
      * alphabetically sorted by community name. A top-level community is one

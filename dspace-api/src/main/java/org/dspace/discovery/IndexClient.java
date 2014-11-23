@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.apache.commons.cli.*;
 import org.dspace.core.Context;
 import org.dspace.utils.DSpace;
+import org.elasticsearch.common.mvel2.optimizers.impl.refl.nodes.WithAccessor;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -67,9 +68,38 @@ public class IndexClient {
                 "b"));
         
         /* Lan 20.11.2014 : add option -B */        
-        options.addOption(OptionBuilder.isRequired(false).withDescription(
-                "(re)build index TEST").create(
-                "B"));        
+        options
+        		.addOption(OptionBuilder
+        				.isRequired(false)
+        				.withDescription("(re)build index for Big database, wiping out current one if it exists")
+        				.create("B"));        
+
+        /* Lan 20.11.2014 : add option -CC */        
+        options
+        		.addOption(OptionBuilder
+        				.isRequired(false)
+        				.withDescription("(re)build index on communities and collections only")
+        				.create("CC"));        
+
+        /* Lan 21.11.2014 : add option -C */        
+        options
+        		.addOption(OptionBuilder
+        				.isRequired(false)
+        				.hasArg()
+        				.withArgName("community id")
+        				.withDescription("(re)build index for the community id")
+        				.create("C")
+        				);
+
+        /* Lan 23.11.2014 : add option -I */        
+        options
+        		.addOption(OptionBuilder
+        				.isRequired(false)
+        				.hasArg()
+        				.withArgName("item id")
+        				.withDescription("incremental index from the item id")
+        				.create("I")
+        				);
 
         options.addOption(OptionBuilder.isRequired(false).withDescription(
                 "Rebuild the spellchecker, can be combined with -b and -f.").create(
@@ -110,6 +140,7 @@ public class IndexClient {
         DSpace dspace = new DSpace();
 
         IndexingService indexer = dspace.getServiceManager().getServiceByName(IndexingService.class.getName(),IndexingService.class);
+        SolrServiceImpl indexer2 = (SolrServiceImpl) indexer;
 
         if (line.hasOption("r")) {
             log.info("Removing " + line.getOptionValue("r") + " from Index");
@@ -122,10 +153,23 @@ public class IndexClient {
             indexer.createIndex(context);
             checkRebuildSpellCheck(line, indexer);
         } else if (line.hasOption("B")) { /* Lan 20.11.2014 */
-            log.info("(Re)building index from scratch TEST.");
-            SolrServiceImpl myindexer = (SolrServiceImpl) dspace.getServiceManager().getServiceByName(IndexingService.class.getName(),IndexingService.class);
-            myindexer.updateIndexCC(context, true);
-//            checkRebuildSpellCheck(line, indexer);
+            log.info("(Re)building index from scratch for large databse.");
+            indexer2.updateIndexBig(context, true);
+            checkRebuildSpellCheck(line, indexer2);
+        } else if (line.hasOption("CC")) { /* Lan 21.11.2014 */
+            log.info("(Re)building index for communities and collections.");
+            indexer2.updateIndexCC(context, true);
+            checkRebuildSpellCheck(line, indexer2);
+        } else if (line.hasOption("C")) { /* Lan 21.11.2014 */
+            log.info("(Re)building index for the community id.");
+        	int communityId = Integer.parseInt(line.getOptionValue("C"));
+            indexer2.updateIndexC(context, communityId, true);
+            checkRebuildSpellCheck(line, indexer2);
+        } else if (line.hasOption("I")) { /* Lan 21.11.2014 */
+            log.info("Increment index from item id.");
+        	int itemId = Integer.parseInt(line.getOptionValue("I"));
+            indexer2.updateIndexI(context, itemId, true);
+            checkRebuildSpellCheck(line, indexer2);
         } else if (line.hasOption("o")) {
             log.info("Optimizing search core.");
             indexer.optimize();

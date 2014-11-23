@@ -237,12 +237,38 @@ public class Item extends DSpaceObject
      */
 	public static ItemIterator findAllUnfiltered(Context context) throws SQLException
     {
-        String myQuery = "SELECT * FROM item WHERE in_archive='1' or withdrawn='1'";
+        String myQuery = "SELECT * FROM item WHERE in_archive='1' or withdrawn='1'"
+        		+ " ORDER BY item.item_id";
 
         TableRowIterator rows = DatabaseManager.queryTable(context, "item", myQuery);
 
         return new ItemIterator(context, rows);
 	}
+
+	public static ItemIterator findGeId(Context context, int id) throws SQLException
+    {
+        String myQuery = "SELECT * FROM item WHERE in_archive='1' AND item_id >="+id
+        		+ " ORDER BY item.item_id";
+
+        TableRowIterator rows = DatabaseManager.queryTable(context, "item", myQuery);
+
+        return new ItemIterator(context, rows);
+	}
+	
+    public static ItemIterator findByCommunity(Context context, int community_id)
+            throws SQLException
+    {
+        String myQuery = "SELECT item.* FROM item, communiy2item"
+        		+ " WHERE in_archive='1'"
+        		+ " AND item.item_id = community2item.item_id"
+        		+ " AND community2item.community_id ="
+                + community_id
+                + " ORDER BY item.item_id";
+
+        TableRowIterator rows = DatabaseManager.queryTable(context, "item", myQuery);
+
+        return new ItemIterator(context, rows);
+    }
 
     /**
      * Find all the items in the archive by a given submitter. The order is

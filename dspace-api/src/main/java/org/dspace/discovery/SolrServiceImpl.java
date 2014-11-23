@@ -421,7 +421,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
     }
 
-    public void updateIndexCC(Context context, boolean force)
+    public void updateIndexBig(Context context, boolean force)
     {
         try {
             CommunityIterator communities = null;
@@ -469,6 +469,144 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 }
             }
 
+            if(getSolr() != null)
+            {
+                getSolr().commit();
+            }
+
+        } catch (Exception e)
+        {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    public void updateIndexI(Context context, int id, boolean force)
+    {
+        try {
+            ItemIterator items = null;
+            try {
+                for (items = Item.findGeId(context, id); items.hasNext();)
+                {
+                    Item item = items.next();
+                    indexContent(context, item, force);
+                    item.decache();
+                }
+            } finally {
+                if (items != null)
+                {
+                    items.close();
+                }
+            }
+
+            if(getSolr() != null)
+            {
+                getSolr().commit();
+            }
+
+        } catch (Exception e)
+        {
+            log.error(e.getMessage(), e);
+        }
+    }
+    
+    
+    public void updateIndexCC(Context context, boolean force)
+    {
+        try {
+            CommunityIterator communities = null;
+            try {
+                for (communities = Community.findAllCursor(context); communities.hasNext();)
+                {
+                    Community community = communities.next();
+                    indexContent(context, community, force);
+                    context.removeCached(community, community.getID());
+                }
+            } finally {
+                if (communities != null)
+                {
+                    communities.close();
+                }
+            }
+
+            CollectionIterator collections = null;
+            try {
+                for (collections = Collection.findAllCursor(context); collections.hasNext();)
+                {
+                    Collection collection = collections.next();
+                    indexContent(context, collection, force);
+                    context.removeCached(collection, collection.getID());
+                }
+            } finally {
+                if (collections != null)
+                {
+                    collections.close();
+                }
+            }
+            
+            if(getSolr() != null)
+            {
+                getSolr().commit();
+            }
+
+        } catch (Exception e)
+        {
+            log.error(e.getMessage(), e);
+        }
+    }
+    
+    protected void indexCommunity(Context context, Community community, boolean force) 
+    		throws SQLException 
+    {
+    	// Index the given community
+    	int id = community.getID();
+        indexContent(context, community, force);
+        context.removeCached(community, id);
+        
+        // Index the collections
+        CollectionIterator collections = null;
+        try {
+	        for (collections = Collection.findByCommunity(context, id); collections.hasNext();)
+	        {
+	            Collection collection = collections.next();
+	            indexContent(context, collection, force);
+	            context.removeCached(collection, collection.getID());
+	
+	            ItemIterator items = null;
+	                for (items = Item.findByCommunity(context, collection.getID()); items.hasNext();) 
+	                {
+	                    Item item = items.next();
+	                    indexContent(context, item, force);
+	                    item.decache();
+	                }
+	            if (items != null)
+	                items.close();            
+	        }
+        } finally {
+        	if (collections != null)
+        		collections.close();           
+        }
+        
+        // Index the subcommunities
+    	CommunityIterator subcommunities = null;
+    	try {
+	    	for (subcommunities = Community.findSubcommunities(context, id); subcommunities.hasNext();) {
+	    		indexCommunity(context, subcommunities.next(), force);
+	    	}
+    	} finally {
+    		if (subcommunities != null)
+    			subcommunities.close();
+    	}
+    	
+    }
+    
+
+    public void updateIndexC(Context context, int id, boolean force)
+    {
+        try {
+        	Community community = Community.find(context, id);
+        	
+        	indexCommunity(context, community, force);
+            
             if(getSolr() != null)
             {
                 getSolr().commit();
