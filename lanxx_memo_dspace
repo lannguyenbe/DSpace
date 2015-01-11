@@ -1,0 +1,58 @@
+## to install jar in .m2 local repository
+mvn install:install-file -Dfile=dspace-api-4.2.jar -DgroupId=org.dspace -DartifactId=dspace-api -Dversion=4.2 -Dpackaging=jar
+
+## to install war in .m2 local repository
+cd $DSSRC/dspace-xmlui-lang
+mvn clean package
+cd target
+mvn install:install-file -Dfile=dspace-xmlui-lang-4.2.2.war -DgroupId=org.dspace -DartifactId=dspace-xmlui-lang -Dversion=4.2.2 -Dpackaging=war
+
+## to recompile
+### 1. install dspace-xmlui-lang in .m2 local repository
+cd $DSSRC/dspace-xmlui-lang
+mvn clean package
+cd target
+mvn install:install-file -Dfile=dspace-xmlui-lang-4.2.2.war -DgroupId=org.dspace -DartifactId=dspace-xmlui-lang -Dversion=4.2.2 -Dpackaging=war
+
+### 2. install dspace-xmlui in .m2 local repository
+cd $DSSRC/dspace-xmlui
+mvn clean package
+cd target
+mvn install:install-file -Dfile=dspace-xmlui-4.2.war -DgroupId=org.dspace -DartifactId=dspace-xmlui -Dversion=4.2 -Dpackaging=war
+
+### 3. install precompiled dspace-api in .m2 local repository
+mvn install:install-file -Dfile=dspace-api-4.2.jar -DgroupId=org.dspace -DartifactId=dspace-api -Dversion=4.2 -Dpackaging=jar
+
+
+### 4. package everything
+cd $DSSRC/dspace
+mvn clean
+mvn -Ddb.name=oracle -Denv=myhome2 package
+cd $DSSRC/dspace/target/dspace-4.2-build
+ant update
+
+### 5. remove extra webapp
+cd $DS/webapps
+# rm -rf webapp
+
+# instead of 3.
+cd $DSSRC/dspace-api/target
+cp dspace-api-4.2.jar $DS/lib
+## to recompile:end
+
+
+### facet on ebucore.identifier[1]@formatLabel
+http://localhost:8070/solr/search/select?q=*%3A*&wt=json&indent=true&facet=true&facet.field=ebucore.identifier%5B1%5D%40formatLabel
+http://localhost:8070/solr/search/select?q=search_text%3A1578&fl=title&wt=json&indent=true&facet=true&facet.field=ebucore.identifier%5B1%5D%40formatLabel
+
+### solr grouping or field collapse : 
+### group=true&group.field=identifier_origin
+### group=true&group.field=identifier_origin&group.ngroups  # show number of groups
+### group=true&group.field=identifier_origin&group.main=true ### results in simple list
+http://localhost:8070/solr/search/select?q=search_text%3Avisite&rows=100&fl=title%2C+identifier_origin&wt=json&indent=true&group=true&group.field=identifier_origin&group.main=true
+
+http://localhost:8070/solr/search/select?q=jornalite+reporter&wt=json&indent=true&spellcheck=true&spellcheck.count=3&spellcheck.extendedResults=true&spellcheck.collate=true
+
+# Backup solr index : make a data/snapshot.<timestamp> of data/index
+http://localhost:8070/solr/search/replication?command=backup
+http://localhost:8070/solr/search/replication?command=details
