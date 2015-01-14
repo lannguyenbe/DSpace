@@ -22,22 +22,16 @@
   persistent: Save changes made via the API to this file
   sharedLib: path to a lib directory that will be shared across all cores
 -->
+<solr persistent="false">
 
-<solr>
-
-  <solrcloud>
-    <str name="host">${host:localhost}</str>
-    <!-- TODO 14.01.2015 Lan : generate port 8070 from the compilation instead of hardcode -->
-    <int name="hostPort">${jetty.port:8070}</int>
-    <str name="hostContext">${hostContext:solr}</str>
-    <int name="zkClientTimeout">${zkClientTimeout:30000}</int>
-    <bool name="genericCoreNodeNames">${genericCoreNodeNames:true}</bool>
-  </solrcloud>
-
-  <shardHandlerFactory name="shardHandlerFactory"
-    class="HttpShardHandlerFactory">
-    <int name="socketTimeout">${socketTimeout:0}</int>
-    <int name="connTimeout">${connTimeout:0}</int>
-  </shardHandlerFactory>
-
+  <!--
+  adminPath: RequestHandler path to manage cores.  
+    If 'null' (or absent), cores will not be manageable via REST
+  -->
+  <cores adminPath="/admin/cores">
+    <core name="search" instanceDir="search" />
+    <core name="statistics" instanceDir="statistics" />
+    <core name="oai" instanceDir="oai" />
+  </cores>
+  
 </solr>
