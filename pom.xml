@@ -119,6 +119,12 @@
                 <artifactId>maven-license-plugin</artifactId>
                 <version>1.9.0</version>
              </plugin>
+             <!-- 15.01.2015 Lan : to support xmlui-mirage2/pom.xml -->
+             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.6</version>
+              </plugin>
           </plugins>
       </pluginManagement>
 

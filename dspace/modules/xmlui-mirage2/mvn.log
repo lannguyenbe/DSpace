@@ -1,0 +1,240 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] Using the builder org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder with a thread count of 1
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building DSpace XML-UI Mirage2 Theme :: Local Customisations 4.2
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-enforcer-plugin:1.0:enforce (enforce-maven) @ xmlui-mirage2 ---
+[INFO] 
+[INFO] --- maven-antrun-plugin:1.7:run (default) @ xmlui-mirage2 ---
+[WARNING] Parameter tasks is deprecated, use target instead
+[INFO] Executing tasks
+
+main:
+     [echo] PATH=C:\local\oraclexe\app\oracle\product\11.2.0\server\bin;;C:\Program Files\Java\jdk1.7.0_60\bin;C:\apache-maven-3.2.1\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\local\TortoiseSVN\bin;C:\local\Programs\nodejs\;C:\local\Programs\Ruby193\bin;C:\Program Files\Java\jre7\bin;C:\apache-maven-3.2.1\bin;C:\local\apache-ant-1.9.4\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\local\TortoiseSVN\bin;C:\local\Git\cmd;C:\local\Git\bin;C:\local\.npm\global;C:\local\.gems\bin
+     [echo] GEM_PATH=C:\local\.gems;C:\local\Programs\Ruby193\lib\ruby\gems\1.9.1
+     [echo] GEM_HOME=C:\local\.gems
+     [echo] mirage2.deps.included=true
+     [echo] grunt.color.scheme=classic_mirage_color_scheme
+     [echo] grunt.environment=prod
+     [echo] source=C:\local\metam-4.2\dspace\modules\xmlui-mirage2/src/main/webapp/themes/
+[INFO] Executed tasks
+[INFO] 
+[INFO] --- gem-maven-plugin:1.0.6:initialize (default) @ xmlui-mirage2 ---
+[INFO] Successfully installed sass-3.4.3
+[INFO]     Compass is charityware. If you love it, please donate on our behalf at http://umdf.org/compass Thanks!
+[INFO] Successfully installed compass-1.0.1
+[INFO] Successfully installed compass-core-1.0.3
+[INFO] Successfully installed multi_json-1.10.1
+[INFO] Successfully installed compass-import-once-1.0.5
+[INFO] Successfully installed chunky_png-1.3.3
+[INFO] Successfully installed rb-fsevent-0.9.4
+[INFO] Successfully installed rb-inotify-0.9.5
+[INFO] Successfully installed ffi-1.9.6-java
+[INFO] 9 gems installed
+[INFO] 
+[INFO] --- maven-dependency-plugin:2.8:unpack-dependencies (unpack-dependencies) @ xmlui-mirage2 ---
+[INFO] Unpacking C:\local\.m2\org\dspace\dspace-xmlui-mirage2\4.2\dspace-xmlui-mirage2-4.2.war to C:\local\metam-4.2\dspace\modules\xmlui-mirage2\target\mirage2-source-extracted with includes "" and excludes "WEB-INF/**,META-INF/**"
+[INFO] 
+[INFO] --- maven-antrun-plugin:1.7:run (native2ascii-utf8) @ xmlui-mirage2 ---
+[INFO] Executing tasks
+
+Encode any UTF-8 chars in properties:
+[INFO] Executed tasks
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ xmlui-mirage2 ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory C:\local\metam-4.2\dspace\modules\xmlui-mirage2\src\main\resources
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:copy-resources (default) @ xmlui-mirage2 ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 1 resource
+[INFO] Copying 0 resource
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.3.2:compile (default-compile) @ xmlui-mirage2 ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ xmlui-mirage2 ---
+[INFO] Not copying test resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.3.2:testCompile (default-testCompile) @ xmlui-mirage2 ---
+[INFO] Not compiling test sources
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.6:test (default-test) @ xmlui-mirage2 ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- iterator-maven-plugin:0.3:iterator (default) @ xmlui-mirage2 ---
+[INFO] ------ (Mirage2) org.apache.maven.plugins:maven-resources-plugin:2.6:copy-resources
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 134 resources
+[INFO] ------ (Mirage2) org.apache.maven.plugins:maven-resources-plugin:2.6:copy-resources
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 1 resource
+[INFO] ------ (Mirage2) com.github.eirslett:frontend-maven-plugin:0.0.16:install-node-and-npm
+[INFO] Installing node version v0.10.31
+[INFO] Downloading via proxy ProxyConfig{protocol='http', host='httpc2', port=7878}
+[INFO] Installed node.exe locally.
+[INFO] Installing npm version 1.4.23
+[INFO] Downloading NPM from http://registry.npmjs.org/npm/-/npm-1.4.23.tgz to C:\local\metam-4.2\dspace\modules\xmlui-mirage2\target\themes\Mirage2\npm.tar.gz
+[INFO] Downloading via proxy ProxyConfig{protocol='http', host='httpc2', port=7878}
+[INFO] Extracting NPM files in node/
+[INFO] Unpacking C:\local\metam-4.2\dspace\modules\xmlui-mirage2\target\themes\Mirage2\npm.tar.gz into C:\local\metam-4.2\dspace\modules\xmlui-mirage2\target\themes\Mirage2/node
+[INFO] Installed NPM locally.
+[INFO] ------ (Mirage2) com.github.eirslett:frontend-maven-plugin:0.0.16:npm
+[INFO] Running 'npm install --color=false --proxy=http://httpc2:7878' in C:\local\metam-4.2\dspace\modules\xmlui-mirage2\target\themes\Mirage2
+[ERROR] MojoFailureException:
+org.apache.maven.plugin.MojoFailureException: Failed to run task
+	at com.github.eirslett.maven.plugins.frontend.mojo.NpmMojo.execute(NpmMojo.java:45)
+	at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo(DefaultBuildPluginManager.java:133)
+	at com.soebes.maven.plugins.iterator.ExecutorMojo.executeMojo(ExecutorMojo.java:302)
+	at com.soebes.maven.plugins.iterator.ExecutorMojo.execute(ExecutorMojo.java:235)
+	at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo(DefaultBuildPluginManager.java:133)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:208)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:153)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:145)
+	at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject(LifecycleModuleBuilder.java:108)
+	at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject(LifecycleModuleBuilder.java:76)
+	at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build(SingleThreadedBuilder.java:51)
+	at org.apache.maven.lifecycle.internal.LifecycleStarter.execute(LifecycleStarter.java:116)
+	at org.apache.maven.DefaultMaven.doExecute(DefaultMaven.java:361)
+	at org.apache.maven.DefaultMaven.execute(DefaultMaven.java:155)
+	at org.apache.maven.cli.MavenCli.execute(MavenCli.java:584)
+	at org.apache.maven.cli.MavenCli.doMain(MavenCli.java:213)
+	at org.apache.maven.cli.MavenCli.main(MavenCli.java:157)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:606)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced(Launcher.java:289)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.launch(Launcher.java:229)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode(Launcher.java:415)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.main(Launcher.java:356)
+Caused by: com.github.eirslett.maven.plugins.frontend.lib.TaskRunnerException: 'npm install --color=false --proxy=http://httpc2:7878' failed.
+	at com.github.eirslett.maven.plugins.frontend.lib.NodeTaskExecutor.execute(NodeTaskExecutor.java:41)
+	at com.github.eirslett.maven.plugins.frontend.mojo.NpmMojo.execute(NpmMojo.java:43)
+	... 24 more
+Caused by: com.github.eirslett.maven.plugins.frontend.lib.ProcessExecutionException: java.io.IOException: Cannot run program "C:\local\metam-4.2\dspace\modules\xmlui-mirage2\target\themes\Mirage2\node\node" (in directory "C:\local\metam-4.2\dspace\modules\xmlui-mirage2\target\themes\Mirage2"): CreateProcess error=87, Paramètre incorrect
+	at com.github.eirslett.maven.plugins.frontend.lib.ProcessExecutor.executeAndRedirectOutput(ProcessExecutor.java:70)
+	at com.github.eirslett.maven.plugins.frontend.lib.NodeExecutor.executeAndRedirectOutput(NodeExecutor.java:21)
+	at com.github.eirslett.maven.plugins.frontend.lib.NodeTaskExecutor.execute(NodeTaskExecutor.java:36)
+	... 25 more
+Caused by: java.io.IOException: Cannot run program "C:\local\metam-4.2\dspace\modules\xmlui-mirage2\target\themes\Mirage2\node\node" (in directory "C:\local\metam-4.2\dspace\modules\xmlui-mirage2\target\themes\Mirage2"): CreateProcess error=87, Paramètre incorrect
+	at java.lang.ProcessBuilder.start(ProcessBuilder.java:1041)
+	at com.github.eirslett.maven.plugins.frontend.lib.ProcessExecutor.executeAndRedirectOutput(ProcessExecutor.java:58)
+	... 27 more
+Caused by: java.io.IOException: CreateProcess error=87, Paramètre incorrect
+	at java.lang.ProcessImpl.create(Native Method)
+	at java.lang.ProcessImpl.<init>(ProcessImpl.java:385)
+	at java.lang.ProcessImpl.start(ProcessImpl.java:136)
+	at java.lang.ProcessBuilder.start(ProcessBuilder.java:1022)
+	... 28 more
+[INFO] ------ (Mirage2) com.github.eirslett:frontend-maven-plugin:0.0.16:grunt
+[INFO] Running 'grunt classic_mirage_color_scheme no-compass-prod --no-color' in C:\local\metam-4.2\dspace\modules\xmlui-mirage2\target\themes\Mirage2
+[ERROR] MojoFailureException:
+org.apache.maven.plugin.MojoFailureException: Failed to run task
+	at com.github.eirslett.maven.plugins.frontend.mojo.GruntMojo.execute(GruntMojo.java:36)
+	at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo(DefaultBuildPluginManager.java:133)
+	at com.soebes.maven.plugins.iterator.ExecutorMojo.executeMojo(ExecutorMojo.java:302)
+	at com.soebes.maven.plugins.iterator.ExecutorMojo.execute(ExecutorMojo.java:235)
+	at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo(DefaultBuildPluginManager.java:133)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:208)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:153)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:145)
+	at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject(LifecycleModuleBuilder.java:108)
+	at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject(LifecycleModuleBuilder.java:76)
+	at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build(SingleThreadedBuilder.java:51)
+	at org.apache.maven.lifecycle.internal.LifecycleStarter.execute(LifecycleStarter.java:116)
+	at org.apache.maven.DefaultMaven.doExecute(DefaultMaven.java:361)
+	at org.apache.maven.DefaultMaven.execute(DefaultMaven.java:155)
+	at org.apache.maven.cli.MavenCli.execute(MavenCli.java:584)
+	at org.apache.maven.cli.MavenCli.doMain(MavenCli.java:213)
+	at org.apache.maven.cli.MavenCli.main(MavenCli.java:157)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:606)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced(Launcher.java:289)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.launch(Launcher.java:229)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode(Launcher.java:415)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.main(Launcher.java:356)
+Caused by: com.github.eirslett.maven.plugins.frontend.lib.TaskRunnerException: 'grunt classic_mirage_color_scheme no-compass-prod --no-color' failed.
+	at com.github.eirslett.maven.plugins.frontend.lib.NodeTaskExecutor.execute(NodeTaskExecutor.java:41)
+	at com.github.eirslett.maven.plugins.frontend.mojo.GruntMojo.execute(GruntMojo.java:34)
+	... 24 more
+Caused by: com.github.eirslett.maven.plugins.frontend.lib.ProcessExecutionException: java.io.IOException: Cannot run program "C:\local\metam-4.2\dspace\modules\xmlui-mirage2\target\themes\Mirage2\node\node" (in directory "C:\local\metam-4.2\dspace\modules\xmlui-mirage2\target\themes\Mirage2"): CreateProcess error=87, Paramètre incorrect
+	at com.github.eirslett.maven.plugins.frontend.lib.ProcessExecutor.executeAndRedirectOutput(ProcessExecutor.java:70)
+	at com.github.eirslett.maven.plugins.frontend.lib.NodeExecutor.executeAndRedirectOutput(NodeExecutor.java:21)
+	at com.github.eirslett.maven.plugins.frontend.lib.NodeTaskExecutor.execute(NodeTaskExecutor.java:36)
+	... 25 more
+Caused by: java.io.IOException: Cannot run program "C:\local\metam-4.2\dspace\modules\xmlui-mirage2\target\themes\Mirage2\node\node" (in directory "C:\local\metam-4.2\dspace\modules\xmlui-mirage2\target\themes\Mirage2"): CreateProcess error=87, Paramètre incorrect
+	at java.lang.ProcessBuilder.start(ProcessBuilder.java:1041)
+	at com.github.eirslett.maven.plugins.frontend.lib.ProcessExecutor.executeAndRedirectOutput(ProcessExecutor.java:58)
+	... 27 more
+Caused by: java.io.IOException: CreateProcess error=87, Paramètre incorrect
+	at java.lang.ProcessImpl.create(Native Method)
+	at java.lang.ProcessImpl.<init>(ProcessImpl.java:385)
+	at java.lang.ProcessImpl.start(ProcessImpl.java:136)
+	at java.lang.ProcessBuilder.start(ProcessBuilder.java:1022)
+	... 28 more
+[INFO] ------ (Mirage2) de.saumya.mojo:gem-maven-plugin:1.0.6:exec
+[WARNING] Compass can't find any Sass files to compile.
+[WARNING] Is your compass configuration correct?.
+[WARNING] If you're trying to start a new project, you have left off the directory argument.
+[WARNING] Run "compass -h" to get help.
+[ERROR] PluginManagerException:
+org.apache.maven.plugin.PluginExecutionException: Execution null of goal de.saumya.mojo:gem-maven-plugin:1.0.6:exec failed: Java returned: 1
+	at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo(DefaultBuildPluginManager.java:144)
+	at com.soebes.maven.plugins.iterator.ExecutorMojo.executeMojo(ExecutorMojo.java:302)
+	at com.soebes.maven.plugins.iterator.ExecutorMojo.execute(ExecutorMojo.java:235)
+	at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo(DefaultBuildPluginManager.java:133)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:208)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:153)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:145)
+	at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject(LifecycleModuleBuilder.java:108)
+	at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject(LifecycleModuleBuilder.java:76)
+	at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build(SingleThreadedBuilder.java:51)
+	at org.apache.maven.lifecycle.internal.LifecycleStarter.execute(LifecycleStarter.java:116)
+	at org.apache.maven.DefaultMaven.doExecute(DefaultMaven.java:361)
+	at org.apache.maven.DefaultMaven.execute(DefaultMaven.java:155)
+	at org.apache.maven.cli.MavenCli.execute(MavenCli.java:584)
+	at org.apache.maven.cli.MavenCli.doMain(MavenCli.java:213)
+	at org.apache.maven.cli.MavenCli.main(MavenCli.java:157)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:606)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced(Launcher.java:289)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.launch(Launcher.java:229)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode(Launcher.java:415)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.main(Launcher.java:356)
+Caused by: Java returned: 1
+	at org.apache.tools.ant.taskdefs.Java.execute(Java.java:87)
+	at de.saumya.mojo.ruby.script.AntLauncher.doExecute(AntLauncher.java:107)
+	at de.saumya.mojo.ruby.script.AntLauncher.executeIn(AntLauncher.java:141)
+	at de.saumya.mojo.ruby.script.Script.executeIn(Script.java:108)
+	at de.saumya.mojo.gem.ExecMojo.executeWithGems(ExecMojo.java:106)
+	at de.saumya.mojo.gem.AbstractGemMojo.executeJRuby(AbstractGemMojo.java:469)
+	at de.saumya.mojo.jruby.AbstractJRubyMojo.execute(AbstractJRubyMojo.java:298)
+	at de.saumya.mojo.gem.AbstractGemMojo.execute(AbstractGemMojo.java:222)
+	at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo(DefaultBuildPluginManager.java:133)
+	... 23 more
+[INFO] 
+[INFO] --- maven-war-plugin:2.1.1:war (default-war) @ xmlui-mirage2 ---
+[INFO] Packaging webapp
+[INFO] Assembling webapp [xmlui-mirage2] in [C:\local\metam-4.2\dspace\modules\xmlui-mirage2\target\xmlui-mirage2-4.2]
+[INFO] Processing war project
+[INFO] Copying webapp webResources [C:\local\metam-4.2\dspace\modules\xmlui-mirage2/src/main/webapp] to [C:\local\metam-4.2\dspace\modules\xmlui-mirage2\target\xmlui-mirage2-4.2]
+[INFO] Copying webapp webResources [C:\local\metam-4.2\dspace\modules\xmlui-mirage2\target/themes] to [C:\local\metam-4.2\dspace\modules\xmlui-mirage2\target\xmlui-mirage2-4.2]
+[INFO] Copying webapp resources [C:\local\metam-4.2\dspace\modules\xmlui-mirage2\src\main\webapp]
+[INFO] Processing overlay [ id org.dspace:dspace-xmlui-mirage2]
+[INFO] Webapp assembled in [2028 msecs]
+[INFO] Building war: C:\local\metam-4.2\dspace\modules\xmlui-mirage2\target\xmlui-mirage2-4.2.war
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 45.567 s
+[INFO] Finished at: 2015-01-16T15:44:13+01:00
+[INFO] Final Memory: 15M/36M
+[INFO] ------------------------------------------------------------------------

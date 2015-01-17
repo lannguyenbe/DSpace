@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<project name="dspace-xmlui" basedir="." default="deploy" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+<project name="dspace-xmlui" basedir="." default="help" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
   
   <property environment="env"/>
   
@@ -8,10 +8,11 @@
   </condition>
 
   <target name="help">
+    <echo message="Type : ant deploy"/>
     <echo message="What deploy is doing ..."/>
     <echo message="------------------------"/>
     <echo message="1. mvn this current overlay dspace-xmlui"/>
-    <echo message="2. mvn the main war xmlui"/>
+    <echo message="2. mvn the main war modules/xmlui"/>
     <echo message="3. touch the jetty context descriptor xmlui.xml"/>
     <echo message="... you should see the redeployment messages on jetty console"/>
   </target>
@@ -35,6 +36,7 @@
   <target name="overlay" depends="install,clean">
     <artifact:mvn pom="../dspace/modules/xmlui/pom.xml" mavenHome="${env.M2_HOME}" fork="true">
       <sysproperty key="db.name" value="oracle"/>
+      <arg value="clean"/>   
       <arg value="package"/>         
     </artifact:mvn>
   </target>

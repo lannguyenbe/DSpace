@@ -1,4 +1,7 @@
 ------------------------------------  J A V A - M V N - A N T ------------------------------------------------
+mvn install:install-file -Dfile=dspace-xmlui-mirage2-4.2.war -DgroupId=org.dspace -DartifactId=dspace-xmlui-mirage2 -Dversion=4.2 -Dpackaging=war
+
+
 # to install dspace-xmlui-lang-4.2.2.war in .m2 local repository
 cd \local\metam-4.2\dspace-xmlui-lang
 mvn clean package
@@ -66,6 +69,7 @@ http://localhost:8070/solr/search/select?q=jornalite+reporter&wt=json&indent=tru
 
 # Backup solr index : make a data/snapshot.<timestamp> of data/index
 http://localhost:8070/solr/search/replication?command=backup
+
 http://localhost:8070/solr/search/replication?command=details
 http://localhost:8070/solr/zookeeper
 
