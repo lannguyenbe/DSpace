@@ -1,9 +1,15 @@
 ------------------------------------  J A V A - M V N - A N T ------------------------------------------------
+cd C:\local\metam-4.2\dspace\modules\xmlui-mirage2
+mvn package -Dmirage2.deps.included=false # if node, ruby ... already pre-installed
+mvn package -P mirage2_dev -Dmirage2.deps.included=false # non minified main.css
+
 mvn install:install-file -Dfile=dspace-xmlui-mirage2-4.2.war -DgroupId=org.dspace -DartifactId=dspace-xmlui-mirage2 -Dversion=4.2 -Dpackaging=war
 
 
 # to install dspace-xmlui-lang-4.2.2.war in .m2 local repository
 cd \local\metam-4.2\dspace-xmlui-lang
+mvn install:install-file -Dfile=dspace-xmlui-mirage2-4.2.war -DgroupId=org.dspace -DartifactId=dspace-xmlui-mirage2 -Dversion=4.2 -Dpackaging=war
+
 mvn clean package
 cd target
 mvn install:install-file -Dfile=dspace-xmlui-lang-4.2.2.war -DgroupId=org.dspace -DartifactId=dspace-xmlui-lang -Dversion=4.2.2 -Dpackaging=war
@@ -22,7 +28,7 @@ mvn clean package
 ## to install jar in .m2 local repository
 mvn install:install-file -Dfile=dspace-api-4.2.jar -DgroupId=org.dspace -DartifactId=dspace-api -Dversion=4.2 -Dpackaging=jar
 
-## to recompile
+#-------------------------------------------------------------- to recompile
 ### 1. install dspace-xmlui-lang in .m2 local repository
 cd $DSSRC/dspace-xmlui-lang
 mvn clean package

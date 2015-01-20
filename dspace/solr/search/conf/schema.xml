@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!--
  Licensed to the Apache Software Foundation (ASF) under one or more
  contributor license agreements.  See the NOTICE file distributed with
@@ -688,21 +688,23 @@
 
    <dynamicField name="random_*" type="random" />
    
-    <!-- 16.12.2014 Lan : specific adaptation for ebucore -->
-    <!-- field name="dc.type" type="string" indexed="true" stored="false" /-->
-    <!-- dynamicField name="ebucore.*"  type="string"  indexed="true"  stored="false"/-->
-    <!-- dynamicField name="ebucore.identifier[1]*"  type="string"  indexed="true"  stored="true"/-->    
-    <field name="dc.type" type="string" indexed="true" stored="true" omitNorms="true" />
-    <dynamicField name="ebucore.*"  type="string"  indexed="true"  stored="true" />
+    <!-- 16.12.2014 Lan : specific adaptation for ebucore
+    <field name="dc.type" type="string" indexed="true" stored="false" />
+    <dynamicField name="ebucore.*"  type="string"  indexed="true"  stored="false"/>
+    -->
+    <field name="dc.type" type="string" indexed="true" stored="true" />
+    <dynamicField name="ebucore.*"  type="string"  indexed="true"  stored="true"/>
 
     <!-- 06.01.2015 Lan : support result group or field collapse thr identifier_origin -->
     <field name="identifier_origin" type="string" indexed="true" stored="true" multiValued="false" omitNorms="true"/>
-    <copyField source="*identifier.origin" dest="identifier_origin"/>
+    <!-- 20.01.2015 Lan : use requestUpdateProcessor instead of copyField, look in solrconfig.xml -->
+    <!-- copyField source="*identifier.origin" dest="identifier_origin"/-->
 
-    <!-- 06.01.2015 Lan : support identifier_attributor as facet filter
-         1. configure spring/api/discovery.xml
+    <!-- 06.01.2015 Lan : support identifier_attributor as facet filter -->
+    <!-- 1. configure spring/api/discovery.xml
          2. configure i18n/messages.xml + messages_fr.xml
-         3. reindex bin/dspace index-discovery -I 1 -->
+         3. reindex bin/dspace index-discovery -I 1
+    -->
     <field name="identifier_attributor" type="rtbf_entityID" indexed="true" stored="true" multiValued="false" omitNorms="true"/>
     <!--copyField source="ebucore.identifier[1]/ebucore:attributor@entityID" dest="identifier_attributor" /-->
     <field name="identifier_attributor_keyword" type="rtbf_entityID" indexed="true" stored="true" multiValued="false" omitNorms="true"/>

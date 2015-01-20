@@ -1030,10 +1030,14 @@
          on each Update Request
       -->
     <!--
-       <lst name="defaults">
-         <str name="update.chain">dedupe</str>
-       </lst>
-       -->
+        <lst name="defaults">
+        <str name="update.chain">dedupe</str>
+        </lst>
+    -->
+
+    <lst name="defaults">
+      <str name="update.chain">identifier_origin</str>
+    </lst>
   </requestHandler>
 
   <!-- for back compat with clients using /update/json and /update/csv -->  
@@ -1864,6 +1868,29 @@
        http://wiki.apache.org/solr/UpdateRequestProcessor
 
     --> 
+  <!-- 20.01.2015 Lan : identifier_origin -->
+  <updateRequestProcessorChain name="identifier_origin">
+    <!-- To guaranty the concat order use 2 separate processors for clone field -->
+    <processor class="solr.CloneFieldUpdateProcessorFactory">
+        <!-- source fields are exclusive, only one has a value -->
+        <str name="source">ebucore.identifier[1]@formatLabel.origin</str>
+        <str name="source">ebucore.identifier[2]@formatLabel.origin</str>
+        <str name="dest">identifier_origin</str>
+    </processor>
+    <processor class="solr.CloneFieldUpdateProcessorFactory">
+        <!-- source fields are exclusive, only one has a value -->
+        <str name="source">ebucore.identifier[1]/dc:identifier.origin</str>
+        <str name="source">ebucore.identifier[2]/dc:identifier.origin</str>
+        <str name="dest">identifier_origin</str>
+    </processor>
+    <processor class="solr.processor.ConcatFieldUpdateProcessorFactory">
+        <str name="fieldName">identifier_origin</str>
+        <str name="delimiter"></str>
+    </processor>
+    <processor class="solr.LogUpdateProcessorFactory" />
+    <processor class="solr.RunUpdateProcessorFactory" />
+  </updateRequestProcessorChain>
+    
   <!-- Deduplication
 
        An example dedup update processor that creates the "id" field
