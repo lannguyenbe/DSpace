@@ -309,7 +309,7 @@ public class Community extends DSpaceObject
     
     public static CommunityIterator findSubcommunities(Context context, int id) throws SQLException
     {
-        String myQuery = "SELECT community.* FROM community, community2community WHERE community_id = child_comm_id AND parent_comm_id ="
+        String myQuery = "SELECT community.* FROM community, community2community WHERE community_id = child_comm_id AND parent_comm_id = "
         		+ id;
 
         TableRowIterator rows = DatabaseManager.queryTable(context, "community", myQuery);

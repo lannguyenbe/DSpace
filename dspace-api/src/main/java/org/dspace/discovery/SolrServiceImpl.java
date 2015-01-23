@@ -554,52 +554,59 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
     }
     
+
     protected void indexCommunity(Context context, Community community, boolean force) 
     		throws SQLException 
     {
-    	// Index the given community
-    	int id = community.getID();
-        indexContent(context, community, force);
-        context.removeCached(community, id);
-        
-        // Index the collections
-        CollectionIterator collections = null;
-        try {
-	        for (collections = Collection.findByCommunity(context, id); collections.hasNext();)
-	        {
-	            Collection collection = collections.next();
-	            indexContent(context, collection, force);
-	            context.removeCached(collection, collection.getID());
+	    try {
+	    	
+	    	// Index the given community
+	    	int id = community.getID();
+	        indexContent(context, community, force);
+	        context.removeCached(community, id);
 	
-	            ItemIterator items = null;
-	                for (items = Item.findByCommunity(context, collection.getID()); items.hasNext();) 
-	                {
-	                    Item item = items.next();
-	                    indexContent(context, item, force);
-	                    item.decache();
-	                }
-	            if (items != null)
-	                items.close();            
+	        CollectionIterator collections = null;
+	        try {
+		        for (collections = Collection.findByCommunity(context, id); collections.hasNext();)
+	            {
+	                Collection collection = collections.next();
+	                indexContent(context, collection, force);
+	                context.removeCached(collection, collection.getID());
+	            }
+	        } finally {
+	            if (collections != null)
+	            {
+	                collections.close();
+	            }
 	        }
-        } finally {
-        	if (collections != null)
-        		collections.close();           
-        }
+	        
+	        ItemIterator items = null;
+	        try {
+	            for (items = Item.findByCommunity(context, id); items.hasNext();)
+	            {
+	                Item item = items.next();
+	                indexContent(context, item, force);
+	                item.decache();
+	            }
+	        } finally {
+	            if (items != null)
+	            {
+	                items.close();
+	            }
+	        }
+	
+	        if(getSolr() != null)
+	        {
+	            getSolr().commit();
+	        }
+	
+	    } catch (Exception e)
+	    {
+	        log.error(e.getMessage(), e);
+	    }
+    }    
         
-        // Index the subcommunities
-    	CommunityIterator subcommunities = null;
-    	try {
-	    	for (subcommunities = Community.findSubcommunities(context, id); subcommunities.hasNext();) {
-	    		indexCommunity(context, subcommunities.next(), force);
-	    	}
-    	} finally {
-    		if (subcommunities != null)
-    			subcommunities.close();
-    	}
-    	
-    }
     
-
     public void updateIndexC(Context context, int id, boolean force)
     {
         try {

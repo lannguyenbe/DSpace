@@ -30,7 +30,6 @@
     <!--<xsl:import href="../dri2xhtml-alt/dri2xhtml.xsl"/>-->
     <xsl:import href="aspect/artifactbrowser/artifactbrowser.xsl"/>
     <xsl:import href="core/global-variables.xsl"/>
-    <xsl:import href="custom-variables.xsl"/> <!-- Lan 22.01.2015 -->
     <xsl:import href="core/elements.xsl"/>
     <xsl:import href="core/forms.xsl"/>
     <xsl:import href="core/page-structure.xsl"/>

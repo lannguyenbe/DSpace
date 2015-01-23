@@ -255,15 +255,28 @@ public class Item extends DSpaceObject
         return new ItemIterator(context, rows);
 	}
 	
+    public static ItemIterator findByCollection(Context context, int collection_id)
+            throws SQLException
+    {
+        String myQuery = "SELECT item.* FROM item, collection2item"
+        		+ " WHERE in_archive='1'"
+        		+ " AND item.item_id = collection2item.item_id"
+        		+ " AND collection2item.collection_id = " + collection_id
+                + " ORDER BY item.item_id";
+
+        TableRowIterator rows = DatabaseManager.queryTable(context, "item", myQuery);
+
+        return new ItemIterator(context, rows);
+    }
+    
     public static ItemIterator findByCommunity(Context context, int community_id)
             throws SQLException
     {
-        String myQuery = "SELECT item.* FROM item, communiy2item"
-        		+ " WHERE in_archive='1'"
-        		+ " AND item.item_id = community2item.item_id"
-        		+ " AND community2item.community_id ="
-                + community_id
-                + " ORDER BY item.item_id";
+        String myQuery = "SELECT item.*"
+        		+ " FROM item, topcommunity2item"
+        		+ " WHERE topcommunity2item.parent_comm_id = " + community_id
+        		+ " AND item.item_id = topcommunity2item.item_id"
+        		+ " ORDER BY item.item_id";
 
         TableRowIterator rows = DatabaseManager.queryTable(context, "item", myQuery);
 
