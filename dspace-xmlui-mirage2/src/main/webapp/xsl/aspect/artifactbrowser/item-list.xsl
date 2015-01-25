@@ -149,17 +149,12 @@
                     </small>
                 </span>
                 <xsl:text> </xsl:text>
-                <!-- Lan  : add identifier.source -->
-                <xsl:if test="dim:field[@element='date' and @qualifier='issued'] or dim:field[@element='publisher' or @element=$identifier.source]">
+                <xsl:if test="dim:field[@element='date' and @qualifier='issued']">
 	                <span class="publisher-date h4">  <small>
 	                    <xsl:text>(</xsl:text>
-	                    <xsl:if test="dim:field[@element='publisher' or @element=$identifier.source]">
+	                    <xsl:if test="dim:field[@element='publisher']">
 	                        <span class="publisher">
 	                            <xsl:copy-of select="dim:field[@element='publisher']/node()"/>
-                                  <i18n:text catalogue="default">
-                                  <xsl:text>xmlui.custom.rtbf.identifier.source.</xsl:text>
-                                  <xsl:copy-of select="dim:field[@element=$identifier.source]/node()"/>
-                               </i18n:text>
 	                        </span>
 	                        <xsl:text>, </xsl:text>
 	                    </xsl:if>

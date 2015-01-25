@@ -242,14 +242,21 @@
                         </xsl:choose>
                         </small></span>
                     <xsl:text> </xsl:text>
-                    <xsl:if test="dri:list[@n=(concat($handle, ':dc.date.issued'))]">
+                    <!-- Lan : add identifier.source -->
+                    <xsl:if test="dri:list[@n=(concat($handle, ':dc.date.issued'))] or dri:list[@n=(concat($handle, ':dc.publisher')) or starts-with(@n,concat($handle, concat(':',$ns.identifier.source)))]">
                         <span class="publisher-date h4">   <small>
                             <xsl:text>(</xsl:text>
-                            <xsl:if test="dri:list[@n=(concat($handle, ':dc.publisher'))]">
+                            <xsl:if test="dri:list[@n=(concat($handle, ':dc.publisher')) or starts-with(@n,concat($handle,concat(':',$ns.identifier.source)))]">
                                 <span class="publisher">
                                     <xsl:apply-templates select="dri:list[@n=(concat($handle, ':dc.publisher'))]/dri:item"/>
+                                    <i18n:text catalogue="default">
+                                       <xsl:text>xmlui.custom.rtbf.identifier.source.</xsl:text>
+                                       <xsl:value-of select="dri:list[starts-with(@n,concat($handle, concat(':',$ns.identifier.source)))]/dri:item"/>
+                                    </i18n:text>
                                 </span>
-                                <xsl:text>, </xsl:text>
+                                <xsl:if test="dri:list[@n=(concat($handle, ':dc.date.issued'))]">
+                                	<xsl:text>, </xsl:text>
+                                </xsl:if>
                             </xsl:if>
                             <span class="date">
                                 <xsl:value-of

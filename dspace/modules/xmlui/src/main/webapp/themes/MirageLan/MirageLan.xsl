@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
     The contents of this file are subject to the license and copyright
@@ -28,6 +28,8 @@
 
     <xsl:import href="../dri2xhtml-alt/dri2xhtml.xsl"/>
     <xsl:import href="lib/xsl/core/global-variables.xsl"/>
+	<!-- Lan 24.01.2015 : add custom-variables separated from core/global-variables -->
+    <xsl:import href="custom-variables.xsl"/>
     <xsl:import href="lib/xsl/core/page-structure.xsl"/>
     <xsl:import href="lib/xsl/core/navigation.xsl"/>
     <xsl:import href="lib/xsl/core/elements.xsl"/>
@@ -40,6 +42,7 @@
     <xsl:import href="lib/xsl/aspect/artifactbrowser/item-view.xsl"/>
     <xsl:import href="lib/xsl/aspect/artifactbrowser/community-list.xsl"/>
     <xsl:import href="lib/xsl/aspect/artifactbrowser/collection-list.xsl"/>
+    <xsl:import href="lib/xsl/aspect/artifactbrowser/discovery.xsl"/>
     <xsl:output indent="yes"/>
     
 

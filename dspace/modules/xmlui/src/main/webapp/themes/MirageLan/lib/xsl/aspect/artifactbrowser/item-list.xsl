@@ -151,6 +151,7 @@
     <!--handles the rendering of a single item in a list in metadata mode-->
     <xsl:template match="dim:dim" mode="itemSummaryList-DIM-metadata">
         <xsl:param name="href"/>
+<xsl:message>In item-list.xsl mode itemSummaryList-DIM-metadata</xsl:message>    
         <div class="artifact-description">
             <div class="artifact-title">
                 <xsl:element name="a">
@@ -211,12 +212,17 @@
                     </xsl:choose>
                 </span>
                 <xsl:text> </xsl:text>
-                <xsl:if test="dim:field[@element='date' and @qualifier='issued'] or dim:field[@element='publisher']">
+                <!-- Lan : add identifier.source -->
+                <xsl:if test="dim:field[@element='date' and @qualifier='issued'] or dim:field[@element='publisher' or @element=$identifier.source]">
 	                <span class="publisher-date">
 	                    <xsl:text>(</xsl:text>
-	                    <xsl:if test="dim:field[@element='publisher']">
+	                    <xsl:if test="dim:field[@element='publisher' or @element=$identifier.source]">
 	                        <span class="publisher">
 	                            <xsl:copy-of select="dim:field[@element='publisher']/node()"/>
+                               <i18n:text catalogue="default">
+                                  <xsl:text>xmlui.custom.rtbf.identifier.source.</xsl:text>
+ 	                               <xsl:copy-of select="dim:field[@element=$identifier.source]/node()"/>
+                               </i18n:text>
 	                        </span>
 	                        <xsl:text>, </xsl:text>
 	                    </xsl:if>

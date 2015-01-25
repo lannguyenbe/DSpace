@@ -435,7 +435,14 @@
                 <xsl:when test="./@target">
                     <a>
                         <xsl:attribute name="href">
-                            <xsl:value-of select="./@target"/>
+                          <xsl:choose>
+                            <xsl:when test="position()=2 or position()=3">
+                              <xsl:text>#</xsl:text>
+                            </xsl:when>
+                            <xsl:otherwise>
+                              <xsl:value-of select="./@target"/>
+                            </xsl:otherwise>
+                          </xsl:choose>
                         </xsl:attribute>
                         <xsl:apply-templates />
                     </a>

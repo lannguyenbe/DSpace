@@ -10,7 +10,6 @@
 -->
 <catalogue xml:lang="en" xmlns:i18n="http://apache.org/cocoon/i18n/2.1">
 
-
 	<!--
 		The format used by all keys is as follows
 
@@ -23,12 +22,6 @@
 		   may be found at xmlui.<Aspect> without specifying a
 		   particular java class.
 		-->
-        
-	<!-- Custom keys -->
-    <!-- Lan 22.01.2015 -->
-	<message key="xmlui.custom.rtbf.identifier.source.TV">Tramontane TV</message>
-	<message key="xmlui.custom.rtbf.identifier.source.SO">Sonuma TV</message>
-	<message key="xmlui.custom.rtbf.identifier.source.RA">Radio</message>
 
 	<!-- General keys -->
 	<message key="xmlui.general.dspace_home">DSpace Home</message>
@@ -129,10 +122,6 @@
 	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_identifier">Identifier</message>
 	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_language">Language (ISO)</message>
 	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_keyword">Keyword</message>
-
-    <!--  07.01.2015 Lan : new facet identifier_attributor -->
-	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_identifier_attributor">Source</message>
-	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.identifier_attributor">Source</message>
 
    <!--  some common other possibilities for Advanced Search Fields -->
    <message key="xmlui.ArtifactBrowser.AdvancedSearch.type_contributor">Contributor</message>
@@ -2368,33 +2357,4 @@
     <message key="xmlui.aspect.versioning.VersionNoticeTransformer.notice.workflow_version_help">A more recent version of this item is in the Workflow.</message>
 
     <!-- End Versioning -->
-
-    <!-- Lan 23.01.2015 : message for Mirage2, copy form messages.xml from master dspace-5.0 -->
-    <message key="xmlui.mirage2.itemSummaryView.MetaData">Metadata</message>
-    <message key="xmlui.mirage2.itemSummaryView.Collections">Collections</message>
-
-    <message key="xmlui.mirage2.discovery.reset">Reset</message>
-    <message key="xmlui.mirage2.discovery.newFilter">Add New Filter</message>
-    <message key="xmlui.mirage2.discovery.showAdvancedFilters">Show Advanced Filters</message>
-    <message key="xmlui.mirage2.discovery.hideAdvancedFilters">Hide Advanced Filters</message>
-
-
-    <message key="xmlui.mirage2.forms.instancedCompositeFields.add">Add</message>
-    <message key="xmlui.mirage2.forms.instancedCompositeFields.remove">Remove</message>
-    <message key="xmlui.mirage2.forms.instancedCompositeFields.noSuggestionError">ERROR: Input field with "suggest" (autocomplete) choice behavior is not implemented for Composite (e.g. "name") fields.</message>
-    <message key="xmlui.mirage2.forms.nonInstancedCompositeFields.noSuggestionError">ERROR: Input field with "suggest" (autocomplete) choice behavior is not implemented for Composite (e.g. "name") fields.</message>
-    <message key="xmlui.mirage2.forms.nonCompositeFieldSet.add">Add</message>
-    <message key="xmlui.mirage2.forms.nonCompositeFieldSet.remove">Remove</message>
-
-    <message key="xmlui.mirage2.page-structure.aboutThisRepository">About This Repository</message>
-    <message key="xmlui.mirage2.page-structure.toggleNavigation">Toggle navigation</message>
-
-    <message key="xmlui.mirage2.page-structure.heroUnit.title">About This Repository</message>
-    <message key="xmlui.mirage2.page-structure.heroUnit.content">To add your own content to this page, edit webapps/xmlui/themes/Mirage2/lib/xsl/core/page-structure.xsl and add your own content to the title, trail, and body. If you wish to add additional pages, you will need to create an additional xsl:when block and match the request-uri to whatever page you are adding. Currently, static pages created through altering XSL are only available under the URI prefix of page/.</message>
-
-    <message key="xmlui.mirage2.navigation.rss.feed">feed</message>
-
-    <message key="xmlui.mirage2.choice-authority-control.loading">Loading...</message>
-
-    <message key="xmlui.mirage2.item-list.thumbnail">Thumbnail</message>
 </catalogue>

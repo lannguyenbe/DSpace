@@ -179,7 +179,7 @@
         <!-- <theme name="Test Theme 2" regex="community-list" path="theme2/"/> -->
 
         <!-- Mirage theme, @mire contributed theme, default since DSpace 3.0 -->
-        <theme name="Atmire Mirage Theme" regex=".*" path="Mirage/" />
+        <!-- theme name="Atmire Mirage Theme" regex=".*" path="Mirage/" /-->
         <!-- Lan 15.01.2015 : Add Mirage2 -->
         <theme name="Mirage 2" regex=".*" path="Mirage2/" />
 
