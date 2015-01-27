@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 
     The contents of this file are subject to the license and copyright
     detailed in the LICENSE and NOTICE files at the root of the source
@@ -327,7 +327,7 @@
                         <xsl:text>/</xsl:text>
                     </xsl:attribute>
                     <span id="ds-header-logo">&#160;</span>
-                    <span id="ds-header-logo-text">:in page-structure.xsl:
+                    <span id="ds-header-logo-text">
                        <i18n:text>xmlui.dri2xhtml.structural.head-subtitle</i18n:text>
                     </span>
                 </a>

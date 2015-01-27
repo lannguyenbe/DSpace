@@ -85,6 +85,9 @@ public class TableRowIterator
     {
         this.results = results;
         this.table = table;
+
+        log.info("TableRowIterator on " +table);
+                
         if (columnNames == null)
         {
             try
@@ -237,6 +240,7 @@ public class TableRowIterator
             {
                 statemt.close();
                 statemt = null;
+                log.info("Close statement on " +table);
             }
         }
         catch (SQLException sqle)

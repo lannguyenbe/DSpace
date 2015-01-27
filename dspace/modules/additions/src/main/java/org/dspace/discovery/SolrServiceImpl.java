@@ -60,7 +60,9 @@ import org.apache.solr.handler.extraction.ExtractingParams;
 import org.dspace.content.Bitstream;
 import org.dspace.content.Bundle;
 import org.dspace.content.Collection;
+import org.dspace.content.CollectionIterator;
 import org.dspace.content.Community;
+import org.dspace.content.CommunityIterator;
 import org.dspace.content.DCValue;
 import org.dspace.content.DSpaceObject;
 import org.dspace.content.Item;
@@ -235,8 +237,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                     break;
 
                 default:
-                    log
-                            .error("Only Items, Collections and Communities can be Indexed");
+                    log.error("Only Items, Collections and Communities can be Indexed");
             }
 
         } catch (Exception e)
@@ -420,6 +421,210 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
     }
 
+    public void updateIndexBig(Context context, boolean force)
+    {
+        try {
+            CommunityIterator communities = null;
+            try {
+                for (communities = Community.findAllCursor(context); communities.hasNext();)
+                {
+                    Community community = communities.next();
+                    indexContent(context, community, force);
+                    context.removeCached(community, community.getID());
+                }
+            } finally {
+                if (communities != null)
+                {
+                    communities.close();
+                }
+            }
+
+            CollectionIterator collections = null;
+            try {
+                for (collections = Collection.findAllCursor(context); collections.hasNext();)
+                {
+                    Collection collection = collections.next();
+                    indexContent(context, collection, force);
+                    context.removeCached(collection, collection.getID());
+                }
+            } finally {
+                if (collections != null)
+                {
+                    collections.close();
+                }
+            }
+            
+            ItemIterator items = null;
+            try {
+                for (items = Item.findAllUnfiltered(context); items.hasNext();)
+                {
+                    Item item = items.next();
+                    indexContent(context, item, force);
+                    item.decache();
+                }
+            } finally {
+                if (items != null)
+                {
+                    items.close();
+                }
+            }
+
+            if(getSolr() != null)
+            {
+                getSolr().commit();
+            }
+
+        } catch (Exception e)
+        {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    public void updateIndexI(Context context, int id, boolean force)
+    {
+        try {
+            ItemIterator items = null;
+            try {
+                for (items = Item.findGeId(context, id); items.hasNext();)
+                {
+                    Item item = items.next();
+                    indexContent(context, item, force);
+                    item.decache();
+                }
+            } finally {
+                if (items != null)
+                {
+                    items.close();
+                }
+            }
+
+            if(getSolr() != null)
+            {
+                getSolr().commit();
+            }
+
+        } catch (Exception e)
+        {
+            log.error(e.getMessage(), e);
+        }
+    }
+    
+    
+    public void updateIndexCC(Context context, boolean force)
+    {
+        try {
+            CommunityIterator communities = null;
+            try {
+                for (communities = Community.findAllCursor(context); communities.hasNext();)
+                {
+                    Community community = communities.next();
+                    indexContent(context, community, force);
+                    context.removeCached(community, community.getID());
+                }
+            } finally {
+                if (communities != null)
+                {
+                    communities.close();
+                }
+            }
+
+            CollectionIterator collections = null;
+            try {
+                for (collections = Collection.findAllCursor(context); collections.hasNext();)
+                {
+                    Collection collection = collections.next();
+                    indexContent(context, collection, force);
+                    context.removeCached(collection, collection.getID());
+                }
+            } finally {
+                if (collections != null)
+                {
+                    collections.close();
+                }
+            }
+            
+            if(getSolr() != null)
+            {
+                getSolr().commit();
+            }
+
+        } catch (Exception e)
+        {
+            log.error(e.getMessage(), e);
+        }
+    }
+    
+
+    protected void indexCommunity(Context context, Community community, boolean force) 
+    		throws SQLException 
+    {
+	    try {
+	    	
+	    	// Index the given community
+	    	int id = community.getID();
+	        indexContent(context, community, force);
+	        context.removeCached(community, id);
+	
+	        CollectionIterator collections = null;
+	        try {
+		        for (collections = Collection.findByCommunity(context, id); collections.hasNext();)
+	            {
+	                Collection collection = collections.next();
+	                indexContent(context, collection, force);
+	                context.removeCached(collection, collection.getID());
+	            }
+	        } finally {
+	            if (collections != null)
+	            {
+	                collections.close();
+	            }
+	        }
+	        
+	        ItemIterator items = null;
+	        try {
+	            for (items = Item.findByCommunity(context, id); items.hasNext();)
+	            {
+	                Item item = items.next();
+	                indexContent(context, item, force);
+	                item.decache();
+	            }
+	        } finally {
+	            if (items != null)
+	            {
+	                items.close();
+	            }
+	        }
+	
+	        if(getSolr() != null)
+	        {
+	            getSolr().commit();
+	        }
+	
+	    } catch (Exception e)
+	    {
+	        log.error(e.getMessage(), e);
+	    }
+    }    
+        
+    
+    public void updateIndexC(Context context, int id, boolean force)
+    {
+        try {
+        	Community community = Community.find(context, id);
+        	
+        	indexCommunity(context, community, force);
+            
+            if(getSolr() != null)
+            {
+                getSolr().commit();
+            }
+
+        } catch (Exception e)
+        {
+            log.error(e.getMessage(), e);
+        }
+    }
+    
     /**
      * Iterates over all documents in the Lucene index and verifies they are in
      * database, if not, they are removed.

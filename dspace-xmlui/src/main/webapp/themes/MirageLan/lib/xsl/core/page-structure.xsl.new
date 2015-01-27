@@ -327,7 +327,6 @@
                         <xsl:text>/</xsl:text>
                     </xsl:attribute>
                     <span id="ds-header-logo">&#160;</span>
-                    <!-- Lan 03.11.2014 -->
                     <span id="ds-header-logo-text">:in page-structure.xsl:
                        <i18n:text>xmlui.dri2xhtml.structural.head-subtitle</i18n:text>
                     </span>
@@ -436,17 +435,7 @@
                 <xsl:when test="./@target">
                     <a>
                         <xsl:attribute name="href">
-                          <!-- Lan 03.11.2014 : disable first community and sub-communities browsing -->
-                          <xsl:choose>
-                            <!-- Lan 01.12.2014 : re-enable -->
-                            <!-- xsl:when test="position()=2 or position()=3" -->
-                            <xsl:when test="position()=200 or position()=300">
-                              <xsl:text>#</xsl:text>
-                            </xsl:when>
-                            <xsl:otherwise>
-                              <xsl:value-of select="./@target"/>
-                            </xsl:otherwise>
-                          </xsl:choose>
+                            <xsl:value-of select="./@target"/>
                         </xsl:attribute>
                         <xsl:apply-templates />
                     </a>

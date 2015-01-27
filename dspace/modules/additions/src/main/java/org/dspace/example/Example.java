@@ -7,6 +7,9 @@
  */
 package org.dspace.example;
 
+import org.dspace.content.*;
+
+
 /**
  * TODO: Add Description
  *
