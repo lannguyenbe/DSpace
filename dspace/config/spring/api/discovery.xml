@@ -22,10 +22,13 @@
 
     <context:annotation-config /> <!-- allows us to use spring annotations in beans -->
 
-    <bean id="solrServiceResourceIndexPlugin" class="org.dspace.discovery.SolrServiceResourceRestrictionPlugin" scope="prototype"/>
     <bean id="SolrServiceSpellIndexingPlugin" class="org.dspace.discovery.SolrServiceSpellIndexingPlugin" scope="prototype"/>
 
-    <alias name="solrServiceResourceIndexPlugin" alias="org.dspace.discovery.SolrServiceResourceRestrictionPlugin"/>
+    <!-- Lan 04.11.2014 : comment 2 following lines to disable "access rights awareness"
+         anonymous can access anything, no need to login
+    -->
+    <!-- bean id="solrServiceResourceIndexPlugin" class="org.dspace.discovery.SolrServiceResourceRestrictionPlugin" scope="prototype"/-->
+    <!-- alias name="solrServiceResourceIndexPlugin" alias="org.dspace.discovery.SolrServiceResourceRestrictionPlugin"/-->
 
     <!-- Additional indexing plugin to implement the browse system via SOLR -->
     <bean id="solrBrowseIndexer" scope="prototype"
@@ -95,6 +98,7 @@
         <!--Which sidebar facets are to be displayed-->
         <property name="sidebarFacets">
             <list>
+                <ref bean="searchFilterIdAttributor" />
                 <ref bean="searchFilterAuthor" />
                 <ref bean="searchFilterSubject" />
                 <ref bean="searchFilterIssued" />
@@ -105,6 +109,7 @@
         <!--The search filters which can be used on the discovery search page-->
         <property name="searchFilters">
             <list>
+                <ref bean="searchFilterIdAttributor" />
                 <ref bean="searchFilterTitle" />
                 <ref bean="searchFilterAuthor" />
                 <ref bean="searchFilterSubject" />
@@ -200,6 +205,7 @@
         <!--Which sidebar facets are to be displayed (same as defaultConfiguration above)-->
         <property name="sidebarFacets">
             <list>
+                <ref bean="searchFilterIdAttributor" />
                 <ref bean="searchFilterAuthor" />
                 <ref bean="searchFilterSubject" />
                 <ref bean="searchFilterIssued" />
@@ -210,6 +216,7 @@
         <!--The search filters which can be used on the discovery search page (same as defaultConfiguration above)-->
         <property name="searchFilters">
             <list>
+                <ref bean="searchFilterIdAttributor" />
                 <ref bean="searchFilterTitle" />
                 <ref bean="searchFilterAuthor" />
                 <ref bean="searchFilterSubject" />
@@ -361,6 +368,18 @@
     </bean>
     
     <!--Search filter configuration beans-->
+    <!-- 07.01.2015 Lan : search filter on identifier_attributor (eg which local repository the data is from) -->
+    <bean id="searchFilterIdAttributor" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
+        <property name="indexFieldName" value="identifier_attributor"/>
+        <property name="metadataFields">
+            <list>
+                <value>ebucore.identifier[1]/ebucore:attributor@entityID</value>
+            </list>
+        </property>
+        <property name="facetLimit" value="10"/>
+        <property name="sortOrder" value="COUNT"/>
+    </bean>
+
     <bean id="searchFilterTitle" class="org.dspace.discovery.configuration.DiscoverySearchFilter">
         <property name="indexFieldName" value="title"/>
         <property name="metadataFields">

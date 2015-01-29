@@ -191,9 +191,88 @@
         </plugins>
     </build>
 
-    <!-- Faster build profile (enable with -Dmirage2.deps.included=true).
-         However you must manually install dependencies on your machine for this to work. -->
     <profiles>
+        <!-- Extra Faster build profile for xsl modification only, not generating main.css or theme.js
+         this is a copy of profile mirage2-deps-preinstalled-fast except the 2 last pluginExecutor
+         exec npm and exec grunt
+         Lan 25.01.2015 - enable with -P mirage2-xfast -->
+        <profile>
+            <id>mirage2-xfast</id>
+            <build>
+                <!-- Centrally manage the versions of all plugins used by this profile -->
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>exec-maven-plugin</artifactId>
+                            <version>1.3.1</version>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+                <plugins>
+                    <plugin>
+                        <groupId>com.soebes.maven.plugins</groupId>
+                        <artifactId>iterator-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>iterator</goal>
+                                </goals>
+                                <configuration>
+                                    <folder>${basedir}/src/main/webapp/themes/</folder>
+                                    <pluginExecutors>
+                                        <pluginExecutor>
+                                            <plugin>
+                                                <groupId>org.apache.maven.plugins</groupId>
+                                                <artifactId>maven-resources-plugin</artifactId>
+                                            </plugin>
+                                            <goal>copy-resources</goal>
+                                            <configuration>
+                                                <outputDirectory>${project.build.directory}/themes/@item@</outputDirectory>
+                                                <overwrite>false</overwrite>
+                                                <resources>
+                                                    <resource>
+                                                        <directory>${project.build.directory}/mirage2-source-extracted</directory>
+                                                        <filtering>false</filtering>
+                                                        <excludes>
+                                                            <exclude>sitemap.xmap</exclude>
+                                                        </excludes>
+                                                    </resource>
+                                                </resources>
+                                            </configuration>
+                                        </pluginExecutor>
+                                        <pluginExecutor>
+                                            <plugin>
+                                                <groupId>org.apache.maven.plugins</groupId>
+                                                <artifactId>maven-resources-plugin</artifactId>
+                                            </plugin>
+                                            <goal>copy-resources</goal>
+                                            <configuration>
+                                                <outputDirectory>${project.build.directory}/themes/@item@</outputDirectory>
+                                                <overwrite>false</overwrite>
+                                                <resources>
+                                                    <resource>
+                                                        <directory>${project.build.directory}/mirage2-source-extracted</directory>
+                                                        <filtering>true</filtering>
+                                                        <includes>
+                                                            <include>sitemap.xmap</include>
+                                                        </includes>
+                                                    </resource>
+                                                </resources>
+                                            </configuration>
+                                        </pluginExecutor>
+                                    </pluginExecutors>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Faster build profile (enable with -Dmirage2.deps.included=true).
+         However you must manually install dependencies on your machine for this to work. -->
         <profile>
             <id>mirage2-deps-preinstalled-fast</id>
             <activation>
