@@ -1,6 +1,12 @@
 ant overwrite_solr_configs
 mvn install:install-file -Dfile=dspace-xmlui-5.0.war -DgroupId=org.dspace -DartifactId=dspace-xmlui -Dversion=5.0 -Dpackaging=war
-------------------------------------- to recompile EVERYTHING (also from dspace-*) --------------------------------------
+
+C:\local\metam-5.0\dspace>
+mvn help:active-profiles -Dmirage2.on=true -Dmirage2.deps.included=false -Ddb.name=oracle -Denv=ptg_dspace2
+
+------------------------------------- to rebuild EVERYTHING (also from dspace-*) --------------------------------------
+### Pour désactiver le build des modules dspace-* ou modules/* : mv pom.xml pom.xml.d
+
 cd [dspace-source] # NOT the subdir [dspace-source]/dspace
 mvn -U clean package -Dmirage2.on=true -Dmirage2.deps.included=false -Ddb.name=oracle -Denv=ptg_dspace2
 # if fail on xmlui-mirage2, retry
