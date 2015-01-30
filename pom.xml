@@ -45,6 +45,13 @@
            (NOTE: individual POMs can override specific settings). -->
       <pluginManagement>
           <plugins>
+              <!-- Lan 30.01.2015 : add maven-eclipse-plugin v2.6
+                 to use with eclipse:eclipse goal -->
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-eclipse-plugin</artifactId>
+                <version>2.6</version>
+              </plugin>          
               <plugin>
                   <artifactId>maven-compiler-plugin</artifactId>
                   <version>3.1</version>

@@ -9,6 +9,8 @@ mvn help:active-profiles -Dmirage2.on=true -Dmirage2.deps.included=false -Ddb.na
 
 cd [dspace-source] # NOT the subdir [dspace-source]/dspace
 mvn -U clean package -Dmirage2.on=true -Dmirage2.deps.included=false -Ddb.name=oracle -Denv=ptg_dspace2
+mvn clean package -Dmirage2.on=true -Dmirage2.deps.included=false -Ddb.name=oracle -Denv=ptg_dspace2
+mvn package -Dmirage2.on=true -Dmirage2.deps.included=false -Ddb.name=oracle -Denv=ptg_dspace2
 # if fail on xmlui-mirage2, retry
 mvn -U package -rf :xmlui-mirage2 -Dmirage2.on=true -Dmirage2.deps.included=false -Ddb.name=oracle -Denv=ptg_dspace2
 # if target does not contain webapps

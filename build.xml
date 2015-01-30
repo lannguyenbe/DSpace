@@ -15,7 +15,23 @@
     </artifact:mvn>
   </target>
   
-  <target name="configure-eclipse" depends="package">
+  <!-- configure eclipse for project that pom.xml exists -->
+  <target name="configure-eclipse">
+    <artifact:mvn pom="pom.xml" mavenHome="${env.M2_HOME}" fork="true">
+      <sysproperty key="eclipse.workspace" value="${env.DSSRC}"/>
+      <arg value="eclipse:configure-workspace"/>
+    </artifact:mvn>
+    <artifact:mvn pom="pom.xml" mavenHome="${env.M2_HOME}" fork="true">
+     <arg value="eclipse:eclipse"/>
+    </artifact:mvn>
+  </target>
+  <!-- to configure manually project for eclipse : example for dspace-rdf
+    1. cd dspace-rdf
+    1. mv pom.xml.d pom.xml
+    2. mvn eclipse:eclipse
+    -->
+
+  <target name="configure-eclipse-old" depends="package">
     <artifact:mvn pom="pom.xml" mavenHome="${env.M2_HOME}" fork="true">
       <sysproperty key="eclipse.workspace" value="${env.DSSRC}"/>
       <arg value="eclipse:configure-workspace"/>
