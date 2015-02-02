@@ -1,4 +1,4 @@
-package org.dspace.discovery;
+package org.dspace.springbean.discovery;
 
 import java.sql.SQLException;
 
@@ -13,14 +13,13 @@ import org.dspace.content.Item;
 import org.dspace.content.ItemAdd;
 import org.dspace.content.ItemIterator;
 import org.dspace.core.Context;
-import org.dspace.discovery.SolrServiceImpl;
 
-public class SorlServImpl2 extends SolrServiceImpl {
+public class SolrServiceImpl extends org.dspace.discovery.SolrServiceImpl {
 
-    public SorlServImpl2() {
+    public SolrServiceImpl() {
     }
 
-    private static final Logger log = Logger.getLogger(SorlServImpl2.class);
+    private static final Logger log = Logger.getLogger(SolrServiceImpl.class);
 
     
     public void updateIndexBig(Context context, boolean force)

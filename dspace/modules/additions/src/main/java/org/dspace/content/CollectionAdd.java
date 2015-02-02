@@ -15,7 +15,7 @@ public class CollectionAdd extends Collection {
         
     public static CollectionIterator findAllCursor(Context context) throws SQLException
     {
-        String myQuery = "SELECT * FROM collection ORDER BY name";
+        String myQuery = "SELECT * FROM collection";
 
         TableRowIterator rows = DatabaseManager.queryTable(context, "collection", myQuery);
 

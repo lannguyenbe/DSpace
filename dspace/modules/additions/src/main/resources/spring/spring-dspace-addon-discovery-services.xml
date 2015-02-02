@@ -24,6 +24,10 @@
     -->
 
 
-    <bean id="org.dspace.discovery.IndexingService" class="org.dspace.discovery.SolrServiceImpl2" />
+    <bean class="org.dspace.springbean.discovery.SolrServiceImpl" id="org.dspace.discovery.SearchService"/>
+
+    <alias name="org.dspace.discovery.SearchService" alias="org.dspace.discovery.IndexingService"/>
+
+    <!-- bean id="org.dspace.discovery.IndexingService" class="org.dspace.springbean.discovery.SolrServiceImpl" /-->
 
 </beans>

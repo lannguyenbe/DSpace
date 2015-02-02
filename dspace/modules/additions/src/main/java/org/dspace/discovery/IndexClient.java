@@ -139,7 +139,7 @@ public class IndexClient {
         DSpace dspace = new DSpace();
 
         IndexingService indexer = dspace.getServiceManager().getServiceByName(IndexingService.class.getName(),IndexingService.class);
-        SorlServImpl2 indexer2 = (SorlServImpl2) indexer;
+        org.dspace.springbean.discovery.SolrServiceImpl indexer2 = (org.dspace.springbean.discovery.SolrServiceImpl) indexer;
 
         if (line.hasOption("r")) {
             log.info("Removing " + line.getOptionValue("r") + " from Index");

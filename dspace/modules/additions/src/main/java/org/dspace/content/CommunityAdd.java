@@ -15,7 +15,7 @@ public class CommunityAdd extends Community {
     
     public static CommunityIterator findAllCursor(Context context) throws SQLException
     {
-        String myQuery = "SELECT * FROM community ORDER BY name";
+        String myQuery = "SELECT * FROM community";
 
         TableRowIterator rows = DatabaseManager.queryTable(context, "community", myQuery);
 
