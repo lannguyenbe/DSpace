@@ -35,7 +35,7 @@
        that you fully re-index after changing this setting as it can
        affect both how text is indexed and queried.
   -->
-  <luceneMatchVersion>4.4</luceneMatchVersion>
+  <luceneMatchVersion>4.10</luceneMatchVersion>
 
   <!-- <lib/> directives can be used to instruct Solr to load an Jars
        identified and use them to resolve any "plugins" specified in
@@ -811,6 +811,9 @@
        <str name="echoParams">explicit</str>
        <int name="rows">10</int>
        <str name="df">search_text</str>
+       <!-- Lan 09.02.2015 : boosting by dc.date.issued -->
+       <str name="defType">edismax</str>
+       <str name="boost">recip(ms(NOW/HOUR, dc.date.issued_dt),3.16e-11,1,1)</str>
      </lst>
       <arr name="last-components">
           <str>spellcheck</str>
@@ -833,6 +836,14 @@
          <str name="fq">inStock:true</str>
        </lst>
       -->
+       <lst name="appends">
+         <!-- Lan 09.02.2015 : Impose this default filter query to collapse multiple
+              sequences to one : 
+              - inside Tramontane when multiple programs share the same sequence;
+              - between Tramontane & Sonuma -->
+         <str name="fq">{!collapse field=identifier_origin max=is_identifier_origin nullPolicy=expand}</str>
+         <str name="expand">true</str>
+       </lst>
     <!-- "invariants" are a way of letting the Solr maintainer lock down
          the options available to Solr clients.  Any params values
          specified here are used regardless of what values may be specified
@@ -1034,7 +1045,8 @@
         <str name="update.chain">dedupe</str>
         </lst>
     -->
-
+    <!-- Lan 20.01.2015 : add to update.chain to generate the field
+         far earlier than the index time -->
     <lst name="defaults">
       <str name="update.chain">identifier_origin</str>
     </lst>
@@ -1870,6 +1882,7 @@
     --> 
   <!-- 20.01.2015 Lan : identifier_origin -->
   <updateRequestProcessorChain name="identifier_origin">
+    <!-- Add field identifier_origin -->
     <!-- To guaranty the concat order use 2 separate processors for clone field -->
     <processor class="solr.CloneFieldUpdateProcessorFactory">
         <!-- source fields are exclusive, only one has a value -->
@@ -1887,6 +1900,14 @@
         <str name="fieldName">identifier_origin</str>
         <str name="delimiter"></str>
     </processor>
+    <!-- Lan 09.02.2015 : add field identifier_origin_count -->
+    <processor class="solr.CloneFieldUpdateProcessorFactory">
+        <str name="source">ebucore.identifier[1]/dc:identifier.origin</str>
+        <str name="dest">identifier_origin_count</str>
+    </processor>
+    <processor class="solr.processor.CountFieldValuesUpdateProcessorFactory">
+        <str name="fieldName">identifier_origin_count</str>
+    </processor>    
     <processor class="solr.LogUpdateProcessorFactory" />
     <processor class="solr.RunUpdateProcessorFactory" />
   </updateRequestProcessorChain>

@@ -136,6 +136,13 @@ cp dspace-api-4.2.jar $DS/lib
 http://localhost:8070/solr/search/select?q=*%3A*&wt=json&indent=true&facet=true&facet.field=ebucore.identifier%5B1%5D%40formatLabel
 http://localhost:8070/solr/search/select?q=search_text%3A1578&fl=title&wt=json&indent=true&facet=true&facet.field=ebucore.identifier%5B1%5D%40formatLabel
 
+### field collapse using CollapsingQparser
+http://localhost:8070/solr/search/select?q=search_text%3Avisite&rows=100&fl=title%2C+identifier_origin&wt=json&indent=true&fq={!collapse%20field=identifier_origin%20nullPolicy=expand}
+
+http://localhost:8070/solr/search/select?q=search_text%3Avisite&rows=100&fl=title%2C+identifier_origin+subject&wt=json&indent=true&fq={!collapse%20field=identifier_origin%20nullPolicy=expand}&facet=true&facet.field=subject
+
+http://localhost:8070/solr/search/select?q=search_text%3Avisite&rows=100&fl=title%2C+identifier_origin&wt=json&indent=true&fq={!collapse%20field=identifier_origin}
+
 ### solr grouping or field collapse : 
 ### group=true&group.field=identifier_origin
 ### group=true&group.field=identifier_origin&group.ngroups  # show number of groups
