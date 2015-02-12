@@ -1442,4 +1442,16 @@ public class BrowseDAOOracle implements BrowseDAO
     public void setEnableBrowseFrequencies(boolean enableBrowseFrequencies) {
         this.enableBrowseFrequencies = enableBrowseFrequencies;
     }
+
+	@Override
+	public int getResourceType() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void setResourceType(int type) {
+		// TODO Auto-generated method stub
+		
+	}
 }

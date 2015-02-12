@@ -123,6 +123,8 @@ public class SolrBrowseDAO implements BrowseDAO
     private boolean distinct = false;
 
     private String facetField;
+    
+    private int resourceType;
 
     // administrative attributes for this class
 
@@ -178,7 +180,10 @@ public class SolrBrowseDAO implements BrowseDAO
                 }
                 // filter on item to be sure to don't include any other object
                 // indexed in the Discovery Search core
-                query.addFilterQueries("search.resourcetype:" + Constants.ITEM);
+                /* Lan 
+                 * query.addFilterQueries("search.resourcetype:" + Constants.ITEM);
+                 */
+                query.addFilterQueries("search.resourcetype:" + resourceType);
                 if (orderField != null)
                 {
                     query.setSortField("bi_" + orderField + "_sort",
@@ -307,7 +312,7 @@ public class SolrBrowseDAO implements BrowseDAO
     {
         DiscoverQuery query = new DiscoverQuery();
         query.setQuery("search.resourceid:" + itemID
-                + " AND search.resourcetype:" + Constants.ITEM);
+                + " AND search.resourcetype:" + resourceType);
         query.setMaxResults(1);
         DiscoverResult resp = null;
         try
@@ -335,7 +340,7 @@ public class SolrBrowseDAO implements BrowseDAO
         addLocationScopeFilter(query);
         addStatusFilter(query);
         query.setMaxResults(0);
-        query.addFilterQueries("search.resourcetype:" + Constants.ITEM);
+        query.addFilterQueries("search.resourcetype:" + resourceType);
         if (isAscending)
         {
             query.setQuery("bi_"+column + "_sort" + ": [* TO \"" + value + "\"}");
@@ -748,4 +753,16 @@ public class SolrBrowseDAO implements BrowseDAO
     {
         this.authority = value;
     }
+
+	@Override
+	public int getResourceType() {
+		return resourceType;
+	}
+
+	@Override
+	public void setResourceType(int type) {
+		resourceType = type;		
+	}
+    
+    
 }

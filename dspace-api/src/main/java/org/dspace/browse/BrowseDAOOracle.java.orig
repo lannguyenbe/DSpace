@@ -21,22 +21,22 @@ import org.dspace.storage.rdbms.TableRow;
 import org.dspace.storage.rdbms.TableRowIterator;
 
 /**
- * This class is the PostgreSQL driver class for reading information from the
- * Browse tables.  It implements the BrowseDAO interface, and also has a
- * constructor of the form:
+ * This class is the Oracle driver class for reading information from the Browse
+ * tables. It implements the BrowseDAO interface, and also has a constructor of
+ * the form:
  *
- * BrowseDAOPostgres(Context context)
+ * BrowseDAOOracle(Context context)
  *
- * As required by BrowseDAOFactory.  This class should only ever be loaded by
+ * As required by BrowseDAOFactory. This class should only ever be loaded by
  * that Factory object.
  *
- * @author Richard Jones
  * @author Graham Triggs
+ *
  */
-public class BrowseDAOPostgres implements BrowseDAO
+public class BrowseDAOOracle implements BrowseDAO
 {
     /** Log4j log */
-    private static Logger log = Logger.getLogger(BrowseDAOPostgres.class);
+    private static Logger log = Logger.getLogger(BrowseDAOOracle.class);
 
     /** The DSpace context */
     private Context context;
@@ -107,10 +107,10 @@ public class BrowseDAOPostgres implements BrowseDAO
     private String querySql    = "";
     private List<Serializable> queryParams = new ArrayList<Serializable>();
 
+    private String whereClauseOperator = "";
+
     /** whether the query (above) needs to be regenerated */
     private boolean rebuildQuery = true;
-
-    private String whereClauseOperator = "";
 
     // FIXME Would be better to join to item table and get the correct values
     /** flags for what the items represent */
@@ -120,12 +120,7 @@ public class BrowseDAOPostgres implements BrowseDAO
 
     private boolean enableBrowseFrequencies = true;
     
-    /**
-     * Required constructor for use by BrowseDAOFactory
-     *
-     * @param context   DSpace context
-     */
-    public BrowseDAOPostgres(Context context)
+    public BrowseDAOOracle(Context context)
         throws BrowseException
     {
         this.context = context;
@@ -137,10 +132,9 @@ public class BrowseDAOPostgres implements BrowseDAO
     /* (non-Javadoc)
      * @see org.dspace.browse.BrowseDAO#doCountQuery()
      */
-    public int doCountQuery()
-        throws BrowseException
+    public int doCountQuery() throws BrowseException
     {
-        String query    = getQuery();
+        String   query  = getQuery();
         Object[] params = getQueryParams();
 
         if (log.isDebugEnabled())
@@ -183,13 +177,13 @@ public class BrowseDAOPostgres implements BrowseDAO
      * @see org.dspace.browse.BrowseDAO#doMaxQuery(java.lang.String, java.lang.String, int)
      */
     public String doMaxQuery(String column, String table, int itemID)
-        throws BrowseException
+            throws BrowseException
     {
         TableRowIterator tri = null;
 
         try
         {
-            String query = "SELECT max(" + column + ") FROM " + table + " WHERE item_id = ?";
+            String query = "SELECT MAX(" + column + ") AS max_value FROM " + table + " WHERE item_id=?";
 
             Object[] params = { Integer.valueOf(itemID) };
             tri = DatabaseManager.query(context, query, params);
@@ -198,7 +192,7 @@ public class BrowseDAOPostgres implements BrowseDAO
             if (tri.hasNext())
             {
                 row = tri.next();
-                return row.getStringColumn("max");
+                return row.getStringColumn("max_value");
             }
             else
             {
@@ -262,7 +256,7 @@ public class BrowseDAOPostgres implements BrowseDAO
             if (tri.hasNext())
             {
                 row = tri.next();
-                return (int)row.getLongColumn("offset");
+                return row.getIntColumn("offset");
             }
             else
             {
@@ -321,7 +315,7 @@ public class BrowseDAOPostgres implements BrowseDAO
             if (tri.hasNext())
             {
                 row = tri.next();
-                return (int)row.getLongColumn("offset");
+                return row.getIntColumn("offset");
             }
             else
             {
@@ -344,8 +338,7 @@ public class BrowseDAOPostgres implements BrowseDAO
     /* (non-Javadoc)
      * @see org.dspace.browse.BrowseDAO#doQuery()
      */
-    public List<BrowseItem> doQuery()
-        throws BrowseException
+    public List<BrowseItem> doQuery() throws BrowseException
     {
         String query = getQuery();
         Object[] params = getQueryParams();
@@ -392,13 +385,15 @@ public class BrowseDAOPostgres implements BrowseDAO
     /* (non-Javadoc)
      * @see org.dspace.browse.BrowseDAO#doValueQuery()
      */
-    public List<String[]> doValueQuery()
-        throws BrowseException
+    public List<String[]> doValueQuery() throws BrowseException
     {
         String query = getQuery();
-        
         Object[] params = getQueryParams();
-        log.debug(LogManager.getHeader(context, "executing_value_query", "query=" + query));
+
+        if (log.isDebugEnabled())
+        {
+            log.debug(LogManager.getHeader(context, "executing_value_query", "query=" + query));
+        }
 
         TableRowIterator tri = null;
 
@@ -704,7 +699,6 @@ public class BrowseDAOPostgres implements BrowseDAO
             itemsDiscoverable = true;
         }
 
-
         this.rebuildQuery = true;
     }
 
@@ -760,8 +754,7 @@ public class BrowseDAOPostgres implements BrowseDAO
      * @return      the query to be executed
      * @throws BrowseException
      */
-    private String buildDistinctQuery(List<Serializable> params)
-        throws BrowseException
+    private String buildDistinctQuery(List<Serializable> params) throws BrowseException
     {
         StringBuffer queryBuf = new StringBuffer();
 
@@ -776,7 +769,7 @@ public class BrowseDAOPostgres implements BrowseDAO
         buildSelectStatementDistinct(queryBuf, params);
         buildWhereClauseOpReset();
 
-        // assemble the focus clause if we are to have one
+        // assemble the focus clase if we are to have one
         // it will look like one of the following, for example
         //     sort_value <= myvalue
         //     sort_1 >= myvalue
@@ -808,7 +801,7 @@ public class BrowseDAOPostgres implements BrowseDAO
             }
             after += " GROUP BY "+tableMap+
                     ".distinct_id, dvalues.value, dvalues.authority, dvalues.sort_value";
-
+            
             queryBuf.insert(0, before);
             queryBuf.append(after);
             buildOrderBy(queryBuf);
@@ -823,8 +816,7 @@ public class BrowseDAOPostgres implements BrowseDAO
      * @return      the query to be executed
      * @throws BrowseException
      */
-    private String buildQuery(List<Serializable> params)
-        throws BrowseException
+    private String buildQuery(List<Serializable> params) throws BrowseException
     {
         StringBuffer queryBuf = new StringBuffer();
 
@@ -839,7 +831,7 @@ public class BrowseDAOPostgres implements BrowseDAO
         buildSelectStatement(queryBuf, params);
         buildWhereClauseOpReset();
 
-        // assemble the focus clause if we are to have one
+        // assemble the focus clase if we are to have one
         // it will look like one of the following, for example
         //     sort_value <= myvalue
         //     sort_1 >= myvalue
@@ -868,8 +860,6 @@ public class BrowseDAOPostgres implements BrowseDAO
      * <code>
      * ORDER BY [order field] (ASC | DESC)
      * </code>
-     *
-     * @return  the ORDER BY clause
      */
     private void buildOrderBy(StringBuffer queryBuf)
     {
@@ -896,24 +886,33 @@ public class BrowseDAOPostgres implements BrowseDAO
      * <code>
      * LIMIT [limit]
      * </code>
-     *
-     * @return  the limit clause
      */
     private void buildRowLimitAndOffset(StringBuffer queryBuf, List<Serializable> params)
     {
         // prepare the LIMIT clause
-        if (limit > 0)
+        if (limit > 0 || offset > 0)
         {
-            queryBuf.append(" LIMIT ? ");
-
-            params.add(Integer.valueOf(limit));
+            queryBuf.insert(0, "SELECT /*+ FIRST_ROWS(n) */ rec.*, ROWNUM rnum  FROM (");
+            queryBuf.append(") ");
         }
 
-        // prepare the OFFSET clause
+        if (limit > 0)
+        {
+            queryBuf.append("rec WHERE rownum<=? ");
+            if (offset > 0)
+            {
+                params.add(Integer.valueOf(limit + offset));
+            }
+            else
+            {
+                params.add(Integer.valueOf(limit));
+            }
+        }
+
         if (offset > 0)
         {
-            queryBuf.append(" OFFSET ? ");
-
+            queryBuf.insert(0, "SELECT * FROM (");
+            queryBuf.append(") WHERE rnum>?");
             params.add(Integer.valueOf(offset));
         }
     }
@@ -933,36 +932,35 @@ public class BrowseDAOPostgres implements BrowseDAO
             if (authority == null)
             {
                 queryBuf.append(tableDis).append(".authority IS NULL");
-            queryBuf.append(" AND ");
+                queryBuf.append(" AND ");
                 queryBuf.append(tableDis).append(".").append(valueField);
-
-            if (valuePartial)
-            {
-                queryBuf.append(" LIKE ? ");
-
-                if (valueField.startsWith("sort_"))
+                if (valuePartial)
                 {
-                    params.add("%" + utils.truncateSortValue(value) + "%");
+                    queryBuf.append(" LIKE ? ");
+
+                    if (valueField.startsWith("sort_"))
+                    {
+                        params.add("%" + utils.truncateSortValue(value) + "%");
+                    }
+                    else
+                    {
+                        params.add("%" + utils.truncateValue(value) + "%");
+                    }
                 }
                 else
                 {
-                    params.add("%" + utils.truncateValue(value) + "%");
-                }
-            }
-            else
-            {
-                queryBuf.append("=? ");
+                    queryBuf.append("=? ");
 
-                if (valueField.startsWith("sort_"))
-                {
-                    params.add(utils.truncateSortValue(value));
-                }
-                else
-                {
-                    params.add(utils.truncateValue(value));
+                    if (valueField.startsWith("sort_"))
+                    {
+                        params.add(utils.truncateSortValue(value));
+                    }
+                    else
+                    {
+                        params.add(utils.truncateValue(value));
+                    }
                 }
             }
-        }
             else
             {
                 queryBuf.append(tableDis).append(".authority=?");
@@ -1061,6 +1059,7 @@ public class BrowseDAOPostgres implements BrowseDAO
         return false;
     }
 
+
     /**
      * Prepare the list of values to be selected on.  Will return something of the form:
      *
@@ -1094,9 +1093,6 @@ public class BrowseDAOPostgres implements BrowseDAO
      * <code>
      * SELECT [arguments] FROM [table]
      * </code>
-     *
-     * @param queryBuf  the string value obtained from distinctClause, countClause or selectValues
-     * @return  the SELECT part of the query
      */
     private void buildSelectStatement(StringBuffer queryBuf, List<Serializable> params) throws BrowseException
     {
@@ -1180,16 +1176,19 @@ public class BrowseDAOPostgres implements BrowseDAO
     }
 
     /**
-     * Get a sub-query to obtain the ids for a distinct browse within a given
-     * constraint.  This will produce something of the form:
+     * assemble a WHERE clause with the given constraints.  This will return something
+     * of the form:
      *
      * <code>
-     * id IN (SELECT distinct_id FROM [container table] WHERE [container field] = [container id])
+     * WHERE [focus clause] [AND] [value clause] [AND] [container constraint]
      * </code>
      *
-     * This is for use inside the overall WHERE clause only
+     * The container constraint is described in one of either getFullConstraint or
+     * getDistinctConstraint, and the form of that section of the query can be
+     * found in their documentation.
      *
-     * @return  the sub-query
+     * If either of focusClause or valueClause is null, they will be duly omitted from
+     * the WHERE clause.
      */
     private void buildWhereClauseDistinctConstraints(StringBuffer queryBuf, List<Serializable> params)
     {
@@ -1199,6 +1198,35 @@ public class BrowseDAOPostgres implements BrowseDAO
         {
             buildWhereClauseOpInsert(queryBuf);
             queryBuf.append(" ").append(table).append(".id=mappings.distinct_id ");
+        }
+    }
+
+    /**
+     * assemble a WHERE clause with the given constraints.  This will return something
+     * of the form:
+     *
+     * <code>
+     * WHERE [focus clause] [AND] [value clause] [AND] [container constraint]
+     * </code>
+     *
+     * The container constraint is described in one of either getFullConstraint or
+     * getDistinctConstraint, and the form of that section of the query can be
+     * found in their documentation.
+     *
+     * If either of focusClause or valueClause is null, they will be duly omitted from
+     * the WHERE clause.
+     */
+    private void buildWhereClauseFullConstraints(StringBuffer queryBuf, List<Serializable> params)
+    {
+        // add the constraint to community or collection if necessary
+        // and desired
+        if (tableDis == null || tableMap == null)
+        {
+            if (containerIDField != null && containerID != -1)
+            {
+                buildWhereClauseOpInsert(queryBuf);
+                queryBuf.append(" ").append(table).append(".item_id=mappings.item_id ");
+            }
         }
     }
 
@@ -1215,8 +1243,6 @@ public class BrowseDAOPostgres implements BrowseDAO
      * <code>
      * sort_value <= 'my text'
      * </code>
-     *
-     * @return  the focus clause
      */
     private void buildWhereClauseJumpTo(StringBuffer queryBuf, List<Serializable> params)
     {
@@ -1224,7 +1250,7 @@ public class BrowseDAOPostgres implements BrowseDAO
         // be matched using
         String focusComparator = getFocusComparator();
 
-        // assemble the focus clause if we are to have one
+        // assemble the focus clase if we are to have one
         // it will look like one of the following
         // - sort_value <= myvalue
         // - sort_1 >= myvalue
@@ -1248,32 +1274,6 @@ public class BrowseDAOPostgres implements BrowseDAO
     }
 
     /**
-     * Get a clause to obtain the ids for a full browse within a given
-     * constraint.  This will produce something of the form:
-     *
-     * <code>
-     * [container field] = [container id]
-     * </code>
-     *
-     * This is for use inside the overall WHERE clause only
-     *
-     * @return  the constraint clause
-     */
-    private void buildWhereClauseFullConstraints(StringBuffer queryBuf, List<Serializable> params)
-    {
-        // add the constraint to community or collection if necessary
-        // and desired
-        if (tableDis == null || tableMap == null)
-        {
-            if (containerIDField != null && containerID != -1)
-            {
-                buildWhereClauseOpInsert(queryBuf);
-                queryBuf.append(" ").append(table).append(".item_id=mappings.item_id ");
-            }
-        }
-    }
-
-    /**
      * Return the clause to constrain the browse to a specific value.
      * Will return something of the form:
      *
@@ -1286,8 +1286,6 @@ public class BrowseDAOPostgres implements BrowseDAO
      * <code>
      * sort_value = 'some author'
      * </code>
-     *
-     * @return  the value clause
      */
     private void buildWhereClauseFilterValue(StringBuffer queryBuf, List<Serializable> params)
     {
@@ -1386,11 +1384,14 @@ public class BrowseDAOPostgres implements BrowseDAO
         return focusComparator;
     }
 
-    /* (non-Javadoc)
-     * @see org.dspace.browse.BrowseDAO#getQuery()
+    /**
+     * Return a string representation (the SQL) of the query that would be executed
+     * using one of doCountQuery, doValueQuery, doMaxQuery or doQuery
+     *
+     * @return  String representation of the query (SQL)
+     * @throws BrowseException
      */
-    private String getQuery()
-        throws BrowseException
+    private String getQuery() throws BrowseException
     {
         if ("".equals(querySql) || rebuildQuery)
         {
@@ -1441,16 +1442,4 @@ public class BrowseDAOPostgres implements BrowseDAO
     public void setEnableBrowseFrequencies(boolean enableBrowseFrequencies) {
         this.enableBrowseFrequencies = enableBrowseFrequencies;
     }
-
-	@Override
-	public int getResourceType() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void setResourceType(int type) {
-		// TODO Auto-generated method stub
-		
-	}
 }
