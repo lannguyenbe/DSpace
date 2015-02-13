@@ -14,7 +14,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.dspace.core.ConfigurationManager;
-import org.dspace.core.Constants;
 import org.dspace.sort.SortOption;
 import org.dspace.sort.SortException;
 
@@ -49,10 +48,6 @@ public final class BrowseIndex
     
     /** the display type of the metadata, as specified in the config */
     private String displayType;
-
-    /* Lan 11.02.2015 -- Add resource type to metadata, , as specified in the config */
-    /* is metadata of community or collection or item ? */
-    private int resourceType;
     
     /** base name for tables, sequences */
     private String tableBaseName;
@@ -125,15 +120,14 @@ public final class BrowseIndex
             this.defaultOrder = SortOption.ASCENDING;
             this.number = number;
 
-            String rx = "(\\w+):(\\w+[\\.\\d]*):([\\w\\.\\*,]+):?(\\w*):?(\\w*)";
+            String rx = "(\\w+):(\\w+):([\\w\\.\\*,]+):?(\\w*):?(\\w*)";
             Pattern pattern = Pattern.compile(rx);
             Matcher matcher = pattern.matcher(definition);
 
             if (matcher.matches())
             {
                 name = matcher.group(1);
-                setDisplayType(matcher.group(2));
-/* Lan                displayType = matcher.group(2);*/
+                displayType = matcher.group(2);
 
                 if (isMetadataIndex())
                 {
@@ -249,23 +243,6 @@ public final class BrowseIndex
         return displayType;
 	}
 
-	private void setDisplayType(String s) {
-		if (s.matches("\\w+\\.\\d")) {
-			String[] str = s.split("\\.");
-			displayType = str[0];
-			resourceType = Integer.parseInt(str[1]);
-		} else {
-			displayType = s;
-			resourceType = Constants.ITEM;
-		}
-	}
-
-	public int getResourceType()
-	{
-        return resourceType;
-	}
-
-	
     /**
      * @return Returns the number of metadata fields for this index
      */
