@@ -390,8 +390,4 @@ public interface BrowseDAO
     public boolean isEnableBrowseFrequencies();
 
 	public void setEnableBrowseFrequencies(boolean enableBrowseFrequencies);
-	
-	/** Lan */
-	public int getResourceType();
-	public void setResourceType(int type);
 }

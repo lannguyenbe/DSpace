@@ -205,7 +205,6 @@ public class BrowseEngine
         {
             // get the table name that we are going to be getting our data from
             dao.setTable(browseIndex.getTableName());
-            dao.setResourceType(browseIndex.getResourceType());
 
             // tell the browse query whether we are ascending or descending on the value
             dao.setAscending(scope.isAscending());
@@ -407,7 +406,6 @@ public class BrowseEngine
             // get the table name that we are going to be getting our data from
             // this is the distinct table constrained to either community or collection
             dao.setTable(browseIndex.getDistinctTableName());
-            dao.setResourceType(browseIndex.getResourceType());
 
             // remind the DAO that this is a distinct value browse, so it knows what sort
             // of query to build

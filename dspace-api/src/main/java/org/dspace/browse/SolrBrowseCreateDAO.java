@@ -12,13 +12,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.solr.common.SolrInputDocument;
-import org.dspace.core.Constants;
-import org.dspace.content.Collection;
-import org.dspace.content.Community;
 import org.dspace.content.Metadatum;
 import org.dspace.content.DSpaceObject;
 import org.dspace.content.Item;
@@ -98,107 +94,6 @@ public class SolrBrowseCreateDAO implements BrowseCreateDAO,
     @Override
     public void additionalIndex(Context context, DSpaceObject dso, SolrInputDocument doc)
     {
-        if (dso instanceof Item) {
-            additionalItemIndex(context, dso, doc);
-        } else if (dso instanceof Community) { /* Lan */
-        	additionalCommunityIndex(context, dso,doc);        	
-        } else if (dso instanceof Collection) {/* Lan */
-        	additionalCollectionIndex(context, dso,doc);
-        } else {
-        	return;
-        }
-    }
-    
-    public void additionalCollectionIndex(Context context, DSpaceObject dso, SolrInputDocument doc) {
-    	return;
-    }
-
-    public void additionalCommunityIndex(Context context, DSpaceObject dso, SolrInputDocument doc) {
-    	Community comm = (Community) dso;
-
-    	for (BrowseIndex bi : bis) {
-    		if (!bi.isMetadataIndex())
-    			continue;
-    		if (bi.getResourceType() != Constants.COMMUNITY)
-    			continue;
-
-    		log.debug("Indexing for community " + comm.getID() + ", for index: "
-                    + bi.getTableName());
-
-            // values to show in the browse list
-            Set<String> distFValues = new HashSet<String>();
-            // value for lookup without authority
-            Set<String> distFVal = new HashSet<String>();
-            // value for lookup with authority
-            Set<String> distFAuths = new HashSet<String>();
-            // value for lookup when partial search (the item mapper tool use it)
-            Set<String> distValuesForAC = new HashSet<String>();
-
-            for (int mdIdx = 0, mdCount = bi.getMetadataCount(); mdIdx < mdCount; mdIdx++) {
-    			String[] md = bi.getMdBits(mdIdx);
-    			Metadatum[] values = comm.getMetadata(md[0], md[1], md[2], Item.ANY);
-    			
-    			if (values != null && values.length > 0) {
-    				for (int x = 0; x < values.length; x++) {
-    					if (StringUtils.isNotEmpty(values[x].value)) {
-                            // get the normalised version of the
-                            // value
-                            String nVal = OrderFormat
-                                    .makeSortString(
-                                            values[x].value,
-                                            values[x].language,
-                                            bi.getDataType());
-                            distFValues
-                                    .add(nVal
-                                            + SolrServiceImpl.FILTER_SEPARATOR
-                                            + values[x].value);
-                            distFVal.add(values[x].value);
-                            distValuesForAC.add(values[x].value);
-    						
-    					}
-    				}
-    			}
-    		}
-            for (String facet : distFValues) {
-                doc.addField(bi.getDistinctTableName() + "_filter", facet);
-            }
-            for (String facet : distFAuths) {
-                doc.addField(bi.getDistinctTableName()
-                        + "_authority_filter", facet);
-            }
-            for (String facet : distValuesForAC) {
-                doc.addField(bi.getDistinctTableName() + "_partial", facet);
-            }
-            for (String facet : distFVal) {
-                doc.addField(bi.getDistinctTableName()+"_value_filter", facet);
-            }
-    	}
-
-    	// Add sorting options as configurated for the browse system
-        try
-        {
-            for (SortOption so : SortOption.getSortOptions())
-            {
-                Metadatum[] dcvalue = comm.getMetadataByMetadataString(so.getMetadata());
-                if (dcvalue != null && dcvalue.length > 0)
-                {
-                    String nValue = OrderFormat
-                            .makeSortString(dcvalue[0].value,
-                                    dcvalue[0].language, so.getType());
-                    doc.addField("bi_sort_" + so.getNumber() + "_sort", nValue);
-                }
-            }
-        }
-        catch (SortException e)
-        {
-            // we can't solve it so rethrow as runtime exception
-            throw new RuntimeException(e.getMessage(), e);
-        }
-    	
-    }
-
-    public void additionalItemIndex(Context context, DSpaceObject dso, SolrInputDocument doc)
-    {
         if (!(dso instanceof Item))
         {
             return;
@@ -211,10 +106,7 @@ public class SolrBrowseCreateDAO implements BrowseCreateDAO,
         // prefered label is relevant
         for (BrowseIndex bi : bis)
         {
-    		if (bi.getResourceType() != Constants.ITEM)
-    			continue;
-
-    		log.debug("Indexing for item " + item.getID() + ", for index: "
+            log.debug("Indexing for item " + item.getID() + ", for index: "
                     + bi.getTableName());
 
             if (bi.isMetadataIndex())
@@ -454,7 +346,7 @@ public class SolrBrowseCreateDAO implements BrowseCreateDAO,
             throw new RuntimeException(e.getMessage(), e);
         }
     }
-    
+
     @Override
     public void deleteByItemID(String table, int itemID) throws BrowseException
     {
