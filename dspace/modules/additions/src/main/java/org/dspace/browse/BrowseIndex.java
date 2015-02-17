@@ -60,6 +60,9 @@ public final class BrowseIndex
     
     /** whether to display frequencies or not, in case of a "metadata" browse index*/
     private boolean displayFrequencies = true;
+    
+    // Lan 17.02.2015
+    private int dsoLevel;
 
     /** additional 'internal' tables that are always defined */
     private static BrowseIndex itemIndex      = new BrowseIndex("bi_item");
@@ -243,6 +246,12 @@ public final class BrowseIndex
         return displayType;
 	}
 
+	// Lan 17.02.2015
+	public int getDsoLevel()
+	{
+        return dsoLevel;
+	}	
+	
     /**
      * @return Returns the number of metadata fields for this index
      */
@@ -693,6 +702,7 @@ public final class BrowseIndex
 			bi.displayFrequencies = Boolean.valueOf(ConfigurationManager
 					.getBooleanProperty("webui.browse.metadata.show-freq."
 							+ idx, true));
+			bi.dsoLevel = ConfigurationManager.getIntProperty("webui.browse.dsolevel."+ idx, 0);
 
             browseIndices.add(bi);
             idx++;
