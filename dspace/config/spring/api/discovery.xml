@@ -110,7 +110,9 @@
         <property name="searchFilters">
             <list>
                 <ref bean="searchFilterIdAttributor" />
-                <ref bean="searchFilterTitle" />
+                <!-- Lan 16.02.2015 Remove title, add titlecom to advanced search -->
+                <!--ref bean="searchFilterTitle" /-->
+                <ref bean="searchFilterTitleCommunity" />
                 <ref bean="searchFilterAuthor" />
                 <ref bean="searchFilterSubject" />
                 <ref bean="searchFilterIssued" />
@@ -217,7 +219,9 @@
         <property name="searchFilters">
             <list>
                 <ref bean="searchFilterIdAttributor" />
-                <ref bean="searchFilterTitle" />
+                <!-- Lan 16.02.2015 Remove title, add titlecom to advanced search -->
+                <!--ref bean="searchFilterTitle" /-->
+                <ref bean="searchFilterTitleCommunity" />
                 <ref bean="searchFilterAuthor" />
                 <ref bean="searchFilterSubject" />
                 <ref bean="searchFilterIssued" />
@@ -385,6 +389,16 @@
         <property name="metadataFields">
             <list>
                 <value>dc.title</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- Lan 16.02.2015 - add this filter to advanced search -->
+    <bean id="searchFilterTitleCommunity" class="org.dspace.discovery.configuration.DiscoverySearchFilter">
+        <property name="indexFieldName" value="titlecom"/>
+        <property name="metadataFields">
+            <list>
+                <value>dcterms.isPartOf.title</value>
             </list>
         </property>
     </bean>
