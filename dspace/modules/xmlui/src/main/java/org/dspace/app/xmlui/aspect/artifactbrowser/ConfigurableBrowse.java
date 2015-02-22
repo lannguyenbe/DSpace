@@ -91,8 +91,12 @@ public class ConfigurableBrowse extends AbstractDSpaceTransformer implements
     private static final Message T_jump_select = message("xmlui.ArtifactBrowser.ConfigurableBrowse.general.jump_select");
 
     private static final Message T_starts_with = message("xmlui.ArtifactBrowser.ConfigurableBrowse.general.starts_with");
+    // Lan
+    private static final Message T_match_with = message("xmlui.ArtifactBrowser.ConfigurableBrowse.general.match_with");
 
     private static final Message T_starts_with_help = message("xmlui.ArtifactBrowser.ConfigurableBrowse.general.starts_with_help");
+    // Lan
+    private static final Message T_match_with_help = message("xmlui.ArtifactBrowser.ConfigurableBrowse.general.match_with_help");
 
     private static final Message T_sort_by = message("xmlui.ArtifactBrowser.ConfigurableBrowse.general.sort_by");
 
@@ -487,8 +491,11 @@ public class ConfigurableBrowse extends AbstractDSpaceTransformer implements
 
             // Create a free text field for the initial characters
             Para jumpForm = jump.addPara();
-            jumpForm.addContent(T_starts_with);
-            jumpForm.addText(BrowseParams.STARTS_WITH).setHelp(T_starts_with_help);
+            // Lan
+            // jumpForm.addContent(T_starts_with);
+            // jumpForm.addText(BrowseParams.STARTS_WITH).setHelp(T_starts_with_help);
+            jumpForm.addContent(T_match_with);
+            jumpForm.addText(BrowseParams.MATCH_WITH).setHelp(T_match_with_help);
             
             jumpForm.addButton("submit").setValue(T_go);
         }
@@ -744,6 +751,8 @@ public class ConfigurableBrowse extends AbstractDSpaceTransformer implements
             params.scope.setOffset(offset > 0 ? offset : 0);
             params.scope.setResultsPerPage(RequestUtils.getIntParameter(request, BrowseParams.RESULTS_PER_PAGE));
             params.scope.setStartsWith(decodeFromURL(request.getParameter(BrowseParams.STARTS_WITH)));
+            // Lan
+            params.scope.setMatchWith(decodeFromURL(request.getParameter(BrowseParams.MATCH_WITH)));
             String filterValue = request.getParameter(BrowseParams.FILTER_VALUE[0]);
             if (filterValue == null)
             {
@@ -1026,6 +1035,9 @@ class BrowseParams
 
     static final String STARTS_WITH = "starts_with";
 
+    // Lan
+    static final String MATCH_WITH = "match_with";
+
     static final String[] FILTER_VALUE = new String[]{"value","authority"};
 
     static final String FILTER_VALUE_LANG = "value_lang";
@@ -1096,6 +1108,7 @@ class BrowseParams
             key += "-" + scope.getBrowseLevel();
             key += "-" + scope.getStartsWith();
             key += "-" + scope.getOrder();
+            key += "-" + scope.getMatchWith();            
             key += "-" + scope.getResultsPerPage();
             key += "-" + scope.getSortBy();
             key += "-" + scope.getSortOption().getNumber();

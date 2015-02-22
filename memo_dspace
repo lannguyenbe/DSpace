@@ -1,6 +1,7 @@
 ant overwrite_solr_configs
 mvn install:install-file -Dfile=dspace-xmlui-5.0.war -DgroupId=org.dspace -DartifactId=dspace-xmlui -Dversion=5.0 -Dpackaging=war
 
+mvn install:install-file -Dfile=additions-5.0.jar -DgroupId=org.dspace -DartifactId=additions -Dversion=5.0 -Dpackaging=jar
 mvn install:install-file -Dfile=dspace-api-5.0.jar -DgroupId=org.dspace -DartifactId=dspace-api -Dversion=5.0 -Dpackaging=jar
 
 
@@ -132,6 +133,19 @@ cp dspace-api-4.2.jar $DS/lib
 ## to recompile:end
 
 -----------------------------------------  S O L R  --------------------------------------------------
+
+
+### filter facet results
+### filter by q=
+http://localhost:8070/solr/search/select?q=bi_3_dis_value_filter%3A*BELGES*&rows=0&wt=json&indent=true&facet=true&facet.field=bi_3_dis_value_filter
+### filter by fq=
+http://localhost:8070/solr/search/select?q=*%3A*&rows=0&wt=json&indent=true&facet=true&facet.field=bi_3_dis_value_filter&fq=bi_3_dis_value_filter:*BELGES*
+http://localhost:8070/solr/search/select?q=*%3A*&fl=bi_3_dis_value_filter&wt=json&indent=true&fq={!field%20f=bi_3_dis_partial}BELGE&facet=true&facet.field=bi_3_dis_value_filter
+http://localhost:8070/solr/search/select?q=*%3A*&fl=bi_3_dis_value_filter&wt=json&indent=true&fq=bi_3_dis_partial%3ABELGE&facet=true&facet.field=bi_3_dis_value_filter
+http://localhost:8070/solr/search/select?q=*%3A*&fl=bi_2_dis_value_filter&wt=json&indent=true&fq=bi_2_dis_partial%3Alaurent&rows=0&facet=true&facet.field=bi_2_dis_value_filter
+http://localhost:8070/solr/search/select?q=*%3A*&fl=bi_3_dis_value_filter&wt=json&indent=true&fq={!q.op=AND%20df=bi_3_dis_partial}h+taxi&rows=0&facet=true&facet.field=bi_3_dis_value_filter
+
+
 ### facet on ebucore.identifier[1]@formatLabel
 http://localhost:8070/solr/search/select?q=*%3A*&wt=json&indent=true&facet=true&facet.field=ebucore.identifier%5B1%5D%40formatLabel
 http://localhost:8070/solr/search/select?q=search_text%3A1578&fl=title&wt=json&indent=true&facet=true&facet.field=ebucore.identifier%5B1%5D%40formatLabel

@@ -123,6 +123,9 @@ public class SolrBrowseDAO implements BrowseDAO
     private boolean distinct = false;
 
     private String facetField;
+    
+    // Lan
+    private String[] selectValues = null;
 
     // administrative attributes for this class
 
@@ -153,6 +156,14 @@ public class SolrBrowseDAO implements BrowseDAO
                 query.addFacetField(dff);
                 query.setFacetMinCount(1);
                 query.setMaxResults(0);
+
+                // Lan
+                if (selectValues != null) {
+                	for (String selval : selectValues) {
+                      query.addFilterQueries("{!q.op=AND df="+facetField + "_partial}" + selval);
+    				}
+                }
+                
             }
             else
             {
@@ -185,6 +196,7 @@ public class SolrBrowseDAO implements BrowseDAO
                             ascending ? SORT_ORDER.asc : SORT_ORDER.desc);
                 }
             }
+                        
             try
             {
 				sResponse = searcher.search(context, query, itemsWithdrawn
@@ -659,10 +671,11 @@ public class SolrBrowseDAO implements BrowseDAO
 
     }
 
-    // is this in use?
+    // Lan
+    // is this in use? Lan does
     public void setSelectValues(String[] selectValues)
     {
-        // this.selectValues = selectValues;
+        this.selectValues = selectValues;        
 
     }
 
