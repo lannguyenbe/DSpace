@@ -492,8 +492,9 @@ public class ConfigurableBrowse extends AbstractDSpaceTransformer implements
             // Create a free text field for the initial characters
             Para jumpForm = jump.addPara();
             // Lan
-            // jumpForm.addContent(T_starts_with);
-            // jumpForm.addText(BrowseParams.STARTS_WITH).setHelp(T_starts_with_help);
+            //jumpForm.addContent(T_starts_with);
+            //jumpForm.addText(BrowseParams.STARTS_WITH).setHelp(T_starts_with_help);
+
             jumpForm.addContent(T_match_with);
             jumpForm.addText(BrowseParams.MATCH_WITH).setHelp(T_match_with_help);
             
@@ -613,6 +614,11 @@ public class ConfigurableBrowse extends AbstractDSpaceTransformer implements
         parameters.putAll(params.getCommonParametersEncoded());
         parameters.putAll(params.getControlParameters());
 
+        // Lan
+        if (params.scope.getMatchWith() != null) {
+        	parameters.put(BrowseParams.MATCH_WITH, params.scope.getMatchWith());
+        }
+
         if (info.hasPrevPage())
         {
             parameters.put(BrowseParams.OFFSET, encodeForURL(String.valueOf(info.getPrevOffset())));
@@ -640,7 +646,11 @@ public class ConfigurableBrowse extends AbstractDSpaceTransformer implements
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.putAll(params.getCommonParametersEncoded());
         parameters.putAll(params.getControlParameters());
-
+        // Lan
+        if (params.scope.getMatchWith() != null) {
+        	parameters.put(BrowseParams.MATCH_WITH, params.scope.getMatchWith());
+        }
+        
         if (info.hasNextPage())
         {
             parameters.put(BrowseParams.OFFSET, encodeForURL(String.valueOf(info.getNextOffset())));
@@ -1062,7 +1072,13 @@ class BrowseParams
         {
             paramMap.put(BrowseParams.FILTER_VALUE_LANG, scope.getFilterValueLang());
         }
-
+        
+        // Lan
+        /*
+        if (scope.getMatchWith() != null)
+        	paramMap.put(BrowseParams.MATCH_WITH, scope.getMatchWith());
+        */
+        
         return paramMap;
     }
 

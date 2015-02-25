@@ -1,7 +1,7 @@
 ant overwrite_solr_configs
 mvn install:install-file -Dfile=dspace-xmlui-5.0.war -DgroupId=org.dspace -DartifactId=dspace-xmlui -Dversion=5.0 -Dpackaging=war
 
-mvn install:install-file -Dfile=additions-5.0.jar -DgroupId=org.dspace -DartifactId=additions -Dversion=5.0 -Dpackaging=jar
+mvn install:install-file -Dfile=additions-5.0.jar -DgroupId=org.dspace.modules -DartifactId=additions -Dversion=5.0 -Dpackaging=jar
 mvn install:install-file -Dfile=dspace-api-5.0.jar -DgroupId=org.dspace -DartifactId=dspace-api -Dversion=5.0 -Dpackaging=jar
 
 

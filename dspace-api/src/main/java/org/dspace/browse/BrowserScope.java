@@ -641,6 +641,6 @@ public class BrowserScope
 	}
 
 	public boolean hasMatchWith() {
-		return (matchWith != null);
+		return (matchWith != null && !matchWith.isEmpty());
 	}
 }
