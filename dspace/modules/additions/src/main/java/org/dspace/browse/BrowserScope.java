@@ -50,6 +50,8 @@ public class BrowserScope
 
     /** the string value to start with */
     private String startsWith;
+    // Lan
+    private String matchWith;
 
     /** the number of results per page to display */
     private int resultsPerPage = 20;
@@ -629,4 +631,16 @@ public class BrowserScope
     public void setAuthorityValue(String value) {
         authority = value;
     }
+
+	public void setMatchWith(String matchWith) {
+		this.matchWith = matchWith;
+	}
+
+	public String getMatchWith() {
+		return matchWith;
+	}
+
+	public boolean hasMatchWith() {
+		return (matchWith != null && !matchWith.isEmpty());
+	}
 }

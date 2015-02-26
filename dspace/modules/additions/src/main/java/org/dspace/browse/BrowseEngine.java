@@ -445,6 +445,11 @@ public class BrowseEngine
                     dao.setContainerID(com.getID());
                 }
             }
+            
+            // Lan
+            if (scope.hasMatchWith()) {
+            	dao.setSelectValues(new String[] {scope.getMatchWith()});
+            }
 
             // this is the total number of results in answer to the query
             int total = getTotalResults(true);
@@ -556,7 +561,7 @@ public class BrowseEngine
             throw new BrowseException(e);
         }
     }
-
+    
     /**
      * Return the focus value.
      *

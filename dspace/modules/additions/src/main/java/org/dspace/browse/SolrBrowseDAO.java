@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.dspace.content.DSpaceObject;
@@ -123,6 +125,9 @@ public class SolrBrowseDAO implements BrowseDAO
     private boolean distinct = false;
 
     private String facetField;
+    
+    // Lan
+    private String[] selectValues = null;
 
     // administrative attributes for this class
 
@@ -153,6 +158,14 @@ public class SolrBrowseDAO implements BrowseDAO
                 query.addFacetField(dff);
                 query.setFacetMinCount(1);
                 query.setMaxResults(0);
+
+                // Lan
+                if (selectValues != null) {
+                	for (String selval : selectValues) {
+                      query.addFilterQueries("{!q.op=AND df="+facetField + "_partial}" + selval);
+    				}
+                }
+                
             }
             else
             {
@@ -185,10 +198,37 @@ public class SolrBrowseDAO implements BrowseDAO
                             ascending ? SORT_ORDER.asc : SORT_ORDER.desc);
                 }
             }
+                        
             try
             {
 				sResponse = searcher.search(context, query, itemsWithdrawn
 						|| !itemsDiscoverable);
+				
+				// Lan - Filter facet results
+				if (distinct) {
+					
+					if (selectValues != null && selectValues.length > 0) {
+						// Compile the patterns from search value
+						String search = selectValues[0].replaceAll("[^\\p{ASCII}]",".").replaceAll("(\\S+)", ".*$1.*");
+				        String[] tokens = search.split("\\s+");
+				        List<Pattern> patterns = new ArrayList<Pattern>();
+				        for (String token : tokens) {
+				        	patterns.add(Pattern.compile(token, Pattern.CASE_INSENSITIVE));
+						}
+						
+						// filter the facet results
+						List<FacetResult> facet = sResponse.getFacetResult(facetField);
+						for (ListIterator<FacetResult> it = facet.listIterator(); it.hasNext();) {
+							String facetVal = it.next().getSortValue().replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+					        for(Pattern pattern : patterns){
+					        	if (!pattern.matcher(facetVal).matches()) {
+					        		it.remove();
+					        		break;
+					        	}
+					        }
+						}
+					}
+				}
             }
             catch (SearchServiceException e)
             {
@@ -338,11 +378,15 @@ public class SolrBrowseDAO implements BrowseDAO
         query.addFilterQueries("search.resourcetype:" + Constants.ITEM);
         if (isAscending)
         {
-            query.setQuery("bi_"+column + "_sort" + ": [* TO \"" + value + "\"}");
+        	// Lan
+            // query.setQuery("bi_"+column + "_sort" + ": [* TO \"" + value + "\"}");
+            query.setQuery("bi_"+column + "_sort" + ":[* TO \"" + value + "\"]");
         }
         else
         {
-            query.setQuery("bi_" + column + "_sort" + ": {\"" + value + "\" TO *]");
+        	// Lan
+        	// query.setQuery("bi_" + column + "_sort" + ": {\"" + value + "\" TO *]");
+            query.setQuery("bi_" + column + "_sort" + ":[\"" + value + "\" TO *]");
         }
 	    boolean includeUnDiscoverable = itemsWithdrawn || !itemsDiscoverable;
         DiscoverResult resp = null;
@@ -659,10 +703,11 @@ public class SolrBrowseDAO implements BrowseDAO
 
     }
 
-    // is this in use?
+    // Lan
+    // is this in use? Lan does
     public void setSelectValues(String[] selectValues)
     {
-        // this.selectValues = selectValues;
+        this.selectValues = selectValues;        
 
     }
 
