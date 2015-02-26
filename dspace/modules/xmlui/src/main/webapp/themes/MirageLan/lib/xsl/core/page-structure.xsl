@@ -329,7 +329,9 @@
                     <span id="ds-header-logo">&#160;</span>
                     <!-- Lan 03.11.2014 -->
                     <span id="ds-header-logo-text">:in page-structure.xsl:
+                    <!-- Lan
                        <i18n:text>xmlui.dri2xhtml.structural.head-subtitle</i18n:text>
+                    -->
                     </span>
                 </a>
                 <h1 class="pagetitle visuallyhidden">

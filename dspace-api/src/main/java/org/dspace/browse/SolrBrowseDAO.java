@@ -378,11 +378,15 @@ public class SolrBrowseDAO implements BrowseDAO
         query.addFilterQueries("search.resourcetype:" + Constants.ITEM);
         if (isAscending)
         {
-            query.setQuery("bi_"+column + "_sort" + ": [* TO \"" + value + "\"]");
+        	// Lan
+            // query.setQuery("bi_"+column + "_sort" + ": [* TO \"" + value + "\"}");
+            query.setQuery("bi_"+column + "_sort" + ":[* TO \"" + value + "\"]");
         }
         else
         {
-            query.setQuery("bi_" + column + "_sort" + ": [\"" + value + "\" TO *]");
+        	// Lan
+        	// query.setQuery("bi_" + column + "_sort" + ": {\"" + value + "\" TO *]");
+            query.setQuery("bi_" + column + "_sort" + ":[\"" + value + "\" TO *]");
         }
 	    boolean includeUnDiscoverable = itemsWithdrawn || !itemsDiscoverable;
         DiscoverResult resp = null;
