@@ -133,6 +133,12 @@ cp dspace-api-4.2.jar $DS/lib
 ## to recompile:end
 
 -----------------------------------------  S O L R  --------------------------------------------------
+fq=titlecom:(quai AND belge)
+fq=-titlecom:(quai AND belge)
+fq={!q.op=AND}titlecom:(quai belge)
+fq={!q.op=AND}-titlecom:(quai belge)
+fq={!q.op=AND df=titlecom}(quai belge)
+fq={!q.op=AND df=titlecom}-(quai belge)
 
 
 ### filter facet results

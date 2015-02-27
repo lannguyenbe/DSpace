@@ -1108,6 +1108,8 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                         }
                         doc.addField(searchFilter.getIndexFieldName(), value);
                         doc.addField(searchFilter.getIndexFieldName() + "_keyword", value);
+                        //Lan
+                        doc.addField(searchFilter.getIndexFieldName() + "_partial", value);
 
                         if (authority != null && preferedLabel == null)
                         {
@@ -1298,6 +1300,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 }
 
                 doc.addField(field, value);
+                
                 if (toProjectionFields.contains(field) || toProjectionFields.contains(unqualifiedField + "." + Item.ANY))
                 {
                     StringBuffer variantsToStore = new StringBuffer();
@@ -2018,7 +2021,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
 		}
     }
 
-    public DiscoverFilterQuery toFilterQuery(Context context, String field, String operator, String value) throws SQLException{
+    public DiscoverFilterQuery toFilterQuery_OLD(Context context, String field, String operator, String value) throws SQLException{
         DiscoverFilterQuery result = new DiscoverFilterQuery();
 
         StringBuilder filterQuery = new StringBuilder();
@@ -2074,6 +2077,81 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 }
             }
 
+
+        }
+
+        result.setDisplayedValue(transformDisplayedValue(context, field, value));
+        result.setFilterQuery(filterQuery.toString());
+        return result;
+    }
+    
+    // Lan
+    public DiscoverFilterQuery toFilterQuery(Context context, String field, String operator, String value) throws SQLException{
+        DiscoverFilterQuery result = new DiscoverFilterQuery();
+
+        StringBuilder filterQuery = new StringBuilder();
+        if(StringUtils.isNotBlank(field))
+        {
+            filterQuery.append(field);
+            if("equals".equals(operator))
+            {
+                //Query the keyword indexed field !
+                filterQuery.append("_keyword");
+            }
+            // Lan
+            else if ("contains".equals(operator))
+            {
+                //Query the partial n-gram field !
+                filterQuery.append("_partial");
+            }
+            else if ("authority".equals(operator))
+            {
+                //Query the authority indexed field !
+                filterQuery.append("_authority");
+            }
+            else if ("notequals".equals(operator)
+                    || "notcontains".equals(operator)
+                    || "notauthority".equals(operator))
+            {
+                filterQuery.insert(0, "-");
+            }
+            filterQuery.append(":");
+            if("equals".equals(operator) || "notequals".equals(operator))
+            {
+                //DO NOT ESCAPE RANGE QUERIES !
+                if(!value.matches("\\[.*TO.*\\]"))
+                {
+                    value = ClientUtils.escapeQueryChars(value);
+                    filterQuery.append(value);
+                }
+                else
+                {
+                	if (value.matches("\\[\\d{1,4} TO \\d{1,4}\\]"))
+                	{
+                		int minRange = Integer.parseInt(value.substring(1, value.length()-1).split(" TO ")[0]);
+                		int maxRange = Integer.parseInt(value.substring(1, value.length()-1).split(" TO ")[1]);
+                		value = "["+String.format("%04d", minRange) + " TO "+ String.format("%04d", maxRange) + "]";
+                	}
+                	filterQuery.append(value);
+                }
+            }
+            else{
+                //DO NOT ESCAPE RANGE QUERIES !
+                if(!value.matches("\\[.*TO.*\\]"))
+                {
+                    value = ClientUtils.escapeQueryChars(value);
+                    filterQuery.append("(").append(value).append(")");
+                }
+                else
+                {
+                    filterQuery.append(value);
+                }
+            }
+            
+            // Lan
+            if ("contains".equals(operator) || "notcontains".equals(operator)) {
+            	filterQuery.insert(0,"{!q.op=AND}");
+            }
 
         }
 
