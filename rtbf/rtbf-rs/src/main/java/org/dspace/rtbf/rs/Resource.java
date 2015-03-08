@@ -6,11 +6,11 @@
  * http://www.dspace.org/license/
  */
 package org.dspace.rtbf.rs;
-import org.dspace.rtbf.rs.exceptions.ContextException;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
@@ -18,21 +18,18 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
-import org.dspace.content.DSpaceObject;
-import org.dspace.core.ConfigurationManager;
-import org.dspace.core.Context;
+import org.dspace.discovery.DiscoverFacetField;
+import org.dspace.discovery.DiscoverQuery;
+import org.dspace.discovery.DiscoverResult;
 import org.dspace.discovery.SearchService;
-import org.dspace.eperson.EPerson;
-import org.dspace.usage.UsageEvent;
+import org.dspace.discovery.DiscoverResult.FacetResult;
+import org.dspace.discovery.configuration.DiscoveryConfigurationParameters;
+import org.dspace.rtbf.rs.common.SimpleNode;
+import org.dspace.sort.OrderFormat;
 import org.dspace.utils.DSpace;
 
 /**
- * Superclass of all resource classes in REST API. It has methods for creating
- * context, write statistics, processsing exceptions, splitting a key of
- * metadata, string representation of action and method for getting the logged
- * in user from the token in request header.
- * 
- * @author Rostislav Novak (Computing and Information Centre, CTU in Prague)
+ * Superclass of all resource classes in REST API. 
  * 
  */
 public abstract class Resource
@@ -40,90 +37,6 @@ public abstract class Resource
 
     private static Logger log = Logger.getLogger(Resource.class);
 
-    private static final boolean writeStatistics;
-    static
-    {
-        writeStatistics = ConfigurationManager.getBooleanProperty("rest", "stats", false);
-    }
-
-    /**
-     * Create context to work with DSpace database. It can create context
-     * with or without a logged in user (parameter user is null). Throws
-     * WebApplicationException caused by: SQLException if there was a problem
-     * with reading from database. Throws AuthorizeException if there was
-     * a problem with authorization to read from the database. Throws Exception
-     * if there was a problem creating context.
-     * 
-     * @param person
-     *            User which will be logged in context.
-     * @return Newly created context with the logged in user unless the specified user was null.
-     *         If user is null, create the context without a logged in user.
-     * @throws ContextException
-     *             Thrown in case of a problem creating context. Can be caused by
-     *             SQLException error in creating context or finding the user to
-     *             log in. Can be caused by AuthorizeException if there was a
-     *             problem authorizing the found user.
-     */
-    protected static org.dspace.core.Context createContext(EPerson person) throws ContextException
-    {
-
-        org.dspace.core.Context context = null;
-
-        try
-        {
-            context = new org.dspace.core.Context();
-            context.getDBConnection().setAutoCommit(false); // Disable autocommit.
-
-            if (person != null)
-            {
-                context.setCurrentUser(person);
-            }
-
-            return context;
-        }
-        catch (SQLException e)
-        {
-            if ((context != null) && (context.isValid()))
-            {
-                context.abort();
-            }
-            throw new ContextException("Could not create context, SQLException. Message: " + e, e);
-        }
-    }
-
-    /**
-     * Records a statistics event about an object used via REST API.
-     * @param dspaceObject
-     *            DSpace object on which a request was performed.
-     * @param action
-     *            Action that was performed.
-     * @param user_ip
-     * @param user_agent
-     * @param xforwardedfor
-     * @param headers
-     * @param request
-     * @param context
-     */
-    protected void writeStats(DSpaceObject dspaceObject, UsageEvent.Action action,
-                              String user_ip, String user_agent, String xforwardedfor, HttpHeaders headers, HttpServletRequest request, Context context)
-    {
-        if (!writeStatistics)
-        {
-            return;
-        }
-
-        if ((user_ip == null) || (user_ip.length() == 0))
-        {
-            new DSpace().getEventService().fireEvent(new UsageEvent(action, request, context, dspaceObject));
-        }
-        else
-        {
-            new DSpace().getEventService().fireEvent(
-                    new UsageEvent(action, user_ip, user_agent, xforwardedfor, context, dspaceObject));
-        }
-
-        log.debug("fired event");
-    }
 
     /**
      * Process exception, print message to logger error stream and abort DSpace
@@ -165,105 +78,6 @@ public abstract class Resource
         }
     }
 
-    /**
-     * Split string with regex ".".
-     * 
-     * @param key
-     *            String which will be splitted.
-     * @return String array filed with separated string.
-     */
-    protected String[] mySplit(String key)
-    {
-        ArrayList<String> list = new ArrayList<String>();
-        int prev = 0;
-        for (int i = 0; i < key.length(); i++)
-        {
-            if (key.charAt(i) == '.')
-            {
-                list.add(key.substring(prev, i));
-                prev = i + 1;
-            }
-            else if (i + 1 == key.length())
-            {
-                list.add(key.substring(prev, i + 1));
-            }
-        }
-
-        if (list.size() == 2)
-        {
-            list.add(null);
-        }
-
-        return list.toArray(new String[0]);
-    }
-
-    /**
-     * Return string representation of values
-     * org.dspace.core.Constants.{READ,WRITE,DELETE}.
-     * 
-     * @param action
-     *            Constant from org.dspace.core.Constants.*
-     * @return String representation. read or write or delete.
-     */
-    protected String getActionString(int action)
-    {
-        String actionStr;
-        switch (action)
-        {
-        case org.dspace.core.Constants.READ:
-            actionStr = "read";
-            break;
-        case org.dspace.core.Constants.WRITE:
-            actionStr = "write";
-            break;
-        case org.dspace.core.Constants.DELETE:
-            actionStr = "delete";
-            break;
-        case org.dspace.core.Constants.REMOVE:
-            actionStr = "remove";
-            break;
-        case org.dspace.core.Constants.ADD:
-            actionStr = "add";
-            break;
-        default:
-            actionStr = "(?action?)";
-            break;
-        }
-        return actionStr;
-    }
-
-    /**
-     * Return EPerson based on stored token in headers under
-     * "rest-dspace-token".
-     * 
-     * @param headers
-     *            Only must have "rest-api-token" for successfull return of
-     *            user.
-     * @return Return EPerson logged under token in headers. If token was wrong
-     *         or header rest-dspace-token was missing, returns null.
-     */
-    protected static EPerson getUser(HttpHeaders headers)
-    {
-        List<String> list = headers.getRequestHeader(TokenHolder.TOKEN_HEADER);
-        String token = null;
-        if ((list != null) && (list.size() > 0))
-        {
-            token = list.get(0);
-            return TokenHolder.getEPerson(token);
-        }
-        return null;
-    }
-
-    protected static String getToken(HttpHeaders headers) {
-        List<String> list = headers.getRequestHeader(TokenHolder.TOKEN_HEADER);
-        String token = null;
-        if ((list != null) && (list.size() > 0))
-        {
-            token = list.get(0);
-            return token;
-        }
-        return null;
-    }
     
     protected SearchService getSearchService()
     {
@@ -273,5 +87,95 @@ public abstract class Resource
 
         return manager.getServiceByName(SearchService.class.getName(),SearchService.class);
     }
+    
+
+    protected void filterFacetResults(List<FacetResult> facets, String qterms) {
+    
+        // Match pattern that begins a word
+        String search = qterms.replaceAll("(\\S+)", ".*\\\\b$1.*");
+        log.debug("Regex filter facet results.(search=" + search + ").");
+
+        // Compile individual patterns
+        String[] tokens = search.split("\\s+");
+        List<Pattern> patterns = new ArrayList<Pattern>();
+        for (String token : tokens) {
+            patterns.add(Pattern.compile(token, Pattern.CASE_INSENSITIVE));
+        }
+
+        // Filter the facet results : ok if match with all patterns
+        for (ListIterator<FacetResult> it = facets.listIterator(); it.hasNext();) {
+            String facetVal = it.next().getSortValue();
+            for(Pattern pattern : patterns){
+                if (!pattern.matcher(facetVal).matches()) {
+                    it.remove();
+                    break;
+                }
+            }
+        }
+
+    }
+    
+
+    public List<SimpleNode> getSimpleNodes(
+            String facetField, SimpleNode.Attribute name,
+            String partialTerms,
+            HttpHeaders headers, HttpServletRequest request)
+            throws WebApplicationException
+    {
+
+        ArrayList<SimpleNode> results = null;
+        org.dspace.core.Context context = null;
+        DiscoverResult queryResults = null;
+                
+        DiscoverQuery query = new DiscoverQuery();
+
+        DiscoverFacetField dff = new DiscoverFacetField(facetField,
+                DiscoveryConfigurationParameters.TYPE_AC, -1,
+                DiscoveryConfigurationParameters.SORT.VALUE);
+        query.addFacetField(dff);
+        query.setFacetMinCount(1);
+        query.setMaxResults(0);
+        
+        String qterms = null;        
+        if (partialTerms != null && !partialTerms.isEmpty()) {
+            // Remove diacritic + escape all but alphanum
+            qterms = OrderFormat.makeSortString(partialTerms, null, OrderFormat.TEXT)
+                        .replaceAll("([^\\p{Alnum}\\s])", "\\\\$1");
+            query.addFilterQueries("{!q.op=AND}" + facetField + "_partial:(" + qterms + ")");
+
+            log.debug("Solr filter query terms.(qterms=" + qterms + ").");
+        }
+        
+        try {
+           context = new org.dspace.core.Context();
+
+           queryResults = getSearchService().search(context, query);
+
+           context.complete();
+        } catch (Exception e) {
+          processException("Could not process authors. Message:"+e.getMessage(), context);
+        } finally {
+          processFinally(context);            
+        }
+        
+        if (queryResults != null) {
+            List<FacetResult> facets = queryResults.getFacetResult(facetField);
+            
+            // Filter results is mandatory when facet.field is multivalue
+            if (qterms != null && !qterms.isEmpty()) {
+                filterFacetResults(facets, qterms);
+            }
+
+            results = new ArrayList<SimpleNode>();          
+            for (FacetResult facet : facets) {
+                results.add(new SimpleNode().setAttribute(name, facet.getDisplayedValue()));
+            }
+            return results;
+            
+        }
+
+        return (new ArrayList<SimpleNode>());
+    }
+
 
 }

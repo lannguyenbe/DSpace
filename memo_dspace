@@ -1,3 +1,5 @@
+main: No Spring WebApplicationInitializer types detected on classpath
+
 ant overwrite_solr_configs
 mvn install:install-file -Dfile=dspace-xmlui-5.0.war -DgroupId=org.dspace -DartifactId=dspace-xmlui -Dversion=5.0 -Dpackaging=war
 

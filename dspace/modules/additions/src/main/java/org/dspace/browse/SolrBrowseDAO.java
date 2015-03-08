@@ -28,6 +28,7 @@ import org.dspace.discovery.DiscoverResult.SearchDocument;
 import org.dspace.discovery.SearchService;
 import org.dspace.discovery.SearchServiceException;
 import org.dspace.discovery.configuration.DiscoveryConfigurationParameters;
+import org.dspace.sort.OrderFormat;
 import org.dspace.utils.DSpace;
 
 /**
@@ -147,6 +148,8 @@ public class SolrBrowseDAO implements BrowseDAO
     {
         if (sResponse == null)
         {
+            String qterms = null;
+
             DiscoverQuery query = new DiscoverQuery();
             addLocationScopeFilter(query);
             addStatusFilter(query);
@@ -160,10 +163,11 @@ public class SolrBrowseDAO implements BrowseDAO
                 query.setMaxResults(0);
 
                 // Lan
-                if (selectValues != null) {
-                	for (String selval : selectValues) {
-                      query.addFilterQueries("{!q.op=AND df="+facetField + "_partial}" + selval);
-    				}
+                if (selectValues != null && selectValues.length > 0) {
+                    // Remove diacritic + escape all but alphanum
+                    qterms = OrderFormat.makeSortString(selectValues[0], null, OrderFormat.TEXT)
+                                .replaceAll("([^\\p{Alnum}\\s])", "\\\\$1");
+                    query.addFilterQueries("{!q.op=AND}" + facetField + "_partial:(" + qterms + ")");
                 }
                 
             }
@@ -207,26 +211,28 @@ public class SolrBrowseDAO implements BrowseDAO
 				// Lan - Filter facet results
 				if (distinct) {
 					
-					if (selectValues != null && selectValues.length > 0) {
+					if (qterms != null) {
 						// Compile the patterns from search value
-						String search = selectValues[0].replaceAll("[^\\p{ASCII}]",".").replaceAll("(\\S+)", ".*$1.*");
-				        String[] tokens = search.split("\\s+");
-				        List<Pattern> patterns = new ArrayList<Pattern>();
-				        for (String token : tokens) {
-				        	patterns.add(Pattern.compile(token, Pattern.CASE_INSENSITIVE));
-						}
+		                String search = qterms.replaceAll("(\\S+)", ".*\\\\b$1.*");
+		                log.info("Regex filter facet results.(search=" + search + ").");
+		                String[] tokens = search.split("\\s+");
+		                List<Pattern> patterns = new ArrayList<Pattern>();
+		                for (String token : tokens) {
+		                    patterns.add(Pattern.compile(token, Pattern.CASE_INSENSITIVE));
+		                }
 						
 						// filter the facet results
-						List<FacetResult> facet = sResponse.getFacetResult(facetField);
-						for (ListIterator<FacetResult> it = facet.listIterator(); it.hasNext();) {
-							String facetVal = it.next().getSortValue().replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
-					        for(Pattern pattern : patterns){
-					        	if (!pattern.matcher(facetVal).matches()) {
-					        		it.remove();
-					        		break;
-					        	}
-					        }
-						}
+						List<FacetResult> facets = sResponse.getFacetResult(facetField);
+		                // filter the facet results
+		                for (ListIterator<FacetResult> it = facets.listIterator(); it.hasNext();) {
+		                    String facetVal = it.next().getSortValue();
+		                    for(Pattern pattern : patterns){
+		                        if (!pattern.matcher(facetVal).matches()) {
+		                            it.remove();
+		                            break;
+		                        }
+		                    }
+		                }
 					}
 				}
             }

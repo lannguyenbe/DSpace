@@ -8,6 +8,7 @@
 package org.dspace.discovery;
 
 import org.dspace.util.MultiFormatDateParser;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -89,6 +90,7 @@ import org.dspace.discovery.configuration.DiscoverySortConfiguration;
 import org.dspace.discovery.configuration.DiscoverySortFieldConfiguration;
 import org.dspace.discovery.configuration.HierarchicalSidebarFacetConfiguration;
 import org.dspace.handle.HandleManager;
+import org.dspace.sort.OrderFormat;
 import org.dspace.storage.rdbms.DatabaseUtils;
 import org.dspace.utils.DSpace;
 import org.springframework.stereotype.Service;
@@ -1108,7 +1110,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                         }
                         doc.addField(searchFilter.getIndexFieldName(), value);
                         doc.addField(searchFilter.getIndexFieldName() + "_keyword", value);
-                        //Lan
+                        // Lan
                         doc.addField(searchFilter.getIndexFieldName() + "_partial", value);
 
                         if (authority != null && preferedLabel == null)
@@ -1153,21 +1155,28 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                         }
 
                         //Add a dynamic fields for auto complete in search
+                        /* Lan  - replace by normalize value      
                         doc.addField(searchFilter.getIndexFieldName() + "_ac",
                                 value.toLowerCase() + separator + value);
-                        if (preferedLabel != null)
+                         */
+                        doc.addField(searchFilter.getIndexFieldName() + "_ac",
+                                OrderFormat.makeSortString(value, null, OrderFormat.TEXT)
+                                + separator + value);                                
+                       if (preferedLabel != null)
                         {
-                            doc.addField(searchFilter.getIndexFieldName()
-                                    + "_ac", preferedLabel.toLowerCase()
+                            doc.addField(searchFilter.getIndexFieldName() + "_ac",
+                                    // preferedLabel.toLowerCase()
+                                    OrderFormat.makeSortString(preferedLabel, null, OrderFormat.TEXT)                                
                                     + separator + preferedLabel);
                         }
                         if (variants != null)
                         {
                             for (String var : variants)
                             {
-                                doc.addField(searchFilter.getIndexFieldName()
-                                        + "_ac", var.toLowerCase() + separator
-                                        + var);
+                                doc.addField(searchFilter.getIndexFieldName() +"_ac",
+                                        // var.toLowerCase()
+                                        OrderFormat.makeSortString(var, null, OrderFormat.TEXT)                                
+                                        + separator + var);
                             }
                         }
 

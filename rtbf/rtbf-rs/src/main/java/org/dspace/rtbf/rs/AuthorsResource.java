@@ -16,28 +16,33 @@ import org.apache.log4j.Logger;
 import org.dspace.rtbf.rs.common.SimpleNode;
 
 /**
- * Root resource (exposed at "communities" path)
- * @author nln
- *
+ * Root resource (exposed at "authors" path)
  */
-@Path("/communities")
-public class CommunitiesResource extends Resource {
-    private static Logger log = Logger.getLogger(CommunitiesResource.class);
+@Path("/authors")
+public class AuthorsResource extends Resource {
+    private static Logger log = Logger.getLogger(AuthorsResource.class);
     
-    public static final String FACETFIELD = "titlecom";
-    public static final SimpleNode.Attribute ELEMENT = SimpleNode.Attribute.TITLE;
+    public static final String FACETFIELD = "author";
+    public static final SimpleNode.Attribute ELEMENT = SimpleNode.Attribute.NAME;
 
+    
+    /**
+     * Method handling HTTP GET requests. The returned object will be sent
+     * to the client as "text/plain" media type.
+     *
+     * @return String that will be returned as a text/plain response.
+     */
     @GET
-    @Path("titles")
+    @Path("names")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    public List<SimpleNode> getTitles2(
+    public List<SimpleNode> getNames(
             @QueryParam("pt") @DefaultValue("") String partialTerms,
             @Context HttpHeaders headers, @Context HttpServletRequest request)
-            throws WebApplicationException
+    throws WebApplicationException
     {
-        log.info("Reading communities titles.(pt=" + partialTerms + ").");
+        log.info("Reading authors name.(pt=" + partialTerms + ").");
 
         return(getSimpleNodes(FACETFIELD, ELEMENT, partialTerms, headers, request));
     }
-    	
+    
 }

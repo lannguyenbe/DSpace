@@ -25,7 +25,7 @@ public class TodoResource {
 	}
 
 	@GET
-//	@Path("jsonarray")
+	@Path("jsonarray")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Todo[] getJSONA() {
 		Todo todo = new Todo();
@@ -39,6 +39,6 @@ public class TodoResource {
 		
 		return results.toArray(new Todo[0]);
 	}
-	
+
 	
 }
