@@ -1,9 +1,10 @@
-﻿<!DOCTYPE html>
+<!doctype html5>
 <html>
     <head>
+    	<meta charset="utf-8">
         <title>Contacts</title>
         <link rel="stylesheet" type="text/css" href="css/contacts.css" />
-		<script type="text/javascript" src="phonegap.js"></script> <!-- nécessaire -->
+		<!-- script type="text/javascript" src="phonegap.js"></script--> <!-- nécessaire -->
 		<script type="text/javascript" src="contactsGeoloc.js"></script> <!-- nécessaire -->
 		<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true&language=fr&libraries=places&v=3.exp"></script>
 		<script>
@@ -208,6 +209,8 @@
 			<input class="field" placeholder="Nom" type="text" name="inName" required><br />
 			<input class="field" placeholder="Téléphone" type="tel" name="inPhone" required><br />
 			<input class="field" placeholder="Adresse" type="text" name="inAddress" oninput="geolocate(this);"><br />
+			<input class="field" placeholder="2è Adresse" type="text" name="inAddress2" oninput="geolocate2(this);"><br />
+			<br/>
 			<input class="fieldSlim" placeholder="N°" type="text" name="inNumber" id="street_number">
 			<input class="fieldLarge" placeholder="Rue" type="text" name="inStreet" id="route"><br />
 			<input class="fieldSlim" placeholder="Code postal" type="text" name="inPostalCode" id="postal_code">

@@ -1,8 +1,11 @@
+<!doctype html>
 <html>
 <head>
+<meta charset="utf-8">
 <title>Authors</title>
 <link rel="stylesheet" href="css/authors.css" />
 
+<script src="js/simulationXhr.js"></script>
 <script>
 	var net = {
 		getXMLHTTPRequest: function () {
@@ -58,22 +61,22 @@
 					, "No matching Data", false 
 					, null);
 		},
-		setProperties: function (xElem, xHidden, xServerCode, xProperty, xIgnoreCase, xMatchAnyWhere
+		setProperties: function (xElem, xHidden, xServerCode, xServerElem, xIgnoreCase, xMatchAnyWhere
 				, xMatchTextBoxWidth // not use
 				, xShowNoMatchMessage, xNoMatchingDataMessage, xUseTimeout, xTheVisibleTime) {
 			var props = {
 					elem: xElem
 					, hidden: xHidden
 					, serverCode: xServerCode
-					, property: xProperty
+					, serverElem: xServerElem
 					, regexFlags: ((xIgnoreCase) ? "i" : "")
 					, regexAny: ((xMatchAnyWhere) ? "^" : "")
 					, matchAnyWhere: xMatchAnyWhere
 					, matchTextBoxWidth: xMatchTextBoxWidth
-					, theVisibleTime: xTheVisibleTime
 					, showNoMatchMessage: xShowNoMatchMessage
 					, noMatchingDataMessage: xNoMatchingDataMessage
 					, useTimeout: xUseTimeout
+					, theVisibleTime: xTheVisibleTime
 			};
 
 			xElem.onkeyup = app.giveOptions;
@@ -84,11 +87,19 @@
 			return props;
 		},
 		giveOptions: function(e) {
-			// this = target
+			// this = target = the input_field
 			var ev = e ? e : window.event;
 			var target = ev.target ? ev.target : ev.srcElement;
 			var intKey = ev.keyCode;
 			app.theTextBox = target;
+
+			/*
+			if (target.obj.useTimeout) {
+				if (isTiming)
+					eraseTimeout();
+				startTimeout()
+			}
+			*/
 
 			if (target.value.length == 0) {
 				app.buildChoices(null, null); // TODO hide
@@ -96,6 +107,8 @@
 			}
 
 			// TODO optimization
+			// 1. 
+			//
 			app.objLastActive = app.theTextBox;
 			app.bMadeRequest = true;
 
@@ -104,7 +117,7 @@
 			app.strLastValue = app.theTextBox.value;
 			
 		},
-		typeAhead: function(s, uri, callback) {
+		SAVE_typeAhead: function(s, uri, callback) {
 			var params = "?pt=" + encodeURIComponent(s);
 			var xhr = net.getXMLHTTPRequest();
 			if (xhr) {
@@ -117,12 +130,13 @@
 				xhr.send();
 			}
 		},
+		typeAhead: function(s, uri, callback) {
+			callback(s, simulation.getResponse());
+		},
 		buildChoices: function(s, rawData) {
 			app.bMadeRequest = false;
 			
 			app.setElementPosition(app.theTextBox); //TODO theTextBox
-
-			console.log(rawData);
 
 			var arrData = eval("(" + rawData + ")");
 			if (arrData.length > 0) {
@@ -130,6 +144,7 @@
 				theMatches = theMatches.join().replace(/\,/gi,"");
 				if (theMatches.length > 0) {
 					document.getElementById("spanOutput").innerHTML = theMatches;
+					document.getElementById("spanOutput").firstChild.className = "spanHigh";
 					return;
 				}
 			}
@@ -144,28 +159,54 @@
 				obj = obj.offsetParent;
 			}
 
-			spanElem = document.getElementById("spanOutput");
-			spanElem.style.left = posX;
-			spanElem.style.top = posY + tBox.offsetHeight;
-			spanElem.style.width = tBox.offsetWidth;
-			spanElem.style.display = "block";
+			var spanContainer = document.getElementById("spanOutput");
+			spanContainer.style.left = posX;
+			spanContainer.style.top = posY + tBox.offsetHeight;
+			spanContainer.style.width = tBox.offsetWidth;
+			spanContainer.style.display = "block";
 			if (tBox.obj.useTimout) {
-				spanElem.onmouseout = StartTimeout;
-				spanElem.onmouseover = EraseTimout;
+				spanContainer.onmouseout = StartTimeout;
+				spanContainer.onmouseover = EraseTimout;
 			} else {
-				spanElem.onmouseout = null;
-				spanElem.onmouseover = null;
+				spanContainer.onmouseout = null;
+				spanContainer.onmouseover = null;
 			}
 		},
-		makeMatches: function (s, arrData) {
+		makeMatches: function(s, arrData) {
 			var matchArray = new Array();
 			for (var i=0, mi=0, len=arrData.length; i < len; i++) {
-				var elem = arrData[i][app.theTextBox.obj.property];
+				var elem = arrData[i];
 			// TODO regex filter by s
-				matchArray[mi++] = elem;
+				matchArray[mi] = app.createSpan(elem, s, i, mi);
+				mi++;
 			}
 			return matchArray;
+		},
+		createSpan: function(elem, s, i, mi) {
+			var spanStart = "<span style='width=100%;display:block;' class='spanNormal'"
+				+" onmouseout='app.setNormalColor(this);'"
+				+" onmouseover='app.setHightColor(this);'";
+			var spanEnd = "</span>";
 
+			var spanMid = " onclick='app.setText(this);'"
+				+ " id=OptionList_" + mi + " theArrayNumber='" + i + "'>";
+			// TODO hightlight
+			return (spanStart + spanMid + elem[app.theTextBox.obj.serverElem] + spanEnd);
+		},
+		setText: function(target) {
+			// this = app
+			console.log(target.textContent);
+			document.getElementById("spanOutput").style.display = "none";
+
+		},
+		setHightColor: function(target) {
+			// this = app
+			// TODO toggle to 'spanNormal' the whole spanContainer
+			target.className = 'spanHigh';
+		},
+		setNormalColor: function(target) {
+			// this = app
+			target.className = 'spanNormal';
 		}
 		
 			

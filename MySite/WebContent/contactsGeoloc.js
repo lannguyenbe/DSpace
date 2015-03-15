@@ -15,13 +15,33 @@ function initialize() {
 		, {types: ['geocode']});
   // When the user selects an address from the dropdown,
   // populate the address fields in the form.
-	google.maps.event.addListener(autocomplete, 'place_changed', function() {
-		fillInAddress();
-	});
+	google.maps.event.addListener(autocomplete, 'place_changed', fillInAddress);;
+
+	// 2è object autocomplete => 2è <div class="pac-container">
+	// donc chaque objet a son propre <div> pac-container
+	autocomplete2 = new google.maps.places.Autocomplete(
+		document.inContact.inAddress2
+		, {types: ['geocode']});
+	google.maps.event.addListener(autocomplete2, 'place_changed', fillInAddress2);
+
+
 	}
 
 function fillInAddress() {
 	var place = autocomplete.getPlace();
+	for (var component in componentForm)
+		document.getElementById(component).value = '';
+	for (var i=0, len=place.address_components.length; i < len; i++) {
+		var addressType = place.address_components[i].types[0];
+		if (componentForm[addressType]) {
+			var val = place.address_components[i][componentForm[addressType]];
+			document.getElementById(addressType).value = val;
+		}
+	}
+}
+
+function fillInAddress2() {
+	var place = autocomplete2.getPlace();
 	for (var component in componentForm)
 		document.getElementById(component).value = '';
 	for (var i=0, len=place.address_components.length; i < len; i++) {
@@ -44,6 +64,19 @@ function geolocate(elem) {
         
 	}
 }
+
+function geolocate2(elem) {
+	if (navigator.geolocation) {
+		navigator.geolocation.getCurrentPosition(function(position) {
+			var geolocation = new google.maps.LatLng(
+				position.coords.latitude, position.coords.longitude);
+			autocomplete2.setBounds(new google.maps.LatLngBounds(geolocation
+				, geolocation));
+		});
+        
+	}
+}
+
 
 function fillElemDataList(elem) {
 	var addr = elem.value;
