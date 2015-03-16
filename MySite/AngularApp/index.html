@@ -1,0 +1,19 @@
+<!doctype html>
+<html ng-app="typaApp">
+<head>
+  <meta charset="utf-8">
+  <title>Type Ahead</title>
+  <script src="angular/1.3.10/angular.js"></script>
+  <script>
+    var app = angular.module('typaApp', []);
+    app.controller('TypaController', ['$scope', function(scope) {
+      scope.firstname = "Lan";      
+    }]);
+  </script>
+</head>
+<body ng-controller="TypaController">
+  <input type="text" ng-model="name"/>
+  <br/>
+  Hello {{firstname}} {{name}}
+</body>
+</html>
