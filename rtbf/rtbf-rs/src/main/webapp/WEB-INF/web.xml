@@ -68,4 +68,29 @@
       </listener-class>
    </listener>
 
+    <!-- Lan 17.03.2015
+        Set server response Access-Control-Allow-Origin for Testing purpose
+        Add jetty-servlets.jar to webapps/<app>/WEB-INF/lib
+    -->
+    <filter>
+        <filter-name>cross-origin</filter-name>
+        <filter-class>org.eclipse.jetty.servlets.CrossOriginFilter</filter-class>
+        <init-param>
+            <param-name>allowedOrigins</param-name>
+            <param-value>*</param-value>
+        </init-param>
+        <init-param>
+            <param-name>allowedMethods</param-name>
+            <param-value>GET,POST,HEAD</param-value>
+        </init-param>
+        <init-param>
+            <param-name>allowedHeaders</param-name>
+            <param-value>X-Requested-With,Content-Type,Accept,Origin</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>cross-origin</filter-name>
+        <url-pattern>/service/*</url-pattern>
+    </filter-mapping>   
+
 </web-app>
