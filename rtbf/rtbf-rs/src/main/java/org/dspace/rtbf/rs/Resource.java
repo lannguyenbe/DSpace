@@ -118,7 +118,7 @@ public abstract class Resource
 
     public List<SimpleNode> getSimpleNodes(
             String facetField, SimpleNode.Attribute name,
-            String partialTerms,
+            String pTerms,
             HttpHeaders headers, HttpServletRequest request)
             throws WebApplicationException
     {
@@ -136,7 +136,8 @@ public abstract class Resource
         query.setFacetMinCount(1);
         query.setMaxResults(0);
         
-        String qterms = null;        
+        String qterms = null;
+        String partialTerms = pTerms.trim();
         if (partialTerms != null && !partialTerms.isEmpty()) {
             // Remove diacritic + escape all but alphanum
             qterms = OrderFormat.makeSortString(partialTerms, null, OrderFormat.TEXT)
