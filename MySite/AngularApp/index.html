@@ -6,7 +6,6 @@
   <link rel="stylesheet" type="text/css" href="css/typa.css" />
   <script src="angular/1.3.10/angular.js"></script>
   <script src="angular/1.3.10/angular-resource.js"></script>
-  <script src="angular/1.3.10/angular-resource.js"></script>
   <script>
     var app = angular.module('typaApp', ['ngResource']);
     //
@@ -25,14 +24,17 @@
     app.controller('AuthorsTypaController', ['$scope', '$rootScope', '$resource', function($scope, $rootScope, $resource) {
 
       var resource = $resource($rootScope.endPoint + $rootScope.resources.authors);
-
+      
       function init() {
-        $scope.getAuthors();
+//        $scope.getAuthors();
       }
 
       $scope.getAuthors = function() {
-//        $scope.authorsList = resource.query({pt: ' '}); // tous
-          $scope.authorsList = resource.query({pt: $scope.query});
+		if ($scope.query)      	
+        	$scope.authorsList = resource.query({pt: $scope.query});
+        else {
+        	$scope.authorsList = [];
+        }        	
       };
 
       init();
@@ -41,28 +43,20 @@
 </head>
 <body>
   <div ng-controller="AuthorsTypaController">
-    <input type="text" ng-model="query" ng-change="getAuthors()"/>
+    <input style="width: 234px;" type="text" placeholder="Author name ..." ng-model="query" ng-change="getAuthors()"/>
 
-    <div class="typa-container" style="width: 234px; position: absolute; left: 8px; top: 129px; /* display: none; */">
-      <div class="typa-item" ng-repeat="author in authorsList.slice(0,4)">
+    <div id="typa_container" class="typa-container" ng-show="query.length" style="width: 234px;">
+      <!--div class="typa-item" ng-repeat="author in authorsList.slice(0,4)"-->
+      <div class="typa-item" ng-repeat="author in authorsList | limitTo:8">
         <span class="typa-icon typa-icon-marker"></span>
         <span class="typa-item-query">{{author.name}}</span>
       </div>
     </div>
+  </div>
 
-<!--
-    <ul>
-      <li ng-repeat="author in authorsList.slice(0,4)">{{author.name}}</li>
-    </ul>
+  <div>
+    <input style="width: 234px;" type="text" placeholder="Serie title ..."/>    
   </div>
--->  
-<!--
-  <div ng-controller="SeriesTypaController">
-    <input type="text" ng-model="query" ng-change="getSeries()"/>
-    <ul>
-      <li ng-repeat="serie in seriesList">{{serie.title}}</li>
-    </ul>
-  </div>
--->
+
 </body>
 </html>
