@@ -9,7 +9,7 @@
   <script src="angular/1.3.10/angular-resource.js"></script>
   <script src="ui-bootstrap/ui-bootstrap-typeahead-tpls-0.12.1.js"></script>
   <script>
-  angular.module('demo', [])
+  angular.module('demo', ['ui.bootstrap'])
     .controller('TypeaheadCtrl', function($scope, $http) {
 
       $scope.selected = undefined;
@@ -28,7 +28,8 @@
 <div class="container-fluid" ng-controller="TypeaheadCtrl">
   <h4>Static arrays</h4>
   <pre>Model: {{selected}}</pre>
-  <input type="text" class="form-control" ng-model="selected" typeahead="state in states | limitTo:8">
+  <input type="text" class="form-control" ng-model="selected" typeahead="state for state in states | filter:$viewValue | limitTo:8">
+  <div ng-include="'template/typeahead/typeahead-popup.html'"></div>
 </div>  
 </body>
 </html>

@@ -213,7 +213,7 @@ public class SolrBrowseDAO implements BrowseDAO
 					
 					if (qterms != null) {
 						// Compile the patterns from search value
-		                String search = qterms.replaceAll("(\\S+)", ".*\\\\b$1.*");
+				        String search = qterms.replaceAll("(\\p{Alnum}+)", "\\\\b$1");
 		                log.info("Regex filter facet results.(search=" + search + ").");
 		                String[] tokens = search.split("\\s+");
 		                List<Pattern> patterns = new ArrayList<Pattern>();
@@ -227,7 +227,7 @@ public class SolrBrowseDAO implements BrowseDAO
 		                for (ListIterator<FacetResult> it = facets.listIterator(); it.hasNext();) {
 		                    String facetVal = it.next().getSortValue();
 		                    for(Pattern pattern : patterns){
-		                        if (!pattern.matcher(facetVal).matches()) {
+		                        if (!pattern.matcher(facetVal).find()) {
 		                            it.remove();
 		                            break;
 		                        }

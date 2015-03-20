@@ -92,13 +92,14 @@ public abstract class Resource
     protected void filterFacetResults(List<FacetResult> facets, String qterms) {
     
         // Match pattern that begins a word
-        String search = qterms.replaceAll("(\\S+)", ".*\\\\b$1.*");
+        String search = qterms.replaceAll("(\\p{Alnum}+)", "\\\\b$1");
         log.debug("Regex filter facet results.(search=" + search + ").");
 
         // Compile individual patterns
         String[] tokens = search.split("\\s+");
         List<Pattern> patterns = new ArrayList<Pattern>();
         for (String token : tokens) {
+            log.debug("token=" + token);
             patterns.add(Pattern.compile(token, Pattern.CASE_INSENSITIVE));
         }
 
@@ -106,7 +107,7 @@ public abstract class Resource
         for (ListIterator<FacetResult> it = facets.listIterator(); it.hasNext();) {
             String facetVal = it.next().getSortValue();
             for(Pattern pattern : patterns){
-                if (!pattern.matcher(facetVal).matches()) {
+                if (!pattern.matcher(facetVal).find()) {
                     it.remove();
                     break;
                 }
