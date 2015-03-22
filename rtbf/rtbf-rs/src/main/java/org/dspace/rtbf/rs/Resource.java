@@ -36,6 +36,8 @@ public abstract class Resource
 {
 
     private static Logger log = Logger.getLogger(Resource.class);
+    
+    private static final int FACETLIMIT = 100;
 
 
     /**
@@ -136,7 +138,7 @@ public abstract class Resource
         query.addFacetField(dff);
         query.setFacetMinCount(1);
         query.setMaxResults(0);
-        
+               
         String qterms = null;
         String partialTerms = pTerms.trim();
         if (partialTerms != null && !partialTerms.isEmpty()) {
@@ -171,6 +173,8 @@ public abstract class Resource
             results = new ArrayList<SimpleNode>();          
             for (FacetResult facet : facets) {
                 results.add(new SimpleNode().setAttribute(name, facet.getDisplayedValue()));
+                if (results.size() > FACETLIMIT)
+                    break;
             }
             return results;
             

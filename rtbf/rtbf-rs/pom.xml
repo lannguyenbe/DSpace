@@ -106,6 +106,14 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
         </dependency>
+        
+        <!-- Crossorigin for dev env -->
+        <!-- install this artifact manually first at all -->
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlets</artifactId>
+            <version>9.2.1.v20140609</version>
+       </dependency>
 		
 
     </dependencies>

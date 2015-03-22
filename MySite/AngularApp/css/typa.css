@@ -38,9 +38,13 @@
     font-size: 11px;
     color: #999
 }
+.typa-item.active,
+.typa-item:active,
 .typa-item:hover {
-    background-color: #fafafa
+/*    background-color: #fafafa */
+    background-color: magenta
 }
+
 .typa-item-selected,
 .typa-item-selected:hover {
     background-color: #ebf2fe
