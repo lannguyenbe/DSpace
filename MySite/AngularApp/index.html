@@ -9,6 +9,17 @@
   <script>
     var app = angular.module('typaApp', ['ngResource']);
     //
+    // Factories
+    app.factory('focus', ['$timeout', function($timeout){
+      return function(id) {
+        $timeout(function() {
+          var element = document.getElementById(id);
+          if (element) { element.focus(); }
+        });
+      }
+
+    }]);
+    //
     // App
     app.run(['$rootScope', function($rootScope) { 
       $rootScope.limitTo = 8
@@ -21,19 +32,30 @@
     }]);
     //
     // Controller
-    app.controller('AuthorsTypaController', ['$scope', '$rootScope', '$resource', 
-    function($scope, $rootScope, $resource, $element) {
+    app.controller('AuthorsTypaController', ['$scope', '$rootScope', '$resource', 'focus',
+    function($scope, $rootScope, $resource, focus) {
 
-//      var resource = $resource($rootScope.endPoint + $rootScope.resources.authors);
-      var resource = $resource($rootScope.resources.authorsJ);
+      var resource = $resource($rootScope.endPoint + $rootScope.resources.authors);
+//      var resource = $resource($rootScope.resources.authorsJ);
       var limitTo = $rootScope.limitTo;
       var active;
       var forceClose;
+      var keys = [];
+      var handledKeys = {}; // callulated from keys on init
 
       // Private functions
       function init() {
-//        $scope.getAuthors();
-        $scope.init();
+        keys.push({keyCode: 40, keyName:"up", handle: function() { if (!reopen()) { var modulo = ($scope.authorsList.length < limitTo) ? $scope.authorsList.length :limitTo; active = (active+modulo+1)%modulo; } }});
+        keys.push({keyCode: 38, keyName:"down", handle: function() { if (!reopen()) { var modulo = ($scope.authorsList.length < limitTo) ? $scope.authorsList.length :limitTo; active = (active+modulo-1)%modulo; } }});
+        keys.push({keyCode: 13, keyName:"enter", handle: function() { if (!reopen()) { $scope.select(active); } }});
+        keys.push({keyCode: 27, keyName:"esc", handle: function() { forceClose |= true; }});
+        keys.push({keyCode: 'ctrl+13', keyName:"ctrl+enter", handle: function() { $scope.selectAdd(active) }});
+
+        for (var i = 0; i < keys.length; i++) {
+          handledKeys[keys[i].keyCode] = keys[i].keyName;
+        }
+
+        focus('query');
       }
 
       function resetAuthorsList() {
@@ -41,47 +63,7 @@
         $scope.active = null;
       }
 
-      // Public functions
-      $scope.getAuthors = function() {
-		if ($scope.query) {    	
-        	$scope.authorsList = resource.query({pt: $scope.query});
-        	active = 0;
-        } else
-          resetAuthorsList();  
-        forceClose = false;               	
-      };
-
-      $scope.select = function(idx) {
-        $scope.query = $scope.authorsList[idx].name;
-        resetAuthorsList();
-      };
-
-      $scope.isEmpty = function () {
-        return (!($scope.authorsList && $scope.authorsList.length > 0));
-      };
-
-      $scope.isForceClose = function () {
-        return (forceClose ? true : false);
-      };
-
-
-      $scope.isActive = function (idx) {
-        return (active == idx);
-      };
-
-      $scope.setActive = function (idx) {
-        active = idx;
-      };
-
-      $scope.keys = [];
-      $scope.init = function () {
-        $scope.keys.push({keyCode: 40, handle: function() { if (!$scope.reopen()) { active = (active+limitTo+1)%limitTo; } }});
-        $scope.keys.push({keyCode: 38, handle: function() { if (!$scope.reopen()) { active = (active+limitTo-1)%limitTo; } }});
-        $scope.keys.push({keyCode: 13, handle: function() { if (!$scope.reopen()) { $scope.select(active); } }});
-        $scope.keys.push({keyCode: 27, handle: function() { forceClose |= true; }});
-      };
-
-      $scope.reopen = function () {
+      function reopen () {
         if ($scope.isForceClose()) {
           forceClose = false;
           return true;
@@ -91,33 +73,107 @@
         } else {
           return false;
         };
+      }
+
+      // Public properties
+      $scope.selectedList = [];
+      // Public functions
+      $scope.getAuthors = function() {
+		if ($scope.query) {    	
+        	$scope.authorsList = resource.query({pt: $scope.query});
+        	active = 0;
+        } else
+          resetAuthorsList();  
+        forceClose = false;               	
+      }
+
+      $scope.select = function(idx) {
+        $scope.selectAdd(idx)
+        $scope.query = $scope.authorsList[idx].name;
+        resetAuthorsList();
+      }
+
+      $scope.selectAdd = function(idx, n) {
+        var nbr;
+        if (!n) { nbr = 1; };
+        for (var i = 0; i < nbr; i++, idx++) {
+          try {
+            $scope.selectedList.push($scope.authorsList[idx].name);          
+          } catch (arrayPushException) {
+            console.log(arrayPushException);
+          }
+        }
+      }
+
+      $scope.isEmpty = function () {
+        return (!($scope.authorsList && $scope.authorsList.length > 0));
+      }
+
+      $scope.isForceClose = function () {
+        return (forceClose ? true : false);
+      }
+
+
+      $scope.isActive = function (idx) {
+        return (active == idx);
+      }
+
+      $scope.setActive = function (idx) {
+        active = idx;
+      }
+
+      $scope.onClick = function (idx, ev) {
+        ev.preventDefault();
+        ev.stopImmediatePropagation();
+
+        if (ev.ctrlKey)
+          $scope.selectAdd(idx);
+        else
+          $scope.select(idx);
+
+       // reset focus to query field
+       focus('query');
+
 
       }
 
       $scope.onKeydown = function (ev) {
-        var kcode = ev.keyCode;
+//        var kcode = ev.which;
 
-        $scope.keys.forEach(function(o) {
-          if (o.keyCode !== kcode) {return;}
-          ev.preventDefault(); 
+        var kcode = (ev.ctrlKey) ? 'ctrl+'+ev.keyCode : ev.keyCode;
+        var key = handledKeys[kcode];
+
+        if ( !key || ev.shiftKey || ev.altKey ) {
+          return;
+        } 
+
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        keys.forEach(function(o) {
+          if (o.keyName !== key) {return;}
           o.handle();
         });
-      };
+      }
 
 
       init();
+
     }]);
   </script>
 </head>
 <body>
   <div ng-controller="AuthorsTypaController">
     <pre>query:{{query}}</pre>
-    <input style="width: 234px;" type="text" placeholder="Author name ..." ng-model="query" 
+    <ul ng-model="selectedList">
+      <li ng-repeat="author in selectedList">{{author}}</li>
+    </ul>
+    <input id="query" style="width: 234px;" type="text" placeholder="Author name ..." ng-model="query"
       ng-change="getAuthors()"
       ng-keydown="onKeydown($event)"
       />
     <div id="typa_container" class="typa-container" ng-show="!isEmpty() && !isForceClose()" style="width: 234px;">
-      <div class="typa-item" ng-repeat="author in authorsList | limitTo:8" ng-click="select($index)"
+      <div class="typa-item" ng-repeat="author in authorsList | limitTo:8" ng-click="onClick($index, $event)"
         ng-class="{'active': isActive($index)}"
         ng-mouseenter="setActive($index)">
         <span class="typa-icon typa-icon-marker"></span>
