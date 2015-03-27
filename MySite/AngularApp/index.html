@@ -19,44 +19,118 @@
   </script>
   <script>
   angular.module('nln.ui',['nln.ui.tpls', 'nln.ui.typeahead']);
-//  angular.module('nln.ui.tpls',['template/typeahead/typa-container.html']);
-  angular.module('nln.ui.tpls',['template/typeahead/test-container.html']);
+  angular.module('nln.ui.tpls',['template/typeahead/typa-container.html']);
+//  angular.module('nln.ui.tpls',['template/typeahead/test-container.html']);
   angular.module('nln.ui.typeahead',['ngResource','nln.ui.utils'])
     //
     // Directives
     .directive('nlnTypaPopup', function () {
       return {
         restrict: 'E'
-       ,replace:true
+       ,replace: true
        ,templateUrl: 'template/typeahead/typa-container.html'
       }
     })
-    .directive('nlnTypahead', function ($compile) {
+    .directive('nlnTypahead', function ($compile, $timeout, $filter) {
       return {
         restrict: 'A'
        ,require:'ngModel'
        ,link: function postLink(originalScope, element, attrs, ngModelCtrl) {
+
+         // Mandatory attributes
+         // id of the input field, pass to popup elem as attribute to receive back selected value
          var inputId = attrs.id;
+         // resource where to search from
+         var asLabel = attrs.nlnTypaAsLabel;
+         var resource = originalScope.$eval(attrs.nlnTypaResource);
 
-        // Create child scope
-        var scope = originalScope.$new();
-        originalScope.$on('$destroy', function(){
-          scope.$destroy();
-        });
+         // Supported attributes
+         // minimal nb of characters that needs to be entered before typeahead kicks-in
+         var minLength = originalScope.$eval(attrs.nlnTypaMinLength) || 1;
+         // minimal wait time after last character typed before typehead kicks-in
+         var waitTime = originalScope.$eval(attrs.nlnTypaWaitMs) || 0;
+
+         // internal variables & local functions
+         var hasFocus;
+         var forceClose;
+
+         var timeoutPromise;
+
+         function scheduleSearchWithTimeout(inputValue) {
+           timeoutPromise = $timeout(function() {
+              getHits(inputValue);
+           }, waitTime);
+         }
+
+         function cancelPreviousTimeout() {
+           if (timeoutPromise) { $timeout.cancel(timeoutPromise); }
+         }
+
+         function resetHitsList() {
+           scope.hitsList = [];
+         }
+
+         function getHits(pattern) {
+           if (resource instanceof Function) {
+             scope.hitsList = resource(pattern);
+/*              .then(function(d) {}, function(e) {}); // TODO : is Promise ???????????
+/*                function (d) { // + default function
+                  scope.label = (d.length) ? Object.keys(d[0])[0] : undefined;
+                  active = (d.length) ? 0 : undefined; 
+                }
+                , function (e) { console.log(e); resetHitsList(); }
+              );*/
+           } else {
+             scope.hitsList = $filter('filter')(resource, {$: pattern});
+           }
+         }
+
+         // Create child scope
+         var scope = originalScope.$new();
+         originalScope.$on('$destroy', function(){
+           scope.$destroy();
+         });
+         // Add properties to child scope
+         scope.hitsList = [];
+         scope.label = asLabel;
+
+         // Add methods to child scope
+         scope.isEmpty = function () {
+           return (!(scope.hitsList &&scope.hitsList.length > 0));
+         }
+         scope.isForceClose = function () {
+           return (forceClose ? true : false);
+         }
+
+         // ngModelCtrl
+         // $parsers kick-in on all the changes coming from the view as well as manually triggered by $setViewValue
+         ngModelCtrl.$parsers.unshift(function(inputValue) {
+
+           hasFocus = true;
+
+           if (inputValue && inputValue.length >= minLength) {
+             if (waitTime > 0) {
+               cancelPreviousTimeout();
+               scheduleSearchWithTimeout(inputValue);
+             } else {
+               getHits(inputValue);
+             }
+           } else {
+             cancelPreviousTimeout();
+             resetHitsList();
+           }
+         });
 
 
-        // Create popup element
-        var popUpEl = angular.element('<nln-typa-popup/>');
-        popUpEl.attr({
-          'input-idref': inputId
-        });
+         // Create popup element
+         var popUpEl = angular.element('<nln-typa-popup/>');
 
-
+         popUpEl.attr({
+           'input-idref': inputId
+         });
 
          // Compile the popup and attach it to the DOM
-         scope.myVar = 'myVar from link';
-//         var popup = $compile(popUpEl)(scope);
-         var popup = $compile(popUpEl)(originalScope);
+         var popup = $compile(popUpEl)(scope);
          element.after(popup);
        }
       } // return
@@ -82,41 +156,45 @@
 //      return resource = $resource($rootScope.resources.authorsJ);
       return $resource($rootScope.endPoint + $rootScope.resources.authors);
     }]);    
+    app.factory('Series', ['$rootScope', '$resource', function($rootScope, $resource) {
+      return $resource($rootScope.endPoint + $rootScope.resources.series);
+    }]);    
     //
     // Controller
-    app.controller('AuthorsTypaController', ['$scope', '$rootScope', 'Authors', 'focus',
-    function($scope, $rootScope, resource, focus) {
+    app.controller('TypaController', ['$scope', '$rootScope', 'focus', 'Authors', 'Series',
+    function($scope, $rootScope, focus, Authors, Series) {
           focus('search-author');
 
-          $scope.myVar = 'myVar from AuthorsTypaCOntroller';
-    }]);
-    app.controller('SeriesTypaController', ['$scope', '$rootScope', 'Authors', 'focus',
-    function($scope, $rootScope, resource, focus) {
+          $scope.getAuthors = function (pattern) {
+            return(Authors.query({pt: pattern}));
+          };
+
+          $scope.getSeries = function (pattern) {
+            return(Series.query({pt: pattern}));
+          };
+
     }]);
 
   </script>
 </head>
 <body>
-  <div ng-controller="AuthorsTypaController">
+  <div ng-controller="TypaController">
     <pre>pattern:{{pattern}}</pre>
     <ul ng-model="selectedList">
       <li ng-repeat="item in selectedList">{{item}}</li>
     </ul>
-    <input id="search-author" style="width: 234px;" type="text" placeholder="Author name ..." ng-model="pattern"
-      ng-change="queryHits()"
+    <input id="search-author" ng-model="author.pattern" style="width: 234px;" type="text" placeholder="Author name ..."
       ng-keydown="onKeydown($event)"
-      nln-typahead/>
-  </div>
+      nln-typahead nln-typa-resource="getAuthors" nln-typa-as-label="name"/>
 
-  <div ng-controller="SeriesTypaController">
     <pre>pattern:{{pattern}}</pre>
     <ul ng-model="selectedList">
       <li ng-repeat="item in selectedList">{{item}}</li>
     </ul>
-    <input id="search-serie" style="width: 234px;" type="text" placeholder="Serie title ..." ng-model="pattern"
-      ng-change="queryHits()"
-      ng-keydown="onKeydown($event)"/>
-    <nln-typa-popup input-idref="search-serie"/>
+    <input id="search-serie" ng-model="serie.pattern" style="width: 234px;" type="text" placeholder="Serie title ..."
+      ng-keydown="onKeydown($event)"
+      nln-typahead nln-typa-resource="getSeries" nln-typa-as-label="title"/>
+
   </div>
 
   <script>
@@ -128,11 +206,14 @@
         '    ng-class="{\'active\': isActive($index)}"\n'+
         '    ng-mouseenter="setActive($index)">\n'+
         '    <span class="typa-icon typa-icon-marker"></span>\n'+
-        '    <span class="typa-item-query">{{item.name}}</span>\n'+
+        '    <span class="typa-item-query" ng-bind="item[label]"></span>\n'+
         '  </div>\n'+
         '</div>\n'+
         '');
     }]);
+
+//        '    <span class="typa-item-query">{{item.name}}</span>\n'+
+
   angular.module('template/typeahead/test-container.html',[])
     .run(['$templateCache', function($templateCache) {
       $templateCache.put('template/typeahead/typa-container.html',
