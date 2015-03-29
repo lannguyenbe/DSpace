@@ -37,23 +37,24 @@
        ,link: function postLink(originalScope, element, attrs, ngModelCtrl) {
 
           // Mandatory attributes
+          // id of the input field, pass to popup elem as attribute to receive back selected value
+          var inputId = attrs.id;
           // resource where to search from
           var resource = originalScope.$eval(attrs.nlnTypaResource);
 
           // Supported attributes
-          // do not apply filter on results returned from resource
-          var notFilter = originalScope.$eval(attrs.nlnTypaNotFilter) || false;
           // minimal nb of characters that needs to be entered before typeahead kicks-in
           var minLength = originalScope.$eval(attrs.nlnTypaMinLength) || 1;
           // minimal wait time after last character typed before typehead kicks-in
           var waitTime = originalScope.$eval(attrs.nlnTypaWaitMs) || 0;
 
-          // Setter : given a string representing the name of the property, 
+          // Setter to assign value 
+          // given a string representing the name of the property, 
           // use setter to assign value to that property.
-          // setter for input field
+          // setter for ngModel input field
           var ngModelGetter = $parse(attrs.ngModel); // is a function
           var ngModelSetter = ngModelGetter.assign; // is a function
-          // setter for output container where selected values will be returned
+          // setter for output container that will contain selected values
           if (attrs.nlnTypaSelected) {
             var selectedSetter = $parse(attrs.nlnTypaSelected).assign;
           }
@@ -63,42 +64,85 @@
           var timeoutPromise;
           var forceClose;
           var activeIdx;
+          var keys = [];
+          var handledKeys = {}; // callulated from keys on init
 
-          var selectedList = []; // keep the selected items
+
+          var selectedList = [];
           if (selectedSetter) { selectedSetter(originalScope, selectedList); }
 
-          // initialize keydown event handlers
-          var keys = [];
-          var handledKeys = {}; // calulated from keys on init
-          keys.push({keyCode: 40, keyName:"down", handle: function() { if (isPopupOpen()) { incrActiveIdx(1); }}});
-          keys.push({keyCode: 38, keyName:"up", handle: function() { if (isPopupOpen()) { incrActiveIdx(-1); }}});
-          keys.push({keyCode: 13, keyName:"enter", handle: function() { if (isPopupOpen()) { select(activeIdx); } }});
-          keys.push({keyCode: 27, keyName:"esc", handle: function() { forceClose = ((scope.hitsList||[]).length > 0); }});
-          keys.push({keyCode: 'ctrl+13', keyName:"ctrl+enter", handle: function() { if ((scope.hitsList||[]).length > 0 && !forceClose) { selectAdd(activeIdx); } }});
- 
-          for (var i = 0; i < keys.length; i++) {
-            handledKeys[keys[i].keyCode] = keys[i].keyName;
-          }
+          function init() {
 
-          function isPopupOpen() {
-            if (forceClose) { // popup is hidden 
-              forceClose = false;
-              return false;
-            } else if ((scope.hitsList||[]).length) { // popup is already open
-              return true;
-            } else if (ngModelCtrl.$viewValue) { // popup is not populated
-              getHits(ngModelCtrl.$viewValue);
+            function incrActiveIdx(n) {
+              var modulo = (scope.filterResults) ? scope.filterResults.length : scope.hitsList.length;
+              activeIdx = (activeIdx+modulo+n)%modulo;
             }
-            return false;
+
+            keys.push({keyCode: 40, keyName:"down", handle: function() { if (!reopen()) { incrActiveIdx(1); }}});
+            keys.push({keyCode: 38, keyName:"up", handle: function() { if (!reopen()) { incrActiveIdx(-1); }}});
+            keys.push({keyCode: 13, keyName:"enter", handle: function() { if (!reopen()) { select(activeIdx); } }});
+            keys.push({keyCode: 27, keyName:"esc", handle: function() { forceClose = ((scope.hitsList||[]).length > 0); }});
+            keys.push({keyCode: 'ctrl+13', keyName:"ctrl+enter", handle: function() { if ((scope.hitsList||[]).length > 0 && !forceClose) { selectAdd(activeIdx); } }});
+
+            for (var i = 0; i < keys.length; i++) {
+              handledKeys[keys[i].keyCode] = keys[i].keyName;
+            }
           }
 
-          function incrActiveIdx(n) {
-            var modulo = (scope.filterResults) ? scope.filterResults.length : scope.hitsList.length;
-            activeIdx = (activeIdx+modulo+n)%modulo;
+          init();
+
+
+          function scheduleSearchWithTimeout(inputValue) {
+            timeoutPromise = $timeout(function() {
+               getHits(inputValue);
+            }, waitTime);
+          }
+
+          function cancelPreviousTimeout() {
+            if (timeoutPromise) { $timeout.cancel(timeoutPromise); }
+          }
+
+          function reopen() {
+            if (forceClose) { // popup is now hidden but was populated
+              forceClose = false;
+              return true;
+            } else if ((scope.hitsList||[]).length) { // popup is already open
+              return false;
+            } else { // popup is not populated
+              getHits(ngModelGetter(originalScope));
+              return true;
+            };
+          }
+
+          function resetHitsList() {
+            if ((scope.hitsList||[]).length > 0) { scope.hitsList = []; }
+            activeIdx = undefined;
+            forceClose = false;
+          }
+
+          function getHits(pattern) {
+            resetHitsList();
+            if (resource instanceof Function) { // async resource
+              scope.hitsList = resource(pattern, function (d) { // on success
+                 if (hasFocus && d.length) {
+                   scope.label = Object.keys(d[0])[0]; // first property
+                   activeIdx = 0;
+                 }
+              }, function (e) { // on error
+                 console.log(e); // TODO retry
+              });
+            } else { // static array
+              var d = scope.hitsList = $filter('filter')(resource, {$: pattern});
+              if (d.length) { 
+                scope.label = Object.keys(d[0])[0]; // first property
+                activeIdx = 0;
+              }
+            }
           }
 
           function select(idx) {
             selectAdd(idx);
+            // TODO setter only once ?
             ngModelSetter(originalScope, scope.hitsList[idx][scope.label]);
             forceClose = true; // hide               	
           }
@@ -111,7 +155,49 @@
             }
           }
 
-          // bind keydown to input field
+
+          // Create child scope
+          var scope = originalScope.$new();
+          originalScope.$on('$destroy', function(){
+            scope.$destroy();
+          });
+          // Add properties to child scope
+          scope.hitsList = [];
+
+          // Add methods to child scope
+          scope.isEmpty = function () {
+            return ((scope.hitsList||[]).length == 0);
+          }
+
+          scope.isForceClose = function () {
+            return (forceClose ? true : false);
+          }
+
+          scope.isActive = function (idx) {
+            return (activeIdx === idx);
+          }
+
+          scope.setActive = function (idx) {
+            activeIdx = idx;
+          }
+
+          scope.onClick = function (idx, ev) {
+            ev.preventDefault();
+            ev.stopImmediatePropagation();
+
+            if (ev.ctrlKey)
+              selectAdd(idx);
+            else
+              select(idx);
+
+
+           // return focus to the input element if a match was selected via a mouse click event
+           // use timeout to avoid $rootScope:inprog error
+           // focus(inputId)
+           $timeout(function() { element[0].focus(); }, 0, false);
+
+          }
+
           element.bind('keydown', function (ev) {
             var kcode = (ev.ctrlKey) ? 'ctrl+'+ev.keyCode : ev.keyCode;
             var key = handledKeys[kcode];
@@ -146,70 +232,8 @@
             $document.unbind('click', dismissClickHandler);
           });          
 
- 
-          // Preparing to query resource
-          function scheduleSearchWithTimeout(inputValue) {
-            timeoutPromise = $timeout(function() {
-               getHits(inputValue);
-            }, waitTime);
-          }
-
-          function cancelPreviousTimeout() {
-            if (timeoutPromise) { $timeout.cancel(timeoutPromise); }
-          }
-
-          function resetHitsList() {
-            if ((scope.hitsList||[]).length > 0) { scope.hitsList = []; }
-            activeIdx = undefined;
-            forceClose = false;
-          }
-
-          var getHits;
-          if (resource instanceof Function) { 
-             if (notFilter)
-               getHits = getHitsAsyncNotFilter; 
-             else
-               getHits = getHitsAsync; 
-          } else { 
-             getHits = getHitsStatic; 
-          }
-
-          function getHitsAsync(pattern) {
-            resetHitsList();
-            resource(pattern, function (d) { // on success
-               if (hasFocus && d.length) {
-                 scope.hitsList = $filter('filter')(d, {$: pattern});
-                 scope.label = Object.keys(d[0])[0]; // first property
-                 activeIdx = 0;
-               }
-            }, function (e) { // on error
-               console.log(e); // TODO retry
-            });
-          }
-
-          function getHitsAsyncNotFilter(pattern) {
-            resetHitsList();
-            scope.hitsList = resource(pattern, function (d) { // on success
-               if (hasFocus && d.length) {
-                 scope.label = Object.keys(d[0])[0]; // first property
-                 activeIdx = 0;
-               }
-            }, function (e) { // on error
-               console.log(e); // TODO retry
-            });
-          }
-
-          function getHitsStatic(pattern) {
-            resetHitsList();
-            var d = scope.hitsList = $filter('filter')(resource, {$: pattern});
-            if (d.length) { 
-              scope.label = Object.keys(d[0])[0]; // first property
-              activeIdx = 0;
-            }
-          }
-
-          // use $parsers to query resource when input changes
-          // ngModelCtrl $parsers kick-in on all the changes coming from the view as well as manually triggered by $setViewValue
+          // ngModelCtrl
+          // $parsers kick-in on all the changes coming from the view as well as manually triggered by $setViewValue
           ngModelCtrl.$parsers.unshift(function(inputValue) {
 
             hasFocus = true;
@@ -228,53 +252,18 @@
           });
 
 
-          // Create child scope for popup
-          var scope = originalScope.$new();
-          originalScope.$on('$destroy', function(){
-            scope.$destroy();
-          });
-          // Add properties to child scope
-          scope.hitsList = [];
-
-          // Add methods to child scope
-          scope.isEmpty = function () {
-            return ((scope.hitsList||[]).length == 0);
-          }
-
-          scope.isForceClose = function () {
-            return (forceClose ? true : false);
-          }
-
-          scope.isActive = function (idx) {
-            return (activeIdx === idx);
-          }
-
-          scope.setActive = function (idx) {
-            activeIdx = idx;
-          }
-
-          scope.onClick = function (idx, ev) {
-            ev.preventDefault();
-            ev.stopImmediatePropagation();
-
-            if (ev.ctrlKey)
-              selectAdd(idx);
-            else
-              select(idx);
-
-            // return focus to the input element if a match was selected via a mouse click event
-            // use timeout to avoid $rootScope:inprog error
-            $timeout(function() { element[0].focus(); }, 0, false);
-          }
-
           // Create popup element
           var popUpEl = angular.element('<nln-typa-popup/>');
+
+          popUpEl.attr({
+            'input-idref': inputId
+          });
 
           // Compile the popup and attach it to the DOM
           var popup = $compile(popUpEl)(scope);
           element.after(popup);
         }
-      } // return link
+      } // return
     });
   </script>
 
@@ -283,6 +272,7 @@
     //
     // Run
     app.run(['$rootScope', function($rootScope) { 
+      $rootScope.limitTo = 8; // TODO should come from the view
       $rootScope.endPoint = 'http://localhost:8070/rs/service';
       $rootScope.resources = {
          authors: '/authors/names'
@@ -327,7 +317,7 @@
       <li ng-repeat="item in author.selected">{{item}}</li>
     </ul>
     <input id="search-author" ng-model="author.pattern" style="width: 234px;" type="text" placeholder="Author name ..."
-      nln-typahead nln-typa-resource="getAuthors" nln-typa-not-filter="true" nln-typa-selected="author.selected"/>
+      nln-typahead nln-typa-resource="getAuthors" nln-typa-selected="author.selected"/>
 
     <pre>pattern:{{serie.pattern}}</pre>
     <ul ng-model="serie.selected">
