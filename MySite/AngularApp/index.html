@@ -97,8 +97,9 @@
             activeIdx = (activeIdx+modulo+n)%modulo;
           }
 
-          function select(idx) {
-            selectAdd(idx);
+          function select(idx, n) {
+            var nbr = n || 1;
+            selectAdd(idx, nbr);
             ngModelSetter(originalScope, scope.hitsList[idx][scope.label]);
             forceClose = true; // hide               	
           }
@@ -253,19 +254,27 @@
             activeIdx = idx;
           }
 
-          scope.onClick = function (idx, ev) {
-            ev.preventDefault();
-            ev.stopImmediatePropagation();
-
+          scope.selectActive = function (ev) {
             if (ev.ctrlKey)
-              selectAdd(idx);
+              selectAdd(activeIdx);
             else
-              select(idx);
+              select(activeIdx);
 
             // return focus to the input element if a match was selected via a mouse click event
             // use timeout to avoid $rootScope:inprog error
             $timeout(function() { element[0].focus(); }, 0, false);
           }
+
+          scope.selectAll = function (ev) {
+            var all = (scope.filterResults) ? scope.filterResults.length : scope.hitsList.length;
+            selectAdd(0, all);
+            select(activeIdx);
+
+            // return focus to the input element if a match was selected via a mouse click event
+            // use timeout to avoid $rootScope:inprog error
+            $timeout(function() { element[0].focus(); }, 0, false);
+          }
+
 
           // Create popup element
           var popUpEl = angular.element('<nln-typa-popup/>');
@@ -293,8 +302,8 @@
     //
     // Factories   
     app.factory('Authors', ['$rootScope', '$resource', function($rootScope, $resource) {
-      return resource = $resource($rootScope.resources.authorsJ);
-//      return $resource($rootScope.endPoint + $rootScope.resources.authors);
+//      return resource = $resource($rootScope.resources.authorsJ);
+      return $resource($rootScope.endPoint + $rootScope.resources.authors);
     }]);    
     app.factory('Series', ['$rootScope', '$resource', function($rootScope, $resource) {
       return $resource($rootScope.endPoint + $rootScope.resources.series);
@@ -334,7 +343,7 @@
       <li ng-repeat="item in serie.selected">{{item}}</li>
     </ul>
     <input id="search-serie" ng-model="serie.pattern" style="width: 234px;" type="text" placeholder="Serie title ..."
-      nln-typahead nln-typa-resource="myAuthors"  nln-typa-selected="serie.selected"/>
+      nln-typahead nln-typa-resource="getSeries" nln-typa-not-filter="true" nln-typa-selected="serie.selected"/>
 
   </div>
 
@@ -343,11 +352,14 @@
     .run(['$templateCache', function($templateCache) {
       $templateCache.put('template/typeahead/typa-container.html',
         '<div class="typa-container" ng-show="!isEmpty() && !isForceClose()" style="width: 234px;">\n'+
-        '  <div class="typa-item" ng-repeat="item in hitsList | limitTo:7 as filterResults" ng-click="onClick($index, $event)"\n'+
+        '  <div class="typa-item" ng-repeat="item in hitsList | limitTo:7 as filterResults" ng-click="selectActive($event)"\n'+
         '    ng-class="{\'active\': isActive($index)}"\n'+
         '    ng-mouseenter="setActive($index)">\n'+
         '    <span class="typa-icon typa-icon-marker"></span>\n'+
         '    <span class="typa-item-query">{{item[label]}}</span>\n'+
+        '  </div>\n'+
+        '  <div>\n'+
+        '    <button ng-if="filterResults.length > 1" ng-click="selectAll($event)" type="button">Simone, envoie tout !</button>\n'+
         '  </div>\n'+
         '</div>\n'+
         '');

@@ -8,7 +8,7 @@
   </condition>
 
   <target name="help">
-    <echo message="in Eclipse, Execute target : deploy"/>
+    <echo message="in Eclipse, execute target : deploy"/>
     <echo message="to deploy in directory modules/xmlui/target of the source tree"/>
     <echo message="What deploy is doing ... "/>
     <echo message="------------------------"/>
@@ -28,6 +28,7 @@
   <!--target name="overlay" depends="install"-->
   <target name="overlay-full">
     <artifact:mvn pom="pom.xml" mavenHome="${env.M2_HOME}" fork="true">
+      <!--sysproperty key="mirage2.deps.included" value="false"/-->
       <arg value="-P mirage2_dev,mirage2-deps-preinstalled-fast"/>   
       <arg value="clean"/>   
       <arg value="package"/>         
@@ -37,18 +38,16 @@
   <!-- this overlay only works for xsl modifications, doesn't regenerate main.css and theme.js -->
   <target name="overlay">
     <artifact:mvn pom="pom.xml" mavenHome="${env.M2_HOME}" fork="true">
-      <!--sysproperty key="mirage2.deps.included" value="false"/-->
-      <!--arg value="-P mirage2_dev,mirage2-deps-preinstalled-fast"/-->   
-      <!--arg value="clean"/-->   
       <arg value="-P mirage2_dev,mirage2-xfast"/>   
+      <arg value="clean"/>   
       <arg value="package"/>         
     </artifact:mvn>
   </target>
 
   <target name="cp2xmlui">
-    <copy todir="../xmlui/target/xmlui-4.2/themes/Mirage2" preservelastmodified="true" overwrite="true">
-      <fileset dir="target/xmlui-mirage2-4.2/themes/Mirage2" includes="**/*">
-        <different targetdir="../xmlui/target/xmlui-4.2/themes/Mirage2" ignoreFileTimes="true" />
+    <copy todir="../xmlui/target/xmlui-5.0/themes/Mirage2" preservelastmodified="true" overwrite="true">
+      <fileset dir="target/xmlui-mirage2-5.0/themes/Mirage2" includes="**/*">
+        <different targetdir="../xmlui/target/xmlui-5.0/themes/Mirage2" ignoreFileTimes="true" />
       </fileset>
     </copy>
   </target>

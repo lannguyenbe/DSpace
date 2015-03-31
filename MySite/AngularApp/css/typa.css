@@ -12,6 +12,7 @@
     box-sizing: border-box;
     overflow: hidden
 }
+/*
 .typa-container:after {
     content: "";
     padding: 1px 1px 1px 0;
@@ -22,7 +23,7 @@
     background-position: right;
     background-repeat: no-repeat;
     background-size: 104px 16px
-}
+}*/
 .hdpi.typa-container:after {
     background-image: url(https://maps.gstatic.com/mapfiles/api-3/images/powered-by-google-on-white2_hdpi.png)
 }
@@ -41,8 +42,8 @@
 .typa-item.active,
 .typa-item:active,
 .typa-item:hover {
-/*    background-color: #fafafa */
-    background-color: magenta
+    background-color: #fafafa 
+/*    background-color: magenta */
 }
 
 .typa-item-selected,
