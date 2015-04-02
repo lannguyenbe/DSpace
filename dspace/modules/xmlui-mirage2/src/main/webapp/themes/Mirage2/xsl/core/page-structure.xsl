@@ -819,6 +819,7 @@
             <xsl:text>scripts-dist.xml</xsl:text>
         </xsl:variable>
         <xsl:for-each select="document($scriptURL)/scripts/script">
+<!--script>var me='<xsl:value-of select="@src"/>';</script-->        
             <script src="{$theme-path}{@src}">&#160;</script>
         </xsl:for-each>
 
