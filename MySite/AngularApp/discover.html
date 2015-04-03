@@ -138,11 +138,14 @@
 </div>
 </div>
 <div class="row">
-<div id="filters-overview-wrapper-squared" class="col-sm-offset-3 col-sm-9"></div>
+<div id="filters-overview-wrapper-squared" class="col-sm-offset-3 col-sm-9">
+<div id="filters-overview-wrapper" ng-include="'template/handlebars/hbs_simple_filters.html'"></div>
+</div>
 </div>
 </fieldset>
 </form>
-<form id="aspect_discovery_SimpleSearch_div_search-filters" class="ds-interactive-div discover-filters-box" action="discover" method="get" onsubmit="javascript:tSubmit(this);">
+<!--form id="aspect_discovery_SimpleSearch_div_search-filters" class="ds-interactive-div discover-filters-box" action="discover" method="get" onsubmit="javascript:tSubmit(this);"-->
+<form id="aspect_discovery_SimpleSearch_div_search-filters" ng-submit="onSubmit($event)" class="ds-interactive-div discover-filters-box" method="get" onsubmit="javascript:tSubmit(this);">
 <div class="ds-static-div clearfix">
 <p class="ds-paragraph pull-right">
 <a href="#" class="show-advanced-filters">Show Advanced Filters</a><a href="#" class="hide-advanced-filters hidden">Hide Advanced Filters</a>
@@ -178,12 +181,12 @@
                         window.DSpace.i18n.discovery.filter_relational_operator = {};
                     }
                 window.DSpace.i18n.discovery.filter_relational_operator.contains='Contains';window.DSpace.i18n.discovery.filter_relational_operator.equals='Equals';window.DSpace.i18n.discovery.filter_relational_operator.authority='ID';window.DSpace.i18n.discovery.filter_relational_operator.notcontains='Not Contains';window.DSpace.i18n.discovery.filter_relational_operator.notequals='Not Equals';window.DSpace.i18n.discovery.filter_relational_operator.notauthority='Not ID';</script>
-<div id="new-filters-wrapper" ng-include="'template/handlebars/hbs.html'"></div>
+<div id="new-filters-wrapper" ng-include="'template/handlebars/hbs_advanced_filters.html'"></div>
 <div id="aspect_discovery_SimpleSearch_row_filter-controls" class="ds-form-item apply-filter">
 <div>
 <div class="">
 <p class="btn-group">
-<button id="aspect_discovery_SimpleSearch_field_submit_reset_filter" class="ds-button-field btn btn-default discovery-reset-filter-button discovery-reset-filter-button" name="submit_reset_filter" type="submit">Reset</button><button class="ds-button-field btn btn-default discovery-add-filter-button visible-xs discovery-add-filter-button visible-xs " name="submit_add_filter" type="submit">Add New Filter</button><button id="aspect_discovery_SimpleSearch_field_submit_apply_filter" class="ds-button-field btn btn-default discovery-apply-filter-button discovery-apply-filter-button" name="submit_apply_filter" type="submit">Apply</button>
+<button id="aspect_discovery_SimpleSearch_field_submit_reset_filter" class="ds-button-field btn btn-default discovery-reset-filter-button discovery-reset-filter-button" name="submit_reset_filter" ng-click="restoreOriginalFilters()" type="submit">Reset</button><button class="ds-button-field btn btn-default discovery-add-filter-button visible-xs discovery-add-filter-button visible-xs " name="submit_add_filter" type="submit">Add New Filter</button><button id="aspect_discovery_SimpleSearch_field_submit_apply_filter" class="ds-button-field btn btn-default discovery-apply-filter-button discovery-apply-filter-button" name="submit_apply_filter" type="submit">Apply</button>
 </p>
 </div>
 </div>
@@ -548,3 +551,24 @@ Apr&egrave;s ...</div>
 </body></html>
 ipt>
 </body></html>
+ml>
+ml>
+irage2/scripts/set-devmode.js"> </script><script src="/xmlui/static/js/discovery/discovery-results.js"> </script>
+<script src="nln-ui/nln-ui.js"> </script>
+<script src="discover.js"> </script>
+</body></html>
+ipt>
+</body></html>
+ml>
+ml>
+>
+ml>
+pt src="nln-ui/nln-ui.js"> </script>
+<script src="discover.js"> </script>
+</body></html>
+ipt>
+</body></html>
+ml>
+ml>
+>
+ml>
