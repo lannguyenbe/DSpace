@@ -23,8 +23,8 @@
     //
     // Factories   
     app.factory('Authors', ['$rootScope', '$resource', function($rootScope, $resource) {
-//      return resource = $resource($rootScope.resources.authorsJ);
-      return $resource($rootScope.endPoint + $rootScope.resources.authors);
+      return resource = $resource($rootScope.resources.authorsJ);
+//      return $resource($rootScope.endPoint + $rootScope.resources.authors);
     }]);    
     app.factory('Series', ['$rootScope', '$resource', function($rootScope, $resource) {
       return $resource($rootScope.endPoint + $rootScope.resources.series);
