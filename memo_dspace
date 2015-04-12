@@ -139,6 +139,9 @@ cp dspace-api-4.2.jar $DS/lib
 ## to recompile:end
 
 -----------------------------------------  S O L R  --------------------------------------------------
+### Join 
+http://localhost:8070/solr/search/select?q=%7B!join+from%3Didentifier_origin+to%3Didentifier_origin%7Dhandle%3A123456789%2F5965%0A&fl=identifier_origin%2C+handle&wt=json&indent=true
+
 fq=titlecom:(quai AND belge)
 fq=-titlecom:(quai AND belge)
 fq={!q.op=AND}titlecom:(quai belge)
@@ -162,7 +165,17 @@ http://localhost:8070/solr/search/select?q=*%3A*&fl=bi_3_dis_value_filter&wt=jso
 http://localhost:8070/solr/search/select?q=*%3A*&wt=json&indent=true&facet=true&facet.field=ebucore.identifier%5B1%5D%40formatLabel
 http://localhost:8070/solr/search/select?q=search_text%3A1578&fl=title&wt=json&indent=true&facet=true&facet.field=ebucore.identifier%5B1%5D%40formatLabel
 
-### solr grouping or field collapse : 
+
+### CollapsingQParser is really a post filter in Solr 5
+# use /search/dontcollapse request handler to list of identifier_origin more than 3 times
+http://localhost:8070/solr/search/dontcollapse?q=homme&fl=identifier_origin&wt=xml&indent=true&facet=true&facet.field=identifier_origin&facet.mincount=3
+
+http://localhost:8070/solr/search/dontcollapse?q=%22la+mariee+etait+en+noir%22&fl=identifier_origin%2C+handle&wt=xml&indent=true
+
+# use /search/select request handler to collapse
+http://localhost:8070/solr/search/select?q=%22la+mariee+etait+en+noir%22&fl=identifier_origin%2C+handle&wt=xml&indent=true
+
+### solr grouping or field collapse :
 ### group=true&group.field=identifier_origin
 ### group=true&group.field=identifier_origin&group.ngroups  # show number of groups
 ### group=true&group.field=identifier_origin&group.main=true ### results in simple list

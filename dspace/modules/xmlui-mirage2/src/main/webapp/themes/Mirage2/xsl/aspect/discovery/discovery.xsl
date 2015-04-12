@@ -1,4 +1,4 @@
-<!--
+﻿<!--
 
     The contents of this file are subject to the license and copyright
     detailed in the LICENSE and NOTICE files at the root of the source
@@ -317,16 +317,73 @@
             </xsl:call-template>
             <xsl:apply-templates select="*[not(name()='label' or name()='head')]" />
         </fieldset>
+        <p class="ds-paragraph" ng-include="'template/handlebars/hidden_advanced_filters.html'"></p>
     </xsl:template>
 
     <xsl:template match="dri:list[@id='aspect.discovery.SimpleSearch.list.primary-search']//dri:item[dri:field[@id='aspect.discovery.SimpleSearch.field.query']]" priority="3">
+        <!--div>
+            <xsl:call-template name="standardAttributes">
+                <xsl:with-param name="class">
+                    <xsl:text>ds-form-item row</xsl:text>
+                </xsl:with-param>
+            </xsl:call-template-->
+
+            <!-- Lan 06.04.2015 - add script -->
+           <script type="text/javascript">
+                  <xsl:text>
+                      if (!window.DSpace) {
+                          window.DSpace = {};
+                      }
+                      if (!window.DSpace.i18n) {
+                          window.DSpace.i18n = {};
+                      }
+                      if (!window.DSpace.i18n.discovery) {
+                          window.DSpace.i18n.discovery = {};
+                      }
+                      if (!window.DSpace.i18n.discovery.scope) {
+                          window.DSpace.i18n.discovery.scope = [];
+                      }
+                      </xsl:text><xsl:for-each select="../dri:item[dri:field[@id='aspect.discovery.SimpleSearch.field.scope']]/dri:field/dri:option"><xsl:text>
+                      window.DSpace.i18n.discovery.scope.push({
+                          id:'</xsl:text><xsl:value-of select="stringescapeutils:escapeEcmaScript(@returnValue)"/><xsl:text>',
+                          label:'</xsl:text>
+                             <xsl:choose>
+                                 <xsl:when test='./*'>
+                                    <xsl:copy-of select="./*"/> 
+                                 </xsl:when>
+                                 <xsl:otherwise>
+                                    <xsl:value-of select="stringescapeutils:escapeEcmaScript(.)"/>
+                                 </xsl:otherwise>
+                             </xsl:choose>
+                         <xsl:text>'
+                      });</xsl:text></xsl:for-each><xsl:text>
+                      if (!window.DSpace.discovery) {
+                          window.DSpace.discovery = {};
+                      }
+                      if (!window.DSpace.discovery.query) {
+                          window.DSpace.discovery.query = [];
+                      }
+                      window.DSpace.discovery.query.push({
+                          scope: '</xsl:text><xsl:value-of select="stringescapeutils:escapeEcmaScript(../dri:item[dri:field[@id='aspect.discovery.SimpleSearch.field.scope']]/dri:field/dri:value/@option)"/><xsl:text>',
+                          query: '</xsl:text><xsl:value-of select="stringescapeutils:escapeEcmaScript(dri:field[@id='aspect.discovery.SimpleSearch.field.query']/dri:value)"/><xsl:text>'
+                      });
+                 </xsl:text>
+           </script>
+
         <div>
             <xsl:call-template name="standardAttributes">
                 <xsl:with-param name="class">
                     <xsl:text>ds-form-item row</xsl:text>
                 </xsl:with-param>
             </xsl:call-template>
+            
+            <!-- Lan 07.04.2015 - add ng-include -->
+            <xsl:attribute name="ng-include">
+                <xsl:text>'template/handlebars/primary_query.html'</xsl:text>
+            </xsl:attribute>
 
+            <!-- Lan 07.04.2015 - ng-include replaces the 2 following div -->
+            <!--
             <div class="col-sm-3">
                 <p>
                     <xsl:apply-templates select="dri:field[@id='aspect.discovery.SimpleSearch.field.scope']"/>
@@ -341,9 +398,13 @@
                     </span>
                 </p>
             </div>
+            -->
         </div>
         <div class="row">
-            <div class="col-sm-offset-3 col-sm-9" id="filters-overview-wrapper-squared"/>
+            <div class="col-sm-offset-3 col-sm-9" id="filters-overview-wrapper-squared">
+            <!-- Lan 04.04.2015 - add ng template -->
+            <div id="filters-overview-wrapper" ng-include="'template/handlebars/hbs_simple_filters.html'"/>
+            </div>
         </div>
     </xsl:template>
 
@@ -445,6 +506,8 @@
                 </xsl:for-each>
             </xsl:for-each>
         </script>
+        <!-- Lan 04.04.2015 - add ng template-->
+        <div id="new-filters-wrapper" ng-include="'template/handlebars/hbs_advanced_filters.html'"></div>
     </xsl:template>
 
     <xsl:template match="dri:row[@id='aspect.discovery.SimpleSearch.row.filter-controls']">
@@ -459,6 +522,8 @@
                     <xsl:apply-templates/>
             </div>
         </div>
+        <!-- Lan 07.04.2015 - add ng template-->
+        <p class="ds-paragraph" ng-include="'template/handlebars/hidden_primary_query.html'"></p>        
     </xsl:template>
 
     <xsl:template match="dri:field[starts-with(@id, 'aspect.discovery.SimpleSearch.field.add-filter')]">

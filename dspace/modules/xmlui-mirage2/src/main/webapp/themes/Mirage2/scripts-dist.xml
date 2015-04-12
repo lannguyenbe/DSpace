@@ -15,7 +15,7 @@
     <script src="vendor/jquery-ui/ui/jquery.ui.datepicker.js">&#160;</script>
     <script src="vendor/handlebars/handlebars.js">&#160;</script>
     <script src="vendor/holderjs/holder.js">&#160;</script>
-    <!-- nln angular js-->
+    <!-- Lan 04.04.2015 angular js-->
     <script src="vendor/angular/1.3.10/angular.js">&#160;</script>
     <script src="vendor/angular/1.3.10/angular-route.js">&#160;</script>
     <script src="vendor/angular/1.3.10/angular-resource.js">&#160;</script>
@@ -53,4 +53,10 @@
     <!--the build comments below need to be inline to fix the 'undefined'
     issue mentioned at https://github.com/yeoman/grunt-usemin/issues/128 -->
     <!-- build:remove --><script src="scripts/set-devmode.js">&#160;</script><!-- endbuild -->
+    
+    <!-- Lan 04.04.2015 nln js-->
+    <script src="scripts/nln/nln-ui/nln-ui.js">&#160;</script>
+    <script src="scripts/nln/discover.js">&#160;</script>
+
+    
 </scripts>

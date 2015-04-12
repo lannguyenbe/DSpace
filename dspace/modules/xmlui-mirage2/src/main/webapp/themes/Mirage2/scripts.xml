@@ -10,8 +10,7 @@
 -->
 <scripts>
     <!-- build:js scripts/theme.js-->
-    <!--script src="vendor/jquery/jquery.min.js">&#160;</script-->
-    <script src="vendor/jquery/jquery.js">&#160;</script>
+    <script src="vendor/jquery/jquery.min.js">&#160;</script>
     <script src="vendor/jquery-ui/ui/jquery.ui.core.js">&#160;</script>
     <script src="vendor/jquery-ui/ui/jquery.ui.datepicker.js">&#160;</script>
     <script src="vendor/handlebars/handlebars.js">&#160;</script>
@@ -54,4 +53,9 @@
     <!--the build comments below need to be inline to fix the 'undefined'
     issue mentioned at https://github.com/yeoman/grunt-usemin/issues/128 -->
     <!-- build:remove --><script src="scripts/set-devmode.js">&#160;</script><!-- endbuild -->
+    
+    <!-- Lan 04.04.2015 nln js-->
+    <script src="scripts/nln/nln-ui/nln-ui.js">&#160;</script>
+    <script src="scripts/nln/discover.js">&#160;</script>
+
 </scripts>
