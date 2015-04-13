@@ -414,7 +414,7 @@ public class ItemViewer extends AbstractDSpaceTransformer implements CacheablePr
         }
         
         // Lan
-        ExpandedItems expandedItems = new ExpandedItems(context, dso);
+        ExpandedItems expandedItems = new ExpandedItems(context, contextPath, dso);
         expandedItems.addBody(body);
     }
 

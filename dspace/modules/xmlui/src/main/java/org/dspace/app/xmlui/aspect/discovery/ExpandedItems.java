@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.dspace.app.xmlui.utils.UIException;
 import org.dspace.app.xmlui.wing.WingException;
 import org.dspace.app.xmlui.wing.element.*;
+import org.dspace.app.xmlui.wing.Message;
 import org.dspace.authorize.AuthorizeException;
 import org.dspace.content.DSpaceObject;
 import org.dspace.core.Context;
@@ -38,14 +39,16 @@ public class ExpandedItems /*extends AbstractDSpaceTransformer*/
     private static final Logger log = Logger.getLogger(ExpandedItems.class);
     
     protected Context context;
+    protected String contextPath;    
     protected DiscoverResult queryResults;
     protected DiscoverQuery queryArgs;
     protected DSpaceObject dso;
 
 
-    public ExpandedItems(Context context, DSpaceObject dso){
+    public ExpandedItems(Context context, String contextPath, DSpaceObject dso){
         this.dso = dso;
         this.context = context;
+        this.contextPath = contextPath;
     }
     
     protected SearchService getSearchService()
@@ -61,7 +64,9 @@ public class ExpandedItems /*extends AbstractDSpaceTransformer*/
 
         DiscoverQuery query = new DiscoverQuery();
         String handle = dso.getHandle();
-        query.addSearchField(field);
+        query.addSearchField("dc.title");
+        query.addSearchField("identifier_attributor");
+        // This is a join query : where identifier_origin in (select identifier_origin where handle = <handle>)
         query.addFilterQueries("{!join from=identifier_origin to=identifier_origin}handle:"+handle);
 
         queryResults =  getSearchService().search(context, query);
@@ -75,7 +80,8 @@ public class ExpandedItems /*extends AbstractDSpaceTransformer*/
     {
 
         try {
-            performSearch();
+            // Questionne solr for expanded results
+            performSearch(); 
         }catch (Exception e){
             log.error("Error while searching for expanded items", e);
 
@@ -83,16 +89,23 @@ public class ExpandedItems /*extends AbstractDSpaceTransformer*/
         }
         
         if (queryResults != null && 0 < queryResults.getDspaceObjects().size()) {
-            // normally exactly 1 result
+            // normally exactly 1 result that represents the most representativ of the items having the same indentifier_origin
+            // the return result may have a different handle from the one we are questionning 
             DSpaceObject resultDso = queryResults.getDspaceObjects().get(0);
-            String handle = dso.getHandle();
+            String handle = dso.getHandle(); // initial handle
             Division expandDiv = null;
 
             if (!handle.equals(resultDso.getHandle())) {
+                // take the first doc, should be the only one
+                DiscoverResult.SearchDocument doc = queryResults.getSearchDocument(resultDso).get(0);
                 expandDiv = body.addDivision("item-expanded");
-                expandDiv.addPara().addContent(resultDso.getHandle());
-                expandDiv.addPara().addContent(resultDso.getMetadata("dc.title"));
-                expandDiv.addPara().addContent(resultDso.getMetadata("identifier_attributor*"));                
+                
+                String link = contextPath + "/handle/" + handle;
+                String title = doc.getSearchFieldValues("dc.title").get(0);
+                expandDiv.addPara().addXref(link).addContent(title);
+                
+                String source = doc.getSearchFieldValues("identifier_attributor").get(0);
+                expandDiv.addPara().addContent(message(source));                
             }
             
             List<DiscoverResult.SearchDocument> expandDocuments = queryResults.getExpandDocuments(resultDso);
@@ -100,18 +113,25 @@ public class ExpandedItems /*extends AbstractDSpaceTransformer*/
                 for (SearchDocument docE : expandDocuments) {
                     String handleE = docE.getSearchFieldValues("handle").get(0);
                     if (!handle.equals(handleE)) {
-                        String titleE = docE.getSearchFieldValues("dc.title").get(0);
+                        expandDiv = (expandDiv == null) ? body.addDivision("item-expanded") : expandDiv;
+                        
+                        String link = contextPath + "/handle/" + handleE;
+                        String title = docE.getSearchFieldValues("dc.title").get(0);
+                        expandDiv.addPara().addXref(link).addContent(title);
+                        
                         String sourceE = docE.getSearchFieldValues("identifier_attributor").get(0);
-                        expandDiv = (expandDiv == null) ? body.addDivision("item-expanded") : expandDiv;                            
-                        expandDiv.addPara().addContent(handleE);                        
-                        expandDiv.addPara().addContent(titleE);                        
-                        expandDiv.addPara().addContent(sourceE);                        
-                    }
+                        expandDiv.addPara(message(sourceE));                         
+                     }
                 }
             }
         }
 
     }
     
+    public static Message message(String key)
+    {
+        return new Message("default", key);
+    }
+
     
 }

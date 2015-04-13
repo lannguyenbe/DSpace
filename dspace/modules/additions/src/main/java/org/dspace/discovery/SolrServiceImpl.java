@@ -1853,8 +1853,6 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 }
                 
                 /* Lan 11.04.2015 - expanded */
-                /* TODO : solrDocFields should be in config file, not hard code here */
-                String[] solrDocFields = {"dc.title", "identifier_attributor"};
                 if (solrQueryResponse.getExpandedResults() != null) {
                     String identifier_origin = (String) doc.getFirstValue("identifier_origin");
                     SolrDocumentList expandedResults = solrQueryResponse.getExpandedResults().get(identifier_origin);
@@ -1864,7 +1862,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                             // get handle
                             resultDocE.addSearchField("handle", (String) docE.getFieldValue("handle"));
                             // get other metadata returned from solr
-                            for (String fieldName : solrDocFields) {
+                            for (String fieldName : searchFields) {
 	                            resultDocE.addSearchField(fieldName, (String) docE.getFirstValue(fieldName));
 	                        }
 	                        result.addExpandDocument(dso, resultDocE);                        
