@@ -11,27 +11,18 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.apache.cocoon.environment.ObjectModelHelper;
-import org.apache.cocoon.environment.Request;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
-import org.dspace.app.xmlui.cocoon.AbstractDSpaceTransformer;
-import org.dspace.app.xmlui.utils.HandleUtil;
 import org.dspace.app.xmlui.utils.UIException;
-import org.dspace.app.xmlui.wing.Message;
 import org.dspace.app.xmlui.wing.WingException;
 import org.dspace.app.xmlui.wing.element.*;
 import org.dspace.authorize.AuthorizeException;
 import org.dspace.content.DSpaceObject;
-import org.dspace.content.Item;
 import org.dspace.core.Context;
 import org.dspace.discovery.DiscoverQuery;
 import org.dspace.discovery.DiscoverResult;
 import org.dspace.discovery.SearchService;
 import org.dspace.discovery.SearchServiceException;
-import org.dspace.discovery.SearchUtils;
 import org.dspace.discovery.DiscoverResult.SearchDocument;
-import org.dspace.discovery.configuration.DiscoveryConfiguration;
 import org.dspace.utils.DSpace;
 import org.xml.sax.SAXException;
 
@@ -70,6 +61,7 @@ public class ExpandedItems /*extends AbstractDSpaceTransformer*/
 
         DiscoverQuery query = new DiscoverQuery();
         String handle = dso.getHandle();
+        query.addSearchField(field);
         query.addFilterQueries("{!join from=identifier_origin to=identifier_origin}handle:"+handle);
 
         queryResults =  getSearchService().search(context, query);
@@ -99,20 +91,21 @@ public class ExpandedItems /*extends AbstractDSpaceTransformer*/
             if (!handle.equals(resultDso.getHandle())) {
                 expandDiv = body.addDivision("item-expanded");
                 expandDiv.addPara().addContent(resultDso.getHandle());
-                
-                // resultDso.getMetaData("dc.title") ????
-                
+                expandDiv.addPara().addContent(resultDso.getMetadata("dc.title"));
+                expandDiv.addPara().addContent(resultDso.getMetadata("identifier_attributor*"));                
             }
             
             List<DiscoverResult.SearchDocument> expandDocuments = queryResults.getExpandDocuments(resultDso);
             if (expandDocuments != null && expandDocuments.size() > 0) {
                 for (SearchDocument docE : expandDocuments) {
                     String handleE = docE.getSearchFieldValues("handle").get(0);
-                    String titleE = docE.getSearchFieldValues("dc.title").get(0);
                     if (!handle.equals(handleE)) {
+                        String titleE = docE.getSearchFieldValues("dc.title").get(0);
+                        String sourceE = docE.getSearchFieldValues("identifier_attributor").get(0);
                         expandDiv = (expandDiv == null) ? body.addDivision("item-expanded") : expandDiv;                            
                         expandDiv.addPara().addContent(handleE);                        
                         expandDiv.addPara().addContent(titleE);                        
+                        expandDiv.addPara().addContent(sourceE);                        
                     }
                 }
             }
