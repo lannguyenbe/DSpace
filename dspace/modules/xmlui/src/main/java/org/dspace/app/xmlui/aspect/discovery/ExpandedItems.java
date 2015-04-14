@@ -60,15 +60,19 @@ public class ExpandedItems /*extends AbstractDSpaceTransformer*/
         return manager.getServiceByName(SearchService.class.getName(),SearchService.class);
     }
     
+    // TODO : externalize searchFields in config
+    private static String[] searchFields = {"dc.title", "identifier_attributor", "dcterms.isPartOf.title"};
     public void performSearch() throws SearchServiceException, UIException, SQLException {
 
         DiscoverQuery query = new DiscoverQuery();
         String handle = dso.getHandle();
-        query.addSearchField("dc.title");
-        query.addSearchField("identifier_attributor");
-        // This is a join query : where identifier_origin in (select identifier_origin where handle = <handle>)
+        
+        for (String sf : searchFields) {
+        	query.addSearchField(sf);			
+		}
+        // Join search
         query.addFilterQueries("{!join from=identifier_origin to=identifier_origin}handle:"+handle);
-
+        
         queryResults =  getSearchService().search(context, query);
     }
 
@@ -93,19 +97,14 @@ public class ExpandedItems /*extends AbstractDSpaceTransformer*/
             // the return result may have a different handle from the one we are questionning 
             DSpaceObject resultDso = queryResults.getDspaceObjects().get(0);
             String handle = dso.getHandle(); // initial handle
-            Division expandDiv = null;
+            org.dspace.app.xmlui.wing.element.List expandList = null;
 
             if (!handle.equals(resultDso.getHandle())) {
                 // take the first doc, should be the only one
                 DiscoverResult.SearchDocument doc = queryResults.getSearchDocument(resultDso).get(0);
-                expandDiv = body.addDivision("item-expanded");
-                
-                String link = contextPath + "/handle/" + handle;
-                String title = doc.getSearchFieldValues("dc.title").get(0);
-                expandDiv.addPara().addXref(link).addContent(title);
-                
-                String source = doc.getSearchFieldValues("identifier_attributor").get(0);
-                expandDiv.addPara().addContent(message(source));                
+                expandList = body.addDivision("item-expanded").addList("item-expanded");
+                expandList.setHead("Linked items"); // TODO n18i                
+                addExpandDoc(expandList, doc);                
             }
             
             List<DiscoverResult.SearchDocument> expandDocuments = queryResults.getExpandDocuments(resultDso);
@@ -113,19 +112,33 @@ public class ExpandedItems /*extends AbstractDSpaceTransformer*/
                 for (SearchDocument docE : expandDocuments) {
                     String handleE = docE.getSearchFieldValues("handle").get(0);
                     if (!handle.equals(handleE)) {
-                        expandDiv = (expandDiv == null) ? body.addDivision("item-expanded") : expandDiv;
-                        
-                        String link = contextPath + "/handle/" + handleE;
-                        String title = docE.getSearchFieldValues("dc.title").get(0);
-                        expandDiv.addPara().addXref(link).addContent(title);
-                        
-                        String sourceE = docE.getSearchFieldValues("identifier_attributor").get(0);
-                        expandDiv.addPara(message(sourceE));                         
-                     }
+                    	if (expandList == null) {
+                            expandList = body.addDivision("item-expanded").addList("item-expanded");
+                            expandList.setHead("Linked items"); // TODO n18i                    		
+                    	}
+                    	addExpandDoc(expandList, docE);
+                    }
                 }
             }
         }
 
+    }
+    
+    private void addExpandDoc(org.dspace.app.xmlui.wing.element.List list, SearchDocument doc) throws WingException {
+    	org.dspace.app.xmlui.wing.element.List expandDocList = list.addList("item-expanded-doc");
+    	
+    	String handle = doc.getSearchFieldValues("handle").get(0);
+        String title = doc.getSearchFieldValues("dc.title").get(0);
+        String link = contextPath + "/handle/" + handle;
+        expandDocList.addItem().addXref(link).addContent(title);
+        
+        String collection = doc.getSearchFieldValues("dcterms.isPartOf.title").get(0);
+        expandDocList.addLabel("dcterms.isPartOf.title");
+        expandDocList.addItem(collection);                
+        
+        String source = doc.getSearchFieldValues("identifier_attributor").get(0);
+        expandDocList.addLabel("identifier_attributor");
+        expandDocList.addItem().addContent(message(source));                
     }
     
     public static Message message(String key)

@@ -25,6 +25,10 @@
 		-->
         
 	<!-- Custom keys -->
+    <!-- Lan 14.04.2015 -->
+	<message key="info:rtbf/repositories/tramontane">Tramontane TV</message>    
+	<message key="info:rtbf/repositories/tramsonuma">Sonuma TV</message>    
+	<message key="info:rtbf/repositories/tramradio">Radio</message>    
     <!-- Lan 22.01.2015 -->
 	<message key="xmlui.custom.rtbf.identifier.source.TV">Tramontane TV</message>
 	<message key="xmlui.custom.rtbf.identifier.source.SO">Sonuma TV</message>

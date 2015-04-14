@@ -1824,6 +1824,8 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 }
 
                 DiscoverResult.SearchDocument resultDoc = new DiscoverResult.SearchDocument();
+                //Lan : Add also handle
+                resultDoc.addSearchField("handle", (String) doc.getFieldValue("handle"));
                 //Add information about our search fields
                 for (String field : searchFields)
                 {
@@ -1859,9 +1861,9 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                     if (expandedResults != null) {
                         for (SolrDocument docE : expandedResults) {
                             DiscoverResult.SearchDocument resultDocE = new DiscoverResult.SearchDocument();
-                            // get handle
+                            // Add handle
                             resultDocE.addSearchField("handle", (String) docE.getFieldValue("handle"));
-                            // get other metadata returned from solr
+                            // Add other metadata returned from solr
                             for (String fieldName : searchFields) {
 	                            resultDocE.addSearchField(fieldName, (String) docE.getFirstValue(fieldName));
 	                        }
