@@ -114,7 +114,6 @@ public class ExpandedItems /*extends AbstractDSpaceTransformer*/
                     if (!handle.equals(handleE)) {
                     	if (expandList == null) {
                             expandList = body.addDivision("item-expanded").addList("item-expanded");
-                            expandList.setHead("Linked items"); // TODO n18i                    		
                     	}
                     	addExpandDoc(expandList, docE);
                     }
@@ -125,6 +124,7 @@ public class ExpandedItems /*extends AbstractDSpaceTransformer*/
     }
     
     private void addExpandDoc(org.dspace.app.xmlui.wing.element.List list, SearchDocument doc) throws WingException {
+
     	org.dspace.app.xmlui.wing.element.List expandDocList = list.addList("item-expanded-doc");
     	
     	String handle = doc.getSearchFieldValues("handle").get(0);
@@ -133,12 +133,10 @@ public class ExpandedItems /*extends AbstractDSpaceTransformer*/
         expandDocList.addItem().addXref(link).addContent(title);
         
         String collection = doc.getSearchFieldValues("dcterms.isPartOf.title").get(0);
-        expandDocList.addLabel("dcterms.isPartOf.title");
         expandDocList.addItem(collection);                
         
         String source = doc.getSearchFieldValues("identifier_attributor").get(0);
-        expandDocList.addLabel("identifier_attributor");
-        expandDocList.addItem().addContent(message(source));                
+        expandDocList.addItem(source);                
     }
     
     public static Message message(String key)

@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 
     The contents of this file are subject to the license and copyright
     detailed in the LICENSE and NOTICE files at the root of the source
@@ -195,6 +195,14 @@
                             <xsl:text>&#160;</xsl:text>
                             <!-- non-breaking space to force separating the end tag -->
                         </span>
+                          <!-- Lan 15.04.2015 - number of expanded items -->
+                          <xsl:if test="dri:list[@n=(concat($handle,':expanded'))]">
+                             <span class="h5"><small>
+                                <xsl:value-of select="count(dri:list[@n=(concat($handle,':expanded'))]/*)"/><xsl:text> </xsl:text>
+                                <i18n:text>xmlui.mirage2.itemSummaryView.itemExpanded</i18n:text>
+                                </small>
+                             </span>
+                          </xsl:if>                        
                     </h4>
                 </xsl:element>
                 <div class="artifact-info">
@@ -242,7 +250,7 @@
                         </xsl:choose>
                         </small></span>
                     <xsl:text> </xsl:text>
-                    <!-- Lan : add identifier.source -->
+                    <!-- Lan : add ns.identifier.source -->
                     <xsl:if test="dri:list[@n=(concat($handle, ':dc.date.issued'))] or dri:list[@n=(concat($handle, ':dc.publisher')) or starts-with(@n,concat($handle, concat(':',$ns.identifier.source)))]">
                         <span class="publisher-date h4">   <small>
                             <xsl:text>(</xsl:text>
@@ -250,7 +258,6 @@
                                 <span class="publisher">
                                     <xsl:apply-templates select="dri:list[@n=(concat($handle, ':dc.publisher'))]/dri:item"/>
                                     <i18n:text catalogue="default">
-                                       <xsl:text>xmlui.custom.rtbf.identifier.source.</xsl:text>
                                        <xsl:value-of select="dri:list[starts-with(@n,concat($handle, concat(':',$ns.identifier.source)))]/dri:item"/>
                                     </i18n:text>
                                 </span>

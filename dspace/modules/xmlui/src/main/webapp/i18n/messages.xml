@@ -26,6 +26,7 @@
         
 	<!-- Custom keys -->
     <!-- Lan 14.04.2015 -->
+    <message key="xmlui.mirage2.itemSummaryView.itemExpanded">Linked titles</message>
 	<message key="info:rtbf/repositories/tramontane">Tramontane TV</message>    
 	<message key="info:rtbf/repositories/tramsonuma">Sonuma TV</message>    
 	<message key="info:rtbf/repositories/tramradio">Radio</message>    

@@ -156,10 +156,9 @@
 	                    <xsl:if test="dim:field[@element='publisher' or @element=$identifier.source]">
 	                        <span class="publisher">
 	                            <xsl:copy-of select="dim:field[@element='publisher']/node()"/>
-                                  <i18n:text catalogue="default">
-                                  <xsl:text>xmlui.custom.rtbf.identifier.source.</xsl:text>
-                                  <xsl:copy-of select="dim:field[@element=$identifier.source]/node()"/>
-                               </i18n:text>
+                                <i18n:text catalogue="default">
+                                     <xsl:copy-of select="dim:field[@element=$identifier.source]/node()"/>
+                                </i18n:text>
 	                        </span>
 	                        <xsl:if test="dim:field[@element='date' and @qualifier='issued']">
 	                        	<xsl:text>, </xsl:text>
