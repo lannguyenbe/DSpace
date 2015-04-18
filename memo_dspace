@@ -1,3 +1,37 @@
+===================================== UPGRADE DEV4 TO METAM-5.0 =============================================================
+mvn install:install-file -Dfile=ojdbc6-12.1.0.1.0.jar -DgroupId=com.oracle -DartifactId=ojdbc6 -Dversion=12.1.0.1.0 -Dpackaging=jar -DgeneratePom=true
+
+edit [dspace-source]/pom.xml to adjust ocjdbc driver to version 11.2.0.2.0 already in .m2 repository
+
+cd dspace
+mvn -U clean package -Dmirage2.on=true -Dmirage2.deps.included=false -Ddb.name=oracle -Denv=dev4
+
+# Fail !
+add .bowerrc to $DSSRC/dspace/modules/xmlui-mirage2/target/themes/Mirage2
+add the following to specify .cache directory
+{
+    "storage":{
+        "packages" : "/usr/local/devhome/nln/.cache/bower"
+    }
+}
+cd $DSSRC/dspace/modules/xmlui-mirage2
+mvn package -Dmirage2.deps.included=false    
+# OK
+
+cd $DSSRC
+vi pom.xml # edit to add module additions otherwise compile of dspace/module/xmlui fails
+
+cd dspace
+mvn -U clean package -Dmirage2.on=true -Dmirage2.deps.included=false -Ddb.name=oracle -Denv=dev4
+cd target
+cd dspace-installer
+ant fresh_intall # on empty dspace2
+
+cd dspace2/bin
+./dspace database info
+./dspace database migrate
+
+=====================================================================================
 mvn install:install-file -Dfile=jetty-servlets-9.2.1.v20140609.jar -DgroupId=org.eclipse.jetty -DartifactId=jetty-servlets -Dversion=9.2.1.v20140609 -Dpackaging=jar
 
 curl -HAccept:application/json http://localhost:8070/rs/service/authors/names
@@ -61,7 +95,7 @@ cd dspace
 mvn package -rf :xmlui-mirage2 -Dmirage2.on=true -Dmirage2.deps.included=false -Ddb.name=oracle -Denv=ptg_dspace2
  
 # on ptg : try again
-cd modules/xmlui-mirages2
+cd modules/xmlui-mirage2
 mvn package -Dmirage2.deps.included=false
 
 # on ptg : error happens on modules/xmlui-mirage2 : when opening a lock file in .npm/cache 
