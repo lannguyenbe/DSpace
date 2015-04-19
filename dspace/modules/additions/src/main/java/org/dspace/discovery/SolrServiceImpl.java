@@ -2074,10 +2074,10 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                         for (SolrDocument docE : expandedResults) {
                             DiscoverResult.SearchDocument resultDocE = new DiscoverResult.SearchDocument();
                             // Add handle
-                            resultDocE.addSearchField("handle", (String) docE.getFieldValue("handle"));
+                            resultDocE.addSearchField("handle", String.valueOf(docE.getFieldValue("handle")));
                             // Add other metadata returned from solr
                             for (String fieldName : searchFields) {
-	                            resultDocE.addSearchField(fieldName, (String) docE.getFirstValue(fieldName));
+	                            resultDocE.addSearchField(fieldName, String.valueOf(docE.getFirstValue(fieldName)));
 	                        }
 	                        result.addExpandDocument(dso, resultDocE);                        
                         }                        

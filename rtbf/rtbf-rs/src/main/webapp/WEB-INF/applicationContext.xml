@@ -17,7 +17,6 @@
                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
 
 
-    <!-- bean class="org.dspace.springbean.discovery.SolrServiceImpl" id="org.dspace.discovery.SearchService"/-->
     <bean class="org.dspace.discovery.SolrServiceImpl" id="org.dspace.discovery.SearchService"/>
 
     

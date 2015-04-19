@@ -316,7 +316,7 @@
         '    <a>{{item[label]}}<a>\n'+
         '  </li>\n'+
         '  <li>\n'+
-        '    <button ng-if="filterResults.length > 1" ng-click="selectAll($event)" type="button">Simone, prends les tous !</button>\n'+
+        '    <button ng-if="filterResults.length > 1" ng-click="selectAll($event)" type="button">SuperMetaMan</button>\n'+
         '  </li>\n'+
         '</ul>\n'+
         '');
@@ -334,7 +334,7 @@
         '    <span class="typa-item-query">{{item[label]}}</span>\n'+
         '  </div>\n'+
         '  <div>\n'+
-        '    <button ng-if="filterResults.length > 1" ng-click="selectAll($event)" type="button">Simone, prends les tous !</button>\n'+
+        '    <button ng-if="filterResults.length > 1" ng-click="selectAll($event)" type="button">SuperMetaMan</button>\n'+
         '  </div>\n'+
         '</div>\n'+
         '');
