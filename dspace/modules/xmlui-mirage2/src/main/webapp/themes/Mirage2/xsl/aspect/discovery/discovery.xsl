@@ -197,12 +197,20 @@
                         </span>
                           <!-- Lan 15.04.2015 - number of expanded items -->
                           <xsl:if test="dri:list[@n=(concat($handle,':expanded'))]">
+                             <xsl:variable name="nbr" select="count(dri:list[@n=(concat($handle,':expanded'))]/*)"/>
                              <span class="h5"><small>
-                                <xsl:value-of select="count(dri:list[@n=(concat($handle,':expanded'))]/*)"/><xsl:text> </xsl:text>
-                                <i18n:text>xmlui.mirage2.itemSummaryView.itemExpanded</i18n:text>
-                                </small>
-                             </span>
-                          </xsl:if>                        
+                             <xsl:value-of select="$nbr"/><xsl:text> </xsl:text>
+                             <xsl:choose>
+                                 <xsl:when test="$nbr = 1">
+                                         <i18n:text>xmlui.mirage2.itemSummaryView.itemExpanded.singular</i18n:text>
+                                 </xsl:when>
+                                 <xsl:otherwise>
+                                         <i18n:text>xmlui.mirage2.itemSummaryView.itemExpanded.plural</i18n:text>
+                                 </xsl:otherwise>
+                           </xsl:choose>
+                           </small>
+                           </span>
+                         </xsl:if>                        
                     </h4>
                 </xsl:element>
                 <div class="artifact-info">
