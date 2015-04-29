@@ -77,6 +77,12 @@ function($scope, $rootScope, $window, focus, Authors, Series) {
       }
     }
 
+    function updateFilter(idx, type, relop, query) {
+      if (type) { /* TODO */ }
+      if (relop) { $scope.filters[idx].relational_operator = relop; }
+      if (query) { /* TODO */ }
+    }
+          
     function removeFilterAtIndex(idx) {
       $scope.filters.splice(idx, 1);
       if ($scope.filters.length == 0) { addNewFilter(0); }       
@@ -91,6 +97,8 @@ function($scope, $rootScope, $window, focus, Authors, Series) {
     }
 
     $scope.addNewFilter = addNewFilter;
+    
+    $scope.updateFilter = updateFilter;
 
     $scope.removeFilter = removeFilterAtIndex;
 
@@ -124,6 +132,14 @@ function($scope, $rootScope, $window, focus, Authors, Series) {
     $scope.getSeries = function (pattern, success, error) {
       return(Series.query({pt: pattern}, success, error));
     }
+    
+    /* TODO - make this list .json - reloadable once per day from solr */
+    $scope.identifierAttributors = [ /* quick and dirty !!! */
+        {"name":"Sonuma TV"}
+        ,{"name":"Tramontane Radio"}
+        ,{"name":"Tramontane TV"}
+    ];
+
 
 }]);
 
@@ -170,7 +186,7 @@ app.directive('typaInputAuthor', function() {
          }
       }
 
-      $scope.onSelectAuthor = function(idx, selVal) {
+      $scope.onSelectAddAuthor = function(idx, selVal) {
          $scope.addNewFilter(idx, 'author', 'equals' , selVal);
       }
 
@@ -197,9 +213,40 @@ app.directive('typaInputTitleSerie', function() {
          }
       }
 
-      $scope.onSelectTitleSerie = function(idx, selVal) {
+      $scope.onSelectAddTitleSerie = function(idx, selVal) {
          $scope.addNewFilter(idx, 'titlecom', 'equals' , selVal);
       }
+
+      $scope.$on('filterType', enableInput);
+      init();
+    } //controller
+  };
+});
+
+app.directive('typaInputIdentifierAttributor', function() {
+  return {
+    controller: function($scope, $element) {
+      function init() {
+         enableInput({}, $scope.fil.type);
+      }
+
+      function enableInput(ev, ft) {
+         if (ft == 'identifier_attributor') { 
+            // enable
+            $element.removeAttr('disabled').show('fast');
+         } else {
+            $element.attr('disabled','true').hide('normal');
+         }
+      }
+
+      $scope.onSelectAddIdentifierAttributor = function(idx, selVal) {
+         $scope.addNewFilter(idx, 'identifier_attributor', 'equals' , selVal);
+      }
+      
+      $scope.onSelectIdentifierAttributor = function(idx, selVal) {
+         $scope.updateFilter(idx, null, 'equals' , null);
+      }
+
 
       $scope.$on('filterType', enableInput);
       init();
@@ -216,7 +263,7 @@ app.directive('typaInputNone', function() {
       }
 
       function enableInput(ev, ft) {
-         if (ft != 'author' && ft != 'titlecom') { 
+         if (ft != 'author' && ft != 'titlecom' && ft != 'identifier_attributor') { 
             // enable
             $element.removeAttr('disabled').show('fast');
          } else {
@@ -308,13 +355,18 @@ angular.module('template/handlebars/hbs_advanced_filters.html', [])
       +'                   class="ds-text-field form-control discovery-filter-input discovery-filter-input"'
       +'                   name="filter_{{$index}}" type="text" ng-model="fil.query">'
       +'            <input id="aspect_discovery_SimpleSearch_field_filter_{{$index}}"'
-/*      +'                   typa-input-author autocomplete="off" nln-typahead nln-typa-resource="getAuthors" nln-typa-not-filter="true" nln-typa-selected="fil.selected" nln-typa-callback="onSelectAuthor"'*/
-      +'                   typa-input-author autocomplete="off" nln-typahead nln-typa-resource="getAuthors" nln-typa-not-filter="true" nln-typa-callback="onSelectAuthor"'
+/*      +'                   typa-input-author autocomplete="off" nln-typahead nln-typa-resource="getAuthors" nln-typa-not-filter="true" nln-typa-selected="fil.selected" nln-typa-callback="onSelectAddAuthor"'*/
+      +'                   typa-input-author autocomplete="off" nln-typahead nln-typa-resource="getAuthors" nln-typa-not-filter="true" nln-typa-callback-add="onSelectAddAuthor"'
       +'                   class="ds-text-field form-control discovery-filter-input discovery-filter-input"'
       +'                   name="filter_{{$index}}" type="text" ng-model="fil.query">'
       +'            <input id="aspect_discovery_SimpleSearch_field_filter_{{$index}}"'
-/*      +'                   typa-input-title-serie autocomplete="off" nln-typahead nln-typa-resource="getSeries" nln-typa-not-filter="true" nln-typa-selected="fil.selected" nln-typa-callback="onSelectTitleSerie"'*/
-      +'                   typa-input-title-serie autocomplete="off" nln-typahead nln-typa-resource="getSeries" nln-typa-not-filter="true" nln-typa-callback="onSelectTitleSerie"'
+/*      +'                   typa-input-title-serie autocomplete="off" nln-typahead nln-typa-resource="getSeries" nln-typa-not-filter="true" nln-typa-selected="fil.selected" nln-typa-callback="onSelectAddTitleSerie"'*/
+      +'                   typa-input-title-serie autocomplete="off" nln-typahead nln-typa-resource="getSeries" nln-typa-not-filter="true" nln-typa-callback-add="onSelectAddTitleSerie"'
+      +'                   class="ds-text-field form-control discovery-filter-input discovery-filter-input"'
+      +'                   name="filter_{{$index}}" type="text" ng-model="fil.query">'
+      +'            <input id="aspect_discovery_SimpleSearch_field_filter_{{$index}}"'
+/*      +'                   typa-input-identifier-attributor autocomplete="off" nln-typahead nln-typa-resource="identifierAttributors" nln-typa-not-filter="true" nln-typa-selected="fil.selected" nln-typa-callback="onSelectAddIdentifierAttributor"'*/
+      +'                   typa-input-identifier-attributor autocomplete="off" nln-typahead nln-typa-resource="identifierAttributors" nln-typa-not-filter="true" nln-typa-callback="onSelectIdentifierAttributor" nln-typa-callback-add="onSelectAddIdentifierAttributor"'
       +'                   class="ds-text-field form-control discovery-filter-input discovery-filter-input"'
       +'                   name="filter_{{$index}}" type="text" ng-model="fil.query">'
 /* TODO to remove */      

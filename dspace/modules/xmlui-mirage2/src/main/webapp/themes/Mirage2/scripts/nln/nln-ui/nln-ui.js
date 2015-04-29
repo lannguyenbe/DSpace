@@ -44,6 +44,9 @@
           if (attrs.nlnTypaCallback) {
             var callbackGetter = $parse(attrs.nlnTypaCallback);
           }
+          if (attrs.nlnTypaCallbackAdd) {
+            var callbackAddGetter = $parse(attrs.nlnTypaCallbackAdd);
+          }
 
           // internal variables & local functions
           var hasFocus;
@@ -102,13 +105,16 @@
           function select(idx) {
             pushSelected(idx);
             ngModelSetter(originalScope, scope.hitsList[idx][scope.label]);
+            if (scope.callback) {
+              scope.callback(originalScope.$index, scope.hitsList[idx][scope.label]);
+            }
             forceClose = true; // hide               	
           }
 
           function selectAdd(idx) {
             if (pushSelected(idx)) {
-                if (scope.callback) {
-                  scope.callback(originalScope.$index, scope.hitsList[idx][scope.label]);
+                if (scope.callbackAdd) {
+                  scope.callbackAdd(originalScope.$index, scope.hitsList[idx][scope.label]);
                 }
             }
           }
@@ -283,6 +289,7 @@
           }
 
           if (callbackGetter) { scope.callback = callbackGetter(originalScope); }
+          if (callbackAddGetter) { scope.callbackAdd = callbackAddGetter(originalScope); }
           if (containerGetter) { scope.container = containerGetter(originalScope); }
 
 

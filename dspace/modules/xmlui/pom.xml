@@ -188,6 +188,10 @@
 
     <dependencies>
 
+        <dependency>
+            <groupId>org.dspace.modules</groupId>
+            <artifactId>additions</artifactId>
+        </dependency>
 
         <!-- DSpace XMLUI Languages -->
         <dependency>
