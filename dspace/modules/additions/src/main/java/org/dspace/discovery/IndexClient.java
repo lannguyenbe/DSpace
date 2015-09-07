@@ -100,6 +100,16 @@ public class IndexClient {
         				.create("I")
         				);
 
+        /* Lan 07.09.2015 : add option -Ito */        
+        options
+        		.addOption(OptionBuilder
+        				.isRequired(false)
+        				.hasArg(true)
+        				.withArgName("item id")
+        				.withDescription("incremental index to the given item id")
+        				.create("Ito")
+        				);
+
         options.addOption(OptionBuilder.isRequired(false).withDescription(
                 "Rebuild the spellchecker, can be combined with -b and -f.").create(
                 "s"));
@@ -167,7 +177,13 @@ public class IndexClient {
         } else if (line.hasOption("I")) { /* Lan 21.11.2014 */
             log.info("Increment index from item id.");
         	int itemId = Integer.parseInt(line.getOptionValue("I"));
-            indexer2.updateIndexI(context, itemId, true);
+        	if (line.hasOption("Ito")) { /* Lan 07.09.2015 */
+                log.info("Increment index to the given item id.");
+                int itemIto = Integer.parseInt(line.getOptionValue("Ito"));
+                indexer2.updateIndexIto(context, itemId, itemIto, true);
+        	} else {
+        		indexer2.updateIndexI(context, itemId, true);
+        	}
             checkRebuildSpellCheck(line, indexer2);
         } else if (line.hasOption("o")) {
             log.info("Optimizing search core.");

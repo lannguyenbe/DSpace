@@ -536,6 +536,36 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
     }
     
+
+    public void updateIndexIto(Context context, int id, int idto, boolean force)
+    {
+        try {
+            ItemIterator items = null;
+            try {
+                for (items = ItemAdd.findBetweenId(context, id, idto); items.hasNext();)
+                {
+                    Item item = items.next();
+                    indexContent(context, item, force);
+                    item.decache();
+                }
+            } finally {
+                if (items != null)
+                {
+                    items.close();
+                }
+            }
+
+            if(getSolr() != null)
+            {
+                getSolr().commit();
+            }
+
+        } catch (Exception e)
+        {
+            log.error(e.getMessage(), e);
+        }
+    }
+    
     
     public void updateIndexCC(Context context, boolean force)
     {

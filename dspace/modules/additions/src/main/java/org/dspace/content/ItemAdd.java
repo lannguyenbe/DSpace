@@ -34,6 +34,17 @@ public class ItemAdd extends Item {
         return new ItemIterator(context, rows);
     }
     
+    public static ItemIterator findBetweenId(Context context, int id, int idto) throws SQLException
+    {
+        String myQuery = "SELECT * FROM item WHERE in_archive='1' AND item_id between "+id
+        		+ " and "+idto
+                + " ORDER BY item.item_id";
+
+        TableRowIterator rows = DatabaseManager.queryTable(context, "item", myQuery);
+
+        return new ItemIterator(context, rows);
+    }
+    
     public static ItemIterator findByCollection(Context context, int collection_id)
             throws SQLException
     {
