@@ -803,7 +803,7 @@
        of SearchComponents (see below) and supports distributed
        queries across multiple shards
     -->
-    <!-- Lan 30/04/2015 items count within "Source" should not be collapse -->
+    <!-- Lan 30/04/2015 items count within "Source" should not be collapse -->    
     <requestHandler name="/selectNoCollapse" class="solr.SearchHandler">
     <!-- default values for query parameters can be specified, these
          will be overridden by parameters in the request
@@ -825,6 +825,7 @@
           <str>spellcheck</str>
       </arr>
     </requestHandler>
+    
     
     <requestHandler name="/select" class="solr.SearchHandler">
     <!-- default values for query parameters can be specified, these
@@ -869,7 +870,7 @@
               sequences to one : 
               - inside Tramontane when multiple programs share the same sequence;
               - between Tramontane & Sonuma -->
-         <str name="fq">{!collapse field=identifier_origin max=is_identifier_origin nullPolicy=expand}</str>
+         <str name="fq">{!collapse field=identifier_origin max=identifier_weight nullPolicy=expand}</str>
          <str name="expand">true</str>
        </lst>
     <!-- "invariants" are a way of letting the Solr maintainer lock down
@@ -1908,38 +1909,38 @@
        http://wiki.apache.org/solr/UpdateRequestProcessor
 
     --> 
-  <!-- 20.01.2015 Lan : identifier_origin -->
+
+  <!-- 28.07.2015 Lan : new identifier_origin -->
   <updateRequestProcessorChain name="identifier_origin">
     <!-- Add field identifier_origin -->
     <!-- To guaranty the concat order use 2 separate processors for clone field -->
     <processor class="solr.CloneFieldUpdateProcessorFactory">
-        <!-- source fields are exclusive, only one has a value -->
-        <str name="source">ebucore.identifier[1]@formatLabel.origin</str>
-        <str name="source">ebucore.identifier[2]@formatLabel.origin</str>
+        <str name="source">ebucore.identifier/dc:identifier</str>
         <str name="dest">identifier_origin</str>
     </processor>
     <processor class="solr.CloneFieldUpdateProcessorFactory">
-        <!-- source fields are exclusive, only one has a value -->
-        <str name="source">ebucore.identifier[1]/dc:identifier.origin</str>
-        <str name="source">ebucore.identifier[2]/dc:identifier.origin</str>
+        <str name="source">owl.sameAs</str>
         <str name="dest">identifier_origin</str>
     </processor>
-    <processor class="solr.processor.ConcatFieldUpdateProcessorFactory">
+    <processor class="solr.processor.LastFieldValueUpdateProcessorFactory">
         <str name="fieldName">identifier_origin</str>
-        <str name="delimiter"></str>
     </processor>
     <!-- Add field identifier_origin_count -->
     <processor class="solr.CloneFieldUpdateProcessorFactory">
-        <str name="source">ebucore.identifier[1]/dc:identifier.origin</str>
+        <str name="source">owl.sameAs</str>
         <str name="dest">identifier_origin_count</str>
     </processor>
     <processor class="solr.processor.CountFieldValuesUpdateProcessorFactory">
         <str name="fieldName">identifier_origin_count</str>
-    </processor>    
+    </processor>
+    <processor class="solr.processor.DefaultValueUpdateProcessorFactory">
+      <str name="fieldName">identifier_origin_count</str>
+      <str name="value">1000</str>
+    </processor>
     <processor class="solr.LogUpdateProcessorFactory" />
     <processor class="solr.RunUpdateProcessorFactory" />
   </updateRequestProcessorChain>
-    
+  
   <!-- Deduplication
 
        An example dedup update processor that creates the "id" field

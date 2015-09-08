@@ -99,9 +99,16 @@
         <property name="sidebarFacets">
             <list>
                 <ref bean="searchFilterIdAttributor" />
-                <ref bean="searchFilterAuthor" />
+                <!-- ref bean="searchFilterAuthor" /-->
+                <ref bean="searchFilterContributor" />
                 <ref bean="searchFilterSubject" />
+                <ref bean="searchFilterChannel" />
+                <ref bean="searchFilterDiffusion" />
                 <ref bean="searchFilterIssued" />
+                <!-- ref bean="searchFilterCodeOrigine" /-->
+                <ref bean="searchFilterPlace" />
+                <ref bean="searchFilterImage" />
+                <ref bean="searchFilterSound" />
             </list>
         </property>
         <!-- Set TagCloud configuration per discovery configuration -->
@@ -114,8 +121,15 @@
                 <!--ref bean="searchFilterTitle" /-->
                 <ref bean="searchFilterTitleCommunity" />
                 <ref bean="searchFilterAuthor" />
+                <ref bean="searchFilterContributor" />
                 <ref bean="searchFilterSubject" />
                 <ref bean="searchFilterIssued" />
+                <ref bean="searchFilterCodeOrigine" />
+                <ref bean="searchFilterPlace" />
+                <ref bean="searchFilterImage" />
+                <ref bean="searchFilterSound" />
+                <ref bean="searchFilterChannel" />
+                <ref bean="searchFilterDiffusion" />
             </list>
         </property>
         <!--The sort filters for the discovery search-->
@@ -187,6 +201,7 @@
                         <value>dc.contributor.author</value>
                         <value>dc.creator</value>
                         <value>dc.subject</value>
+                        <value>rtbf.matter</value>
                     </list>
                 </property>
                 <!--The minimum number of matching terms across the metadata fields above before an item is found as related -->
@@ -208,9 +223,16 @@
         <property name="sidebarFacets">
             <list>
                 <ref bean="searchFilterIdAttributor" />
-                <ref bean="searchFilterAuthor" />
+                <!-- ref bean="searchFilterAuthor" /-->
+                <ref bean="searchFilterContributor" />
                 <ref bean="searchFilterSubject" />
+                <ref bean="searchFilterChannel" />
+                <ref bean="searchFilterDiffusion" />
                 <ref bean="searchFilterIssued" />
+                <!-- ref bean="searchFilterCodeOrigine" /-->
+                <ref bean="searchFilterPlace" />
+                <ref bean="searchFilterImage" />
+                <ref bean="searchFilterSound" />
             </list>
         </property>
         <!-- Set TagCloud configuration per discovery configuration -->
@@ -223,8 +245,15 @@
                 <!--ref bean="searchFilterTitle" /-->
                 <ref bean="searchFilterTitleCommunity" />
                 <ref bean="searchFilterAuthor" />
+                <ref bean="searchFilterContributor" />
                 <ref bean="searchFilterSubject" />
                 <ref bean="searchFilterIssued" />
+                <ref bean="searchFilterCodeOrigine" />
+                <ref bean="searchFilterPlace" />
+                <ref bean="searchFilterImage" />
+                <ref bean="searchFilterSound" />
+                <ref bean="searchFilterChannel" />
+                <ref bean="searchFilterDiffusion" />
             </list>
         </property>
         <!--The sort filters for the discovery search (same as defaultConfiguration above)-->
@@ -377,7 +406,7 @@
         <property name="indexFieldName" value="identifier_attributor"/>
         <property name="metadataFields">
             <list>
-                <value>ebucore.identifier[1]/ebucore:attributor@entityID</value>
+                <value>ebucore.identifier/attributor@entityID</value>
             </list>
         </property>
         <property name="facetLimit" value="10"/>
@@ -403,6 +432,33 @@
         </property>
     </bean>
 
+    <bean id="searchFilterContributor" class="org.dspace.discovery.configuration.HierarchicalSidebarFacetConfiguration">
+        <property name="indexFieldName" value="contributor"/>
+        <property name="metadataFields">
+            <list>
+                <value>rtbf.contributor/role</value>
+            </list>
+        </property>
+        <property name="facetLimit" value="10"/>
+        <property name="sortOrder" value="COUNT"/>
+        <property name="splitter" value="/"/>
+        <property name="skipFirstNodeLevel" value="false"/>
+    </bean>
+
+    <!-- Lan 20.08.2015 - add this filter to advanced search -->
+    <bean id="searchFilterCodeOrigine" class="org.dspace.discovery.configuration.HierarchicalSidebarFacetConfiguration">
+        <property name="indexFieldName" value="codeorigine"/>
+        <property name="metadataFields">
+            <list>
+                <value>rtbf.code_origine.*</value>
+           </list>
+        </property>
+        <property name="facetLimit" value="10"/>
+        <property name="sortOrder" value="COUNT"/>
+        <property name="splitter" value="/"/>
+        <property name="skipFirstNodeLevel" value="false"/>
+    </bean>
+
     <bean id="searchFilterAuthor" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
         <property name="indexFieldName" value="author"/>
         <property name="metadataFields">
@@ -415,11 +471,13 @@
         <property name="sortOrder" value="COUNT"/>
     </bean>
 
+    <!-- Lan 27.07.2015 - add rtbf.matter -->
     <bean id="searchFilterSubject" class="org.dspace.discovery.configuration.HierarchicalSidebarFacetConfiguration">
         <property name="indexFieldName" value="subject"/>
         <property name="metadataFields">
             <list>
                 <value>dc.subject.*</value>
+                <value>rtbf.matter.*</value>
             </list>
         </property>
         <property name="facetLimit" value="10"/>
@@ -432,6 +490,72 @@
         <property name="metadataFields">
             <list>
                 <value>dc.date.issued</value>
+            </list>
+        </property>
+        <property name="type" value="date"/>
+        <property name="sortOrder" value="VALUE"/>
+    </bean>
+
+    <!-- Lan 24.08.2015 - add this filter to advanced search -->
+    <bean id="searchFilterPlace" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
+        <property name="indexFieldName" value="place"/>
+        <property name="metadataFields">
+            <list>
+                <value>rtbf.place</value>
+           </list>
+        </property>
+        <property name="facetLimit" value="10"/>
+        <property name="sortOrder" value="COUNT"/>
+    </bean>
+
+    <!-- Lan 24.08.2015 - add this filter to advanced search -->
+    <bean id="searchFilterImage" class="org.dspace.discovery.configuration.HierarchicalSidebarFacetConfiguration">
+        <property name="indexFieldName" value="image"/>
+        <property name="metadataFields">
+            <list>
+                <value>rtbf.image</value>
+           </list>
+        </property>
+        <property name="facetLimit" value="10"/>
+        <property name="sortOrder" value="COUNT"/>
+        <property name="splitter" value="::"/>
+        <property name="skipFirstNodeLevel" value="false"/>
+    </bean>
+    
+    <!-- Lan 24.08.2015 - add this filter to advanced search -->
+    <bean id="searchFilterSound" class="org.dspace.discovery.configuration.HierarchicalSidebarFacetConfiguration">
+        <property name="indexFieldName" value="sound"/>
+        <property name="metadataFields">
+            <list>
+                <value>rtbf.sound</value>
+           </list>
+        </property>
+        <property name="facetLimit" value="10"/>
+        <property name="sortOrder" value="COUNT"/>
+        <property name="splitter" value="::"/>
+        <property name="skipFirstNodeLevel" value="false"/>
+    </bean>
+    
+    <!-- Lan 25.08.2015 - add this filter to advanced search -->
+    <bean id="searchFilterChannel" class="org.dspace.discovery.configuration.HierarchicalSidebarFacetConfiguration">
+        <property name="indexFieldName" value="channel"/>
+        <property name="metadataFields">
+            <list>
+                <value>rtbf.channel/date_diffusion.*</value>
+           </list>
+        </property>
+        <property name="facetLimit" value="10"/>
+        <property name="sortOrder" value="COUNT"/>
+        <property name="splitter" value="/"/>
+        <property name="skipFirstNodeLevel" value="false"/>
+    </bean>
+
+    <!-- Lan 25.08.2015 - add this filter to advanced search -->
+    <bean id="searchFilterDiffusion" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
+        <property name="indexFieldName" value="datediffusion"/>
+        <property name="metadataFields">
+            <list>
+                <value>rtbf.date_diffusion.*</value>
             </list>
         </property>
         <property name="type" value="date"/>
