@@ -65,6 +65,9 @@
             <item>
                 <xsl:copy-of select="dri:item/dri:field[@id='aspect.discovery.SimpleSearch.field.scope']"/>
                 <xsl:copy-of select="dri:item/dri:field[@id='aspect.discovery.SimpleSearch.field.query']"/>
+                <!-- Lan 10.09.2015 did-you-mean -->
+                <xsl:copy-of select="dri:item[@id='aspect.discovery.SimpleSearch.item.did-you-mean']"/>
+                <!-- Lan 10.09.2015 - did-you-mean - end-->
                 <xsl:copy-of select="dri:item/dri:field[@id='aspect.discovery.SimpleSearch.field.submit']"/>
             </item>
         </list>

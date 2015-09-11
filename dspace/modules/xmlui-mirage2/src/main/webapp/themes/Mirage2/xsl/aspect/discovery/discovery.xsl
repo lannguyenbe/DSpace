@@ -415,6 +415,17 @@
             </div>
             -->
         </div>
+
+        <!-- Lan 10.09.2015 - did-you-mean -->
+        <xsl:if test="dri:item[@id='aspect.discovery.SimpleSearch.item.did-you-mean']">
+            <div class="row">
+                <div class="col-sm-offset-3 col-sm-9">
+                    <xsl:apply-templates select="dri:item[@id='aspect.discovery.SimpleSearch.item.did-you-mean']"/>
+                </div>
+            </div>
+        </xsl:if>
+        <!-- Lan 10.09.2015 - did-you-mean - end -->
+
         <div class="row">
             <div class="col-sm-offset-3 col-sm-9" id="filters-overview-wrapper-squared">
             <!-- Lan 04.04.2015 - add ng template -->
@@ -440,9 +451,16 @@
                 </p>
             </div>
         </div>
+        <!-- Lan 10.09.2015 did-you-mean
         <div class="row">
             <div class="col-sm-offset-3 col-sm-9" id="filters-overview-wrapper-squared"/>
         </div>
+        -->
+        <xsl:if test="dri:item[@id='aspect.discovery.SimpleSearch.item.did-you-mean']">
+            <xsl:apply-templates select="dri:item[@id='aspect.discovery.SimpleSearch.item.did-you-mean']"/>
+        </xsl:if>
+        <div id="filters-overview-wrapper-squared"/>
+        <!-- Lan 10.09.2015 - did-you-mean - end-->
     </xsl:template>
 
     <xsl:template match="dri:div[@id='aspect.discovery.SimpleSearch.div.search-results']/dri:head">

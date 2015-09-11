@@ -35,7 +35,7 @@
        that you fully re-index after changing this setting as it can
        affect both how text is indexed and queried.
   -->
-  <luceneMatchVersion>4.4</luceneMatchVersion>
+  <luceneMatchVersion>4.10</luceneMatchVersion>
 
   <!-- <lib/> directives can be used to instruct Solr to load an Jars
        identified and use them to resolve any "plugins" specified in
@@ -72,17 +72,19 @@
        The examples below can be used to load some solr-contribs along 
        with their external dependencies.
     -->
-  <lib dir="../../../solr-4.9.0/contrib/extraction/lib" regex=".*\.jar" />
-  <lib dir="../../../solr-4.9.0/dist/" regex="solr-cell-\d.*\.jar" />
+  <!--
+  <lib dir="../../../contrib/extraction/lib" regex=".*\.jar" />
+  <lib dir="../../../dist/" regex="solr-cell-\d.*\.jar" />
 
-  <lib dir="../../../solr-4.9.0/contrib/clustering/lib/" regex=".*\.jar" />
-  <lib dir="../../../solr-4.9.0/dist/" regex="solr-clustering-\d.*\.jar" />
+  <lib dir="../../../contrib/clustering/lib/" regex=".*\.jar" />
+  <lib dir="../../../dist/" regex="solr-clustering-\d.*\.jar" />
 
-  <lib dir="../../../solr-4.9.0/contrib/langid/lib/" regex=".*\.jar" />
-  <lib dir="../../../solr-4.9.0/dist/" regex="solr-langid-\d.*\.jar" />
+  <lib dir="../../../contrib/langid/lib/" regex=".*\.jar" />
+  <lib dir="../../../dist/" regex="solr-langid-\d.*\.jar" />
 
-  <lib dir="../../../solr-4.9.0/contrib/velocity/lib" regex=".*\.jar" />
-  <lib dir="../../../solr-4.9.0/dist/" regex="solr-velocity-\d.*\.jar" />
+  <lib dir="../../../contrib/velocity/lib" regex=".*\.jar" />
+  <lib dir="../../../dist/" regex="solr-velocity-\d.*\.jar" />
+  -->
 
   <!-- an exact 'path' can be used instead of a 'dir' to specify a 
        specific jar file.  This will cause a serious error to be logged 
@@ -370,7 +372,7 @@
        <maxTime>${solr.autoCommit.maxTime:10000}</maxTime> <!--Default commit every 10 seconds-->
        <openSearcher>true</openSearcher> 
      </autoCommit>
-
+     
     <!-- softAutoCommit is like autoCommit except it causes a
          'soft' commit which only ensures that changes are visible
          but does not ensure that data is synced to disk.  This is
@@ -803,50 +805,15 @@
        of SearchComponents (see below) and supports distributed
        queries across multiple shards
     -->
-    <!-- Lan 30/04/2015 items count within "Source" should not be collapse -->    
-    <requestHandler name="/selectNoCollapse" class="solr.SearchHandler">
+  <requestHandler name="/select" class="solr.SearchHandler">
     <!-- default values for query parameters can be specified, these
          will be overridden by parameters in the request
       -->
      <lst name="defaults">
        <str name="echoParams">explicit</str>
        <int name="rows">10</int>
-       <str name="df">search_text</str>
-       <!-- Lan 09.02.2015 : boosting by dc.date.issued -->
-       <str name="defType">edismax</str>
-       <str name="boost">recip(ms(NOW/HOUR, dc.date.issued_dt),3.16e-11,1,1)</str>
-       <!-- Lan 20.04.2015 : 'minimum should match' when multiple terms in the query -->
-       <!-- 3<-25% 9<-3 : if there are 1 or 2 or 3 clauses all are required, 
-        if there are 4-9 clauses all but 25% are required, 
-        and if there are more than 9 clauses, all but three are required -->
-       <str name="mm">3&lt;-25% 9&lt;-3</str>
+       <str name="df">item.handle</str>
      </lst>
-      <arr name="last-components">
-          <str>spellcheck</str>
-      </arr>
-    </requestHandler>
-    
-    
-    <requestHandler name="/select" class="solr.SearchHandler">
-    <!-- default values for query parameters can be specified, these
-         will be overridden by parameters in the request
-      -->
-     <lst name="defaults">
-       <str name="echoParams">explicit</str>
-       <int name="rows">10</int>
-       <str name="df">search_text</str>
-       <!-- Lan 09.02.2015 : boosting by dc.date.issued -->
-       <str name="defType">edismax</str>
-       <str name="boost">recip(ms(NOW/HOUR, dc.date.issued_dt),3.16e-11,1,1)</str>
-       <!-- Lan 20.04.2015 : 'minimum should match' when multiple terms in the query -->
-       <!-- 3<-25% 9<-3 : if there are 1 or 2 or 3 clauses all are required, 
-        if there are 4-9 clauses all but 25% are required, 
-        and if there are more than 9 clauses, all but three are required -->
-       <str name="mm">3&lt;-25% 9&lt;-3</str>
-     </lst>
-      <arr name="last-components">
-          <str>spellcheck</str>
-      </arr>
     <!-- In addition to defaults, "appends" params can be specified
          to identify values which should be appended to the list of
          multi-val params from the query (or the existing "defaults").
@@ -865,14 +832,6 @@
          <str name="fq">inStock:true</str>
        </lst>
       -->
-       <lst name="appends">
-         <!-- Lan 09.02.2015 : Impose this default filter query to collapse multiple
-              sequences to one : 
-              - inside Tramontane when multiple programs share the same sequence;
-              - between Tramontane & Sonuma -->
-         <str name="fq">{!collapse field=identifier_origin max=identifier_weight nullPolicy=expand}</str>
-         <str name="expand">true</str>
-       </lst>
     <!-- "invariants" are a way of letting the Solr maintainer lock down
          the options available to Solr clients.  Any params values
          specified here are used regardless of what values may be specified
@@ -906,24 +865,7 @@
          <str>nameOfCustomComponent1</str>
          <str>nameOfCustomComponent2</str>
        </arr>
-
       -->
-
-    </requestHandler>
-    
-    <!-- copy of /select but making use of the external spellcheck_index -->
-    <requestHandler name="/select2spell" class="solr.SearchHandler">
-    <!-- default values for query parameters can be specified, these
-         will be overridden by parameters in the request
-      -->
-     <lst name="defaults">
-       <str name="echoParams">explicit</str>
-       <int name="rows">10</int>
-       <str name="df">search_text</str>
-     </lst>
-      <arr name="last-components">
-          <str>spellcheck_index</str>
-      </arr>
     </requestHandler>
 
   <!-- A request handler that returns indented JSON by default -->
@@ -932,7 +874,7 @@
        <str name="echoParams">explicit</str>
        <str name="wt">json</str>
        <str name="indent">true</str>
-       <str name="df">search_text</str>
+       <str name="df">item.handle</str>
      </lst>
   </requestHandler>
 
@@ -974,7 +916,7 @@
           text^0.5 features^1.0 name^1.2 sku^1.5 id^10.0 manu^1.1 cat^1.4
           title^10.0 description^5.0 keywords^5.0 author^2.0 resourcename^1.0
        </str>
-       <str name="df">search_text</str>
+       <str name="df">item.handle</str>
        <str name="mm">100%</str>
        <str name="q.alt">*:*</str>
        <str name="rows">10</str>
@@ -984,7 +926,7 @@
          text^0.5 features^1.0 name^1.2 sku^1.5 id^10.0 manu^1.1 cat^1.4
          title^10.0 description^5.0 keywords^5.0 author^2.0 resourcename^1.0
        </str>
-       <str name="mlt.fl">search_text,features,name,sku,id,manu,cat,title,description,keywords,author,resourcename</str>
+       <str name="mlt.fl">text,features,name,sku,id,manu,cat,title,description,keywords,author,resourcename</str>
        <int name="mlt.count">3</int>
 
        <!-- Faceting defaults -->
@@ -1070,15 +1012,10 @@
          on each Update Request
       -->
     <!--
-        <lst name="defaults">
-        <str name="update.chain">dedupe</str>
-        </lst>
-    -->
-    <!-- Lan 20.01.2015 : add to update.chain to generate the field
-         far earlier in the index time - before schema.xml - access to all fields of the doc -->
-    <lst name="defaults">
-      <str name="update.chain">identifier_origin</str>
-    </lst>
+       <lst name="defaults">
+         <str name="update.chain">dedupe</str>
+       </lst>
+       -->
   </requestHandler>
 
   <!-- for back compat with clients using /update/json and /update/csv -->  
@@ -1102,13 +1039,13 @@
                   startup="lazy"
                   class="solr.extraction.ExtractingRequestHandler" >
     <lst name="defaults">
-      <!--<str name="lowernames">true</str>-->
+      <str name="lowernames">true</str>
       <str name="uprefix">ignored_</str>
 
       <!-- capture link hrefs but ignore div attributes -->
-      <str name="captureAttr">false</str>
-      <!--<str name="fmap.a">links</str>-->
-      <!--<str name="fmap.div">ignored_</str>-->
+      <str name="captureAttr">true</str>
+      <str name="fmap.a">links</str>
+      <str name="fmap.div">ignored_</str>
     </lst>
   </requestHandler>
 
@@ -1291,25 +1228,18 @@
       <str>myLastComponentName</str>
     </arr>
   -->
-   <!-- Lan 05.01.2015 : rename /spellcheck to /spellcheck_index -->
+
    <!-- The spell check component can return a list of alternative spelling
   suggestions.  -->
-  <!-- searchComponent name="spellcheck" class="solr.SpellCheckComponent"-->
-  <searchComponent name="spellcheck_index" class="solr.SpellCheckComponent">
+  <searchComponent name="spellcheck" class="solr.SpellCheckComponent">
 
     <str name="queryAnalyzerFieldType">textSpell</str>
 
-
-    <!-- Lan 11.09.2015 : comment out otherwise data/spellchecker is built when optimize
     <lst name="spellchecker">
-      <str name="classname">solr.IndexBasedSpellChecker</str>
       <str name="name">default</str>
-      <str name="field">a_spell</str>
+      <str name="field">name</str>
       <str name="spellcheckIndexDir">./spellchecker</str>
-      <str name="buildOnOptimize">true</str>
-      <str name="spellcheck.onlyMorePopular">false</str>
     </lst>
-    -->
 
     <!-- a spellchecker that uses a different distance measure
     <lst name="spellchecker">
@@ -1418,42 +1348,7 @@
 
         http://wiki.apache.org/solr/SpellCheckComponent
      -->
-  
-  <!-- Lan 11.09.2015 : spellcheck on author name -->
   <searchComponent name="spellcheck" class="solr.SpellCheckComponent">
-
-    <!-- str name="queryAnalyzerFieldType">text_general</str-->
-    <str name="queryAnalyzerFieldType">textgen</str>
-
-    <!-- a spellchecker built from a field of the main index -->
-    <lst name="spellchecker">
-      <str name="name">default</str>
-      <!-- str name="field">search_text</str-->
-      <str name="field">author_keyword</str>
-      <str name="classname">solr.DirectSolrSpellChecker</str>
-      <!-- the spellcheck distance measure used, the default is the internal levenshtein -->
-      <str name="distanceMeasure">internal</str>
-      <!-- minimum accuracy needed to be considered a valid spellcheck suggestion -->
-      <float name="accuracy">0.5</float>
-      <!-- the maximum #edits we consider when enumerating terms: can be 1 or 2 -->
-      <int name="maxEdits">2</int>
-      <!-- the minimum shared prefix when enumerating terms -->
-      <int name="minPrefix">1</int>
-      <!-- maximum number of inspections per result. -->
-      <int name="maxInspections">5</int>
-      <!-- minimum length of a query term to be considered for correction -->
-      <int name="minQueryLength">4</int>
-      <!-- maximum threshold of documents a query term can appear to be considered for correction -->
-      <float name="maxQueryFrequency">0.01</float>
-      <!-- uncomment this to require suggestions to occur in 1% of the documents
-      	<float name="thresholdTokenFrequency">.01</float>
-      -->
-    </lst>
-    
-  </searchComponent>
-
-  <!-- Lan 05.01.2015 : rename original to spellcheck_orig -->
-  <searchComponent name="spellcheck_orig" class="solr.SpellCheckComponent">
 
     <str name="queryAnalyzerFieldType">text_general</str>
 
@@ -1464,7 +1359,7 @@
     <!-- a spellchecker built from a field of the main index -->
     <lst name="spellchecker">
       <str name="name">default</str>
-      <str name="field">search_text</str>
+      <str name="field">item.handle</str>
       <str name="classname">solr.DirectSolrSpellChecker</str>
       <!-- the spellcheck distance measure used, the default is the internal levenshtein -->
       <str name="distanceMeasure">internal</str>
@@ -1547,16 +1442,13 @@
        See http://wiki.apache.org/solr/SpellCheckComponent for details
        on the request parameters.
     -->
-  <!-- Lan 11.09.2015 comment this requestHandler
   <requestHandler name="/spell" class="solr.SearchHandler" startup="lazy">
     <lst name="defaults">
-      <str name="df">search_text</str>
-      -->
+      <str name="df">item.handle</str>
       <!-- Solr will use suggestions from both the 'default' spellchecker
            and from the 'wordbreak' spellchecker and combine them.
            collations (re-written queries) can include a combination of
            corrections from both spellcheckers -->
-      <!--
       <str name="spellcheck.dictionary">default</str>
       <str name="spellcheck.dictionary">wordbreak</str>
       <str name="spellcheck">on</str>
@@ -1573,7 +1465,6 @@
       <str>spellcheck</str>
     </arr>
   </requestHandler>
-  -->
 
   <!-- Term Vector Component
 
@@ -1590,7 +1481,7 @@
     -->
   <requestHandler name="/tvrh" class="solr.SearchHandler" startup="lazy">
     <lst name="defaults">
-      <str name="df">search_text</str>
+      <str name="df">item.handle</str>
       <bool name="tv">true</bool>
     </lst>
     <arr name="last-components">
@@ -1745,7 +1636,7 @@
   <requestHandler name="/elevate" class="solr.SearchHandler" startup="lazy">
     <lst name="defaults">
       <str name="echoParams">explicit</str>
-      <str name="df">search_text</str>
+      <str name="df">item.handle</str>
     </lst>
     <arr name="last-components">
       <str>elevator</str>
@@ -1867,38 +1758,6 @@
        http://wiki.apache.org/solr/UpdateRequestProcessor
 
     --> 
-
-  <!-- 28.07.2015 Lan : new identifier_origin -->
-  <updateRequestProcessorChain name="identifier_origin">
-    <!-- Add field identifier_origin -->
-    <!-- To guaranty the concat order use 2 separate processors for clone field -->
-    <processor class="solr.CloneFieldUpdateProcessorFactory">
-        <str name="source">ebucore.identifier/dc:identifier</str>
-        <str name="dest">identifier_origin</str>
-    </processor>
-    <processor class="solr.CloneFieldUpdateProcessorFactory">
-        <str name="source">owl.sameAs</str>
-        <str name="dest">identifier_origin</str>
-    </processor>
-    <processor class="solr.processor.LastFieldValueUpdateProcessorFactory">
-        <str name="fieldName">identifier_origin</str>
-    </processor>
-    <!-- Add field identifier_origin_count -->
-    <processor class="solr.CloneFieldUpdateProcessorFactory">
-        <str name="source">owl.sameAs</str>
-        <str name="dest">identifier_origin_count</str>
-    </processor>
-    <processor class="solr.processor.CountFieldValuesUpdateProcessorFactory">
-        <str name="fieldName">identifier_origin_count</str>
-    </processor>
-    <processor class="solr.processor.DefaultValueUpdateProcessorFactory">
-      <str name="fieldName">identifier_origin_count</str>
-      <str name="value">1000</str>
-    </processor>
-    <processor class="solr.LogUpdateProcessorFactory" />
-    <processor class="solr.RunUpdateProcessorFactory" />
-  </updateRequestProcessorChain>
-  
   <!-- Deduplication
 
        An example dedup update processor that creates the "id" field

@@ -1446,7 +1446,8 @@
        See http://wiki.apache.org/solr/SpellCheckComponent for details
        on the request parameters.
     -->
-  <requestHandler name="/spell" class="solr.SearchHandler" startup="lazy">
+  <!-- Lan 11.09.2015 Rename /spell to /spell_2 -->    
+  <requestHandler name="/spell_2" class="solr.SearchHandler" startup="lazy">
     <lst name="defaults">
       <str name="df">id</str>
       <!-- Solr will use suggestions from both the 'default' spellchecker
