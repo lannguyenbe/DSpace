@@ -72,5 +72,49 @@ public class ItemAdd extends Item {
 
         return new ItemIterator(context, rows);
     }
-    
+
+    public static ItemIterator findGeIdByCommunity(Context context, int community_id, int item_id)
+            throws SQLException
+    {
+        String myQuery = "SELECT item.*"
+                + " FROM item, "
+        		+ " (select community_id, item_id from community2item"
+        		+ " union"
+        		+ " select  cc.parent_comm_id community_id ,c2i.item_id"
+        		+ " from community2item c2i, community2community cc"
+        		+ " where cc.parent_comm_id = " + community_id
+        		+ " and cc.child_comm_id = c2i.community_id"
+                + " ) topcommunity2item"
+                + " WHERE topcommunity2item.community_id = " + community_id
+                + " AND item.item_id = topcommunity2item.item_id"
+                + " AND item.item_id >= " + item_id
+                + " ORDER BY item.item_id";
+
+        TableRowIterator rows = DatabaseManager.queryTable(context, "item", myQuery);
+
+        return new ItemIterator(context, rows);
+    }
+
+    public static ItemIterator findBetweenIdByCommunity(Context context, int community_id, int item_id, int item_id_to)
+            throws SQLException
+    {
+        String myQuery = "SELECT item.*"
+                + " FROM item, "
+        		+ " (select community_id, item_id from community2item"
+        		+ " union"
+        		+ " select  cc.parent_comm_id community_id ,c2i.item_id"
+        		+ " from community2item c2i, community2community cc"
+        		+ " where cc.parent_comm_id = " + community_id
+        		+ " and cc.child_comm_id = c2i.community_id"
+                + " ) topcommunity2item"
+                + " WHERE topcommunity2item.community_id = " + community_id
+                + " AND item.item_id = topcommunity2item.item_id"
+                + " AND item.item_id between " + item_id + " and " + item_id_to
+                + " ORDER BY item.item_id";
+
+        TableRowIterator rows = DatabaseManager.queryTable(context, "item", myQuery);
+
+        return new ItemIterator(context, rows);
+    }
+
 }

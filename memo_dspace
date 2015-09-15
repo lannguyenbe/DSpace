@@ -12,7 +12,7 @@ modify C:\local\metam-5.0\dspace\modules\xmlui-mirage2\src\main\webapp\themes\Mi
     <script src="vendor/angular-route/angular-route.js">&#160;</script>
     <script src="vendor/angular-resource/angular-resource.js">&#160;</script>
 mvn package -P mirage2_dev -Dmirage2.deps.included=false # non mimified main.css
-# vi C:\local\metam-5.0\dspace\modules\xmlui-mirage2\target\xmlui-mirage2-5.0\themes\Mirage2\styles\main.css should contains what is modified
+# vi C:\local\metam-5.0\dspace\modules\xmlui-mirage2\target\xmlui-mirage2-5.0\themes\Mirage2\styles\main.css should contains didYouMean
 
 # 1. to install dspace-xmlui-mirage2 in .m2 local repository
 cd \local\metam-5.0\dspace-xmlui-mirage2

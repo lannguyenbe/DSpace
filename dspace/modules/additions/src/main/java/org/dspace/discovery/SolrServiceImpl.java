@@ -317,6 +317,73 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         unIndexContent(context, handle, false);
     }
 
+    public void unIndexContentR(Context context, String handle) throws IOException, SQLException {
+    	unIndexContentR(context, handle, true);
+    }
+    
+
+    /**
+     * Lan 14.09.2015 
+     * Unindex recursively documents from the index, the corresponding dso of the given handle should exist in the database,
+     * the main usage is to delete all documents of a top community from the index BEFORE deleting data from the DB
+     * for item = same result as calling unIndexContent(context, handle) without R
+     * for collection = unindex all the items having this collection as parent; then unindex the collection
+     * Careful !!! even if the item belongs to multiple collections, the item is unindexed anyway
+     * for community = unindex all the items, collections, communities having this community as parent; then unindex the community
+     */
+    public void unIndexContentR(Context context, String handle, boolean commit) throws IOException, SQLException {
+    	
+    	DSpaceObject dso = HandleManager.resolveToObject(context, handle);
+    	
+    	try {
+    		if (getSolr() != null) {
+    			int resourceID = dso.getID();
+                String uniqueID = dso.getType()+"-"+dso.getID();
+	    		switch (dso.getType()) {
+		    		case Constants.ITEM:
+		                getSolr().deleteById(uniqueID);
+		    			break;
+		    		case Constants.COLLECTION:
+		                getSolr().deleteByQuery("location.coll:" + resourceID);
+		                getSolr().deleteById(uniqueID);
+		    			break;
+		    		case Constants.COMMUNITY:
+		    			// unindex items and collections
+		                getSolr().deleteByQuery("location.comm:" + resourceID);
+		                
+		                // unindex sub-communitites -- consult the database because community document don't have location.comm value
+		                CommunityIterator subCommunities = null;
+		                try {
+		                	for (subCommunities = CommunityAdd.findSubcommunities(context, resourceID); subCommunities.hasNext();) {
+		                        Community subComm = subCommunities.next();
+		                        String subCommID = String.valueOf(Constants.COMMUNITY) + subComm.getID();
+				                getSolr().deleteById(subCommID);
+		                	}
+		                	
+		                } finally {
+		                	if (subCommunities != null) {
+		                		subCommunities.close();
+		                	}
+		                }
+		                
+		                // unindex the given community
+		                getSolr().deleteById(uniqueID);
+		    			break;
+		    		default:
+		    			log.error("Only Items, Collections and Communities can be Indexed");
+	    		}
+                if(commit)
+                {
+                    getSolr().commit();
+                }
+    		}    		
+    	} catch (SolrServerException e) {
+    		log.error(e.getMessage(),e);
+    	}
+    }
+    
+    
+    
     /**
      * Unindex a Document in the Lucene Index.
      * @param context the dspace context
@@ -536,6 +603,35 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
     }
     
+    public void updateIndexCI(Context context, int commId, int itemId, boolean force)
+    {
+        try {
+            ItemIterator items = null;
+            try {
+                for (items = ItemAdd.findGeIdByCommunity(context, commId, itemId); items.hasNext();)
+                {
+                    Item item = items.next();
+                    indexContent(context, item, force);
+                    item.decache();
+                }
+            } finally {
+                if (items != null)
+                {
+                    items.close();
+                }
+            }
+
+            if(getSolr() != null)
+            {
+                getSolr().commit();
+            }
+
+        } catch (Exception e)
+        {
+            log.error(e.getMessage(), e);
+        }
+    }
+    
 
     public void updateIndexIto(Context context, int id, int idto, boolean force)
     {
@@ -566,6 +662,34 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
     }
     
+    public void updateIndexCIto(Context context, int commId, int itemId, int itemIdto, boolean force)
+    {
+        try {
+            ItemIterator items = null;
+            try {
+                for (items = ItemAdd.findBetweenIdByCommunity(context, commId, itemId, itemIdto); items.hasNext();)
+                {
+                    Item item = items.next();
+                    indexContent(context, item, force);
+                    item.decache();
+                }
+            } finally {
+                if (items != null)
+                {
+                    items.close();
+                }
+            }
+
+            if(getSolr() != null)
+            {
+                getSolr().commit();
+            }
+
+        } catch (Exception e)
+        {
+            log.error(e.getMessage(), e);
+        }
+    }
     
     public void updateIndexCC(Context context, boolean force)
     {
@@ -588,6 +712,50 @@ public class SolrServiceImpl implements SearchService, IndexingService {
             CollectionIterator collections = null;
             try {
                 for (collections = CollectionAdd.findAllCursor(context); collections.hasNext();)
+                {
+                    Collection collection = collections.next();
+                    indexContent(context, collection, force);
+                    context.removeCached(collection, collection.getID());
+                }
+            } finally {
+                if (collections != null)
+                {
+                    collections.close();
+                }
+            }
+            
+            if(getSolr() != null)
+            {
+                getSolr().commit();
+            }
+
+        } catch (Exception e)
+        {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    public void updateIndexCC(Context context, int commId, boolean force)
+    {
+        try {
+            CommunityIterator communities = null;
+            try {
+                for (communities = CommunityAdd.findSubcommunities(context, commId); communities.hasNext();)
+                {
+                    Community community = communities.next();
+                    indexContent(context, community, force);
+                    context.removeCached(community, community.getID());
+                }
+            } finally {
+                if (communities != null)
+                {
+                    communities.close();
+                }
+            }
+
+            CollectionIterator collections = null;
+            try {
+                for (collections = CollectionAdd.findByCommunity(context, commId); collections.hasNext();)
                 {
                     Collection collection = collections.next();
                     indexContent(context, collection, force);

@@ -55,6 +55,16 @@ public class IndexClient {
                         .create("r"));
 
 
+        /* Lan 14.09.2015 : add option -R */        
+        options
+		        .addOption(OptionBuilder
+		                .withArgName("handle")
+		                .hasArg(true)
+		                .withDescription(
+		                        "remove recursively an Item, Collection or Community from index based on its handle")
+		                .create("R"));
+
+
         options
                 .addOption(OptionBuilder
                         .isRequired(false)
@@ -96,7 +106,7 @@ public class IndexClient {
         				.isRequired(false)
         				.hasArg()
         				.withArgName("item id")
-        				.withDescription("incremental index from the item id")
+        				.withDescription("adding ordered items to index from item id")
         				.create("I")
         				);
 
@@ -106,7 +116,7 @@ public class IndexClient {
         				.isRequired(false)
         				.hasArg(true)
         				.withArgName("item id")
-        				.withDescription("incremental index to the given item id")
+        				.withDescription("adding ordered items to item id")
         				.create("Ito")
         				);
 
@@ -154,6 +164,9 @@ public class IndexClient {
         if (line.hasOption("r")) {
             log.info("Removing " + line.getOptionValue("r") + " from Index");
             indexer.unIndexContent(context, line.getOptionValue("r"));
+        } else if (line.hasOption("R")) { /* Lan 14.09.2015 */
+            log.info("Removing recursively " + line.getOptionValue("R") + " from Index");
+            indexer2.unIndexContentR(context, line.getOptionValue("R"));
         } else if (line.hasOption("c")) {
             log.info("Cleaning Index");
             indexer.cleanIndex(line.hasOption("f"));
@@ -166,24 +179,46 @@ public class IndexClient {
             indexer2.updateIndexBig(context, true);
             checkRebuildSpellCheck(line, indexer2);
         } else if (line.hasOption("CC")) { /* Lan 21.11.2014 */
-            log.info("(Re)building index for communities and collections.");
-            indexer2.updateIndexCC(context, true);
+            if (line.hasOption("C")) {
+            	int communityId = Integer.parseInt(line.getOptionValue("C"));
+            	log.info("(Re)building index for communities and collections of the community id " + communityId);
+                indexer2.updateIndexCC(context, communityId, true);
+            } else {
+                log.info("(Re)building index for communities and collections.");            
+            	indexer2.updateIndexCC(context, true);
+            }
+            checkRebuildSpellCheck(line, indexer2);
+        } else if (line.hasOption("I")) { /* Lan 21.11.2014 */
+        	int itemId = Integer.parseInt(line.getOptionValue("I"));
+            log.info("Adding ordered items from item id " + itemId);
+        	int communityId = 0; int itemIto = 0; 
+        	if (line.hasOption("Ito")) { /* Lan 07.09.2015 */
+                itemIto = Integer.parseInt(line.getOptionValue("Ito"));
+                log.info("Adding ordered items to item id " + itemIto);
+        	}
+        	if (line.hasOption("C")) { /* Lan 14.09.2015 */
+        		communityId = Integer.parseInt(line.getOptionValue("C"));
+                log.info("Adding ordered items for community id " + communityId);
+        	}
+        	if (communityId > 0) {
+        		if (itemIto > 0) {
+                	indexer2.updateIndexCIto(context, communityId, itemId, itemIto, true);
+        		} else {
+                	indexer2.updateIndexCI(context, communityId, itemId, true);        			
+        		}
+        	} else {
+        		if (itemIto > 0) {
+                	indexer2.updateIndexIto(context, itemId, itemIto, true);        			
+        		} else {
+                	indexer2.updateIndexI(context, itemId, true);        			
+        			
+        		}
+        	}
             checkRebuildSpellCheck(line, indexer2);
         } else if (line.hasOption("C")) { /* Lan 21.11.2014 */
             log.info("(Re)building index for the community id.");
         	int communityId = Integer.parseInt(line.getOptionValue("C"));
             indexer2.updateIndexC(context, communityId, true);
-            checkRebuildSpellCheck(line, indexer2);
-        } else if (line.hasOption("I")) { /* Lan 21.11.2014 */
-            log.info("Increment index from item id.");
-        	int itemId = Integer.parseInt(line.getOptionValue("I"));
-        	if (line.hasOption("Ito")) { /* Lan 07.09.2015 */
-                log.info("Increment index to the given item id.");
-                int itemIto = Integer.parseInt(line.getOptionValue("Ito"));
-                indexer2.updateIndexIto(context, itemId, itemIto, true);
-        	} else {
-        		indexer2.updateIndexI(context, itemId, true);
-        	}
             checkRebuildSpellCheck(line, indexer2);
         } else if (line.hasOption("o")) {
             log.info("Optimizing search core.");
