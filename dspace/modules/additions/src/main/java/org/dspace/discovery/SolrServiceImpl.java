@@ -69,6 +69,8 @@ import org.dspace.content.CollectionIterator;
 import org.dspace.content.Community;
 import org.dspace.content.CommunityAdd;
 import org.dspace.content.CommunityIterator;
+import org.dspace.content.HandleLog;
+import org.dspace.content.HandleLogIterator;
 import org.dspace.content.ItemAdd;
 import org.dspace.content.Metadatum;
 import org.dspace.content.DSpaceObject;
@@ -335,6 +337,10 @@ public class SolrServiceImpl implements SearchService, IndexingService {
     	
     	DSpaceObject dso = HandleManager.resolveToObject(context, handle);
     	
+    	if (dso == null) {
+    		return;
+    	}
+    	
     	try {
     		if (getSolr() != null) {
     			int resourceID = dso.getID();
@@ -356,7 +362,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
 		                try {
 		                	for (subCommunities = CommunityAdd.findSubcommunities(context, resourceID); subCommunities.hasNext();) {
 		                        Community subComm = subCommunities.next();
-		                        String subCommID = String.valueOf(Constants.COMMUNITY) + subComm.getID();
+		                        String subCommID = String.valueOf(Constants.COMMUNITY)+"-"+subComm.getID();
 				                getSolr().deleteById(subCommID);
 		                	}
 		                	
@@ -745,6 +751,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                     Community community = communities.next();
                     indexContent(context, community, force);
                     context.removeCached(community, community.getID());
+                    
                 }
             } finally {
                 if (communities != null)
@@ -755,7 +762,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
 
             CollectionIterator collections = null;
             try {
-                for (collections = CollectionAdd.findByCommunity(context, commId); collections.hasNext();)
+                for (collections = CollectionAdd.findAllByCommunity(context, commId); collections.hasNext();)
                 {
                     Collection collection = collections.next();
                     indexContent(context, collection, force);
@@ -767,7 +774,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                     collections.close();
                 }
             }
-            
+
             if(getSolr() != null)
             {
                 getSolr().commit();
@@ -779,6 +786,112 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
     }
     
+    public void updateIndexS(Context context, boolean commit)
+    {
+        try {
+            HandleLogIterator hlogs = null;
+            int numlogs = 0;
+
+            // 1. Sync DEL on item, collection, community in this order
+            try {
+                for (hlogs = HandleLog.findAllDel(context), numlogs = 0; hlogs.hasNext(); numlogs++)
+                {
+                    HandleLog handleLog = hlogs.next();
+                    
+                    String uniqueID = handleLog.getType() + "-" + handleLog.getID();
+//                    System.out.println(handleLog.getOper() + ", " + uniqueID + ", " + handleLog.getHandleID());
+                    getSolr().deleteById(uniqueID);
+                    handleLog.populateLogDone();
+                    log.info("Sync delete search.uniqueid: " + uniqueID + " handleid: " + handleLog.getHandleID() + " from Index");
+                    
+                }
+                System.out.println(numlogs + " DEL");
+                if (commit) { getSolr().commit(); }
+            } finally {
+                if (hlogs != null) { 
+                	hlogs.close(); 
+                	hlogs = null; 
+                }
+            }
+    
+            // 2. Sync INS/UPD on community
+            try {
+            	Community community;
+                for (hlogs = HandleLog.findCommunities2Sync(context), numlogs = 0; hlogs.hasNext(); numlogs++)
+                {
+                    HandleLog handleLog = hlogs.next();
+                    
+                    community = (Community) Community.find(context, handleLog.getType(), handleLog.getID());
+                    if (community != null) {
+//                        System.out.println(handleLog.getOper() + ", " + handleLog.getType() + "-" + handleLog.getID() + ", " + handleLog.getHandleID());
+                        indexContent(context, community, true); // force is true 
+                        context.removeCached(community, community.getID());
+                        handleLog.populateLogDone();
+                    }
+                }
+                System.out.println(numlogs + " INS/UPD on Community");
+                if (commit) { getSolr().commit(); }
+            } finally {
+                if (hlogs != null) { 
+                	hlogs.close(); 
+                	hlogs = null; 
+                }
+            }
+
+            // 3. Sync INS/UPD on collection
+            try {
+            	Collection collection;
+                for (hlogs = HandleLog.findCollections2Sync(context), numlogs = 0; hlogs.hasNext(); numlogs++)
+                {
+                    HandleLog handleLog = hlogs.next();
+                    
+                    collection = (Collection) Collection.find(context, handleLog.getType(), handleLog.getID());
+                    if (collection != null ) {
+//                        System.out.println(handleLog.getOper() + ", " + handleLog.getType() + "-" + handleLog.getID() + ", " + handleLog.getHandleID());
+                        indexContent(context, collection, true); // force is true
+                        context.removeCached(collection, collection.getID());
+                        handleLog.populateLogDone();
+                    }
+                }
+                System.out.println(numlogs + " INS/UPD on Collection");
+                if (commit) { getSolr().commit(); }
+            } finally {
+                if (hlogs != null) { 
+                	hlogs.close(); 
+                	hlogs = null; 
+                }
+            }
+
+            // 4. Sync INS/UPD on item
+            try {
+            	Item item;
+                for (hlogs = HandleLog.findItems2Sync(context), numlogs = 0; hlogs.hasNext(); numlogs++)
+                {
+                    HandleLog handleLog = hlogs.next();
+                    
+                    item = (Item) Item.find(context, handleLog.getType(), handleLog.getID());
+                    if (item != null) {
+//                        System.out.println(handleLog.getOper() + ", " + handleLog.getType() + "-" + handleLog.getID() + ", " + handleLog.getHandleID());
+                        indexContent(context, item, true); // force is true
+                        context.removeCached(item, item.getID());
+                        handleLog.populateLogDone();
+                    }
+                }
+                System.out.println(numlogs + " INS/UPD on Item");
+                if (commit) { getSolr().commit(); }
+            } finally {
+                if (hlogs != null) { 
+                	hlogs.close(); 
+                	hlogs = null; 
+                }
+            }
+
+        } catch (Exception e)
+        {
+            log.error(e.getMessage(), e);
+        }
+    }
+
 
     protected void indexCommunity(Context context, Community community, boolean force) 
             throws SQLException 

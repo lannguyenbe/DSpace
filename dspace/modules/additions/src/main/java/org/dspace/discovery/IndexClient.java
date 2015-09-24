@@ -120,6 +120,14 @@ public class IndexClient {
         				.create("Ito")
         				);
 
+        /* Lan 15.09.2015 : add option -S */        
+        options
+        		.addOption(OptionBuilder
+        				.isRequired(false)
+        				.withDescription("Sync the index to the database based on t_handle_log")
+        				.create("S")
+        				);
+
         options.addOption(OptionBuilder.isRequired(false).withDescription(
                 "Rebuild the spellchecker, can be combined with -b and -f.").create(
                 "s"));
@@ -190,30 +198,35 @@ public class IndexClient {
             checkRebuildSpellCheck(line, indexer2);
         } else if (line.hasOption("I")) { /* Lan 21.11.2014 */
         	int itemId = Integer.parseInt(line.getOptionValue("I"));
-            log.info("Adding ordered items from item id " + itemId);
         	int communityId = 0; int itemIto = 0; 
         	if (line.hasOption("Ito")) { /* Lan 07.09.2015 */
                 itemIto = Integer.parseInt(line.getOptionValue("Ito"));
-                log.info("Adding ordered items to item id " + itemIto);
         	}
         	if (line.hasOption("C")) { /* Lan 14.09.2015 */
         		communityId = Integer.parseInt(line.getOptionValue("C"));
-                log.info("Adding ordered items for community id " + communityId);
         	}
         	if (communityId > 0) {
         		if (itemIto > 0) {
+                    log.info("Adding ordered items for community id " + communityId + " from item id " + itemId + " to " + itemIto);
                 	indexer2.updateIndexCIto(context, communityId, itemId, itemIto, true);
         		} else {
+                    log.info("Adding ordered items for community id " + communityId + " from item id " + itemId);
                 	indexer2.updateIndexCI(context, communityId, itemId, true);        			
         		}
         	} else {
         		if (itemIto > 0) {
+                    log.info("Adding ordered items from item id " + itemId + " to " + itemIto);
                 	indexer2.updateIndexIto(context, itemId, itemIto, true);        			
         		} else {
+                    log.info("Adding ordered items from item id " + itemId);
                 	indexer2.updateIndexI(context, itemId, true);        			
         			
         		}
         	}
+            checkRebuildSpellCheck(line, indexer2);
+        } else if (line.hasOption("S")) { /* Lan 15.09.2015 */
+            log.info("Sync the index to the database based on t_handle_log.");
+            indexer2.updateIndexS(context, true);
             checkRebuildSpellCheck(line, indexer2);
         } else if (line.hasOption("C")) { /* Lan 21.11.2014 */
             log.info("(Re)building index for the community id.");
