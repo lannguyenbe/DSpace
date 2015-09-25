@@ -6,6 +6,7 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 import org.dspace.core.Constants;
 import org.dspace.core.Context;
+import org.dspace.storage.rdbms.DatabaseAccess;
 import org.dspace.storage.rdbms.TableRow;
 
 public class HandleLog {
@@ -131,7 +132,7 @@ public class HandleLog {
     	String myDelete = "DELETE FROM t_handle_log"
 				+ " WHERE logid = " + this.getLogID();
 
-    	HandleLogIterator.DatabaseAccess.executeTransaction(ourContext, myInsert, myDelete);
+    	DatabaseAccess.executeTransaction(ourContext, myInsert, myDelete);
     	
     }
 

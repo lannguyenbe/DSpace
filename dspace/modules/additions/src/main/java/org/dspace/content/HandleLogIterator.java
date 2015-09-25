@@ -10,13 +10,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.dspace.core.Context;
-import org.dspace.storage.rdbms.DatabaseManager;
+import org.dspace.storage.rdbms.DatabaseAccess;
 import org.dspace.storage.rdbms.TableRow;
 import org.dspace.storage.rdbms.TableRowIterator;
 
@@ -35,7 +33,7 @@ public class HandleLogIterator {
 	
 	public HandleLogIterator(Context context, String query, Object... parameters ) throws SQLException 
 	{
-		TableRowIterator rows = DatabaseAccess.query(context, this, query);
+		TableRowIterator rows = DatabaseAccess.query(context, query);
 
 		ourContext = context;
 		handleLogRows = rows;
@@ -68,7 +66,7 @@ public class HandleLogIterator {
 	 * @author nln
 	 *
 	 */
-	class TableRowIterator {
+	class TableRowIteratorInner {
 	    /**
 	     * Results from a query
 	     */
@@ -108,7 +106,7 @@ public class HandleLogIterator {
 	    private List<Integer> columnTypes = null;
 
 
-		public TableRowIterator(ResultSet results) {
+		public TableRowIteratorInner(ResultSet results) {
 			this.results = results;
 
 			try {
@@ -288,131 +286,5 @@ public class HandleLogIterator {
 
 	
 	} /* class TableRowIterator */
-	
-	static class DatabaseAccess {
-		private static Connection connection;
-
-		public static TableRowIterator query(Context context, HandleLogIterator hl, String query) throws SQLException {
-			Connection conn = getConnection(context);			
-	        PreparedStatement statement = null;
-	        
-	        try
-	        {
-	        	statement = conn.prepareStatement(query);
-
-	            TableRowIterator retTRI = hl.new TableRowIterator(statement.executeQuery());
-
-	            retTRI.setStatement(statement);
-	            return retTRI;
-	        }
-	        catch (SQLException sqle) 
-	        {
-	            if (statement != null)
-	            {
-	                try
-	                {
-	                    statement.close();
-	                }
-	                catch (SQLException s)
-	                {
-	                    log.error("SQL query close Error - ",s);
-	                    throw s;
-	                }
-	            }
-	            log.error("SQL query Error - ",sqle);
-	            throw sqle;
-	        }
-	    }
-
-		public static void execute(Context context, String sql) throws SQLException {
-			Connection conn = getConnection(context);			
-	        PreparedStatement statement = null;
-
-	        try
-	        {
-	            statement = connection.prepareStatement(sql);
-	            statement.execute();
-	        }
-	        catch (SQLException sqle) {
-                log.error("SQL execute Error - ", sqle);
-                throw sqle;
-	        }
-	        finally {
-	            if (statement != null) {
-	                try {
-	                    statement.close();
-	                }
-	                catch (SQLException sqle) {
-	                    log.error("SQL execute close Error - ", sqle);
-	                    throw sqle;
-	                }
-	            }
-	        }
-	    }
-
-		public static void executeTransaction(Context context, String... sqls) throws SQLException {
-			Connection conn = getConnection(context);			
-	        List<PreparedStatement> statements = null;
-
-	        try {
-	        	conn.setAutoCommit(false);
-	        	statements = new ArrayList<PreparedStatement>();
-	        	for (int i = 0, len = sqls.length; i < len; i++) {
-	        		PreparedStatement stmt = connection.prepareStatement(sqls[i]);
-	        		stmt.execute();
-		            statements.add(stmt);
-	        	}
-	        	conn.commit();
-	        }
-	        catch (SQLException sqle) {
-	        	conn.rollback();      	
-                log.error("SQL executeTransaction Error - ", sqle);
-                throw sqle;
-	        }
-	        finally  {
-	            if (statements != null) {
-	                try  {
-	                	for (PreparedStatement stmt : statements) {
-	                		stmt.close();
-	                	}
-	                }
-	                catch (SQLException sqle) {
-	                    log.error("SQL executeTransaction close Error - ", sqle);
-	                    throw sqle;
-	                }
-	            }
-	            if (conn != null) {
-	            	conn.setAutoCommit(true);
-	            }
-	        }
-	    }
-
-
-		public static Connection getConnection(Context context) throws SQLException {
-			if (connection == null) {
-	            connection = context.getDBConnection();
-/*	        	connection = getMyConnection();*/
-			}
-			return connection;
-		}
-		
-		public static Connection getMyConnection() throws SQLException {
-			try {
-				Class.forName("oracle.jdbc.OracleDriver");
-			} catch(ClassNotFoundException e) {
-	            log.error("getConnection - ",e);
-				return null;
-			} 
-
-			Connection conn = null;
-			String currentUrlString = null;
-
-			currentUrlString= "jdbc:oracle:thin:argus2/argus@oda11:1521:utf";
-			conn = DriverManager.getConnection(currentUrlString);
-
-			return conn;
-		}
-
-	} /* class DataBaseManager */
 
 }
