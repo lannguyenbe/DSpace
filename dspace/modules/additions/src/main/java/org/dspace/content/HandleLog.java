@@ -124,13 +124,31 @@ public class HandleLog {
     
     public void populateLogDone() throws SQLException {
     	String myInsert = "INSERT INTO t_handle_log_done("
-    					+ " resource_type_id, resource_id, oper, dateoper, logid, handle_id, datedone)"
-    					+ " SELECT resource_type_id, resource_id, oper, dateoper, logid, handle_id, SYSTIMESTAMP"
-    					+ " FROM t_handle_log l"
-    					+ " WHERE l.logid = " + this.getLogID();
+    					+ "     resource_type_id, resource_id, oper, dateoper, logid, handle_id, datedone)"
+    					+ " WITH done AS ("
+    					+ "     SELECT t.*"
+    					+ "	    FROM t_handle_log t"
+    					+ "     WHERE t.logid = " + this.getLogID()
+    					+ " )"
+    					+ " SELECT l.resource_type_id, l.resource_id, l.oper, l.dateoper, l.logid, l.handle_id, SYSTIMESTAMP"
+    					+ " FROM t_handle_log l, done"
+    					+ " WHERE l.resource_type_id = done.resource_type_id"
+    					+ " AND l.resource_id = done.resource_id"
+    					+ " AND l.dateoper <= done.dateoper";
 
-    	String myDelete = "DELETE FROM t_handle_log"
-				+ " WHERE logid = " + this.getLogID();
+    	String myDelete = "DELETE FROM t_handle_log h"
+						+ " WHERE h.logid  in ("
+    					+ " 	WITH done AS ("
+    					+ "     	SELECT t.*"
+    					+ "	    	FROM t_handle_log t"
+    					+ "     	WHERE t.logid = " + this.getLogID()
+    					+ " 	)"
+    					+ " 	SELECT l.logid"
+    					+ " 	FROM t_handle_log l, done"
+    					+ " 	WHERE l.resource_type_id = done.resource_type_id"
+    					+ " 	AND l.resource_id = done.resource_id"
+    					+ " 	AND l.dateoper <= done.dateoper"
+						+ ")" ;
 
     	DatabaseAccess.executeTransaction(ourContext, myInsert, myDelete);
     	

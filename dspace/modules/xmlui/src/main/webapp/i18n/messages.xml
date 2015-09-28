@@ -149,6 +149,19 @@
     <!--  07.01.2015 Lan : new facet identifier_attributor -->
 	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_identifier_attributor">Source</message>
 	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.identifier_attributor">Source</message>
+    <!--  25.09.2015 Lan : new facet labels -->
+	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_channel">Channel</message>
+	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.channel">Channel</message>
+	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_datediffusion">Date Broadcasted</message>
+	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.datediffusion">Date Broadcasted</message>
+	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_place">Location</message>
+	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.place">Location</message>
+	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_image">Image</message>
+	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.image">Image</message>
+	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_sound">Sound</message>
+	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.sound">Sound</message>
+	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.contributor">Contributor</message>
+	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.codeorigine">Support</message>
 
    <!--  some common other possibilities for Advanced Search Fields -->
    <message key="xmlui.ArtifactBrowser.AdvancedSearch.type_contributor">Contributor</message>

@@ -200,6 +200,9 @@ cp dspace-api-4.2.jar $DS/lib
 ## to recompile:end
 
 -----------------------------------------  S O L R  --------------------------------------------------
+### docs issued since 2 days
+http://vm-dev4.inf.rtbf.be:8080/solr/search/select?q=dc.date.issued_dt%3A%5BNOW-2DAYS+TO+NOW%5D&wt=json&indent=true
+
 ### Number of doc of type item of Sonuma TV
 http://vm-dev4.inf.rtbf.be:8080/solr/search/selectNoCollapse?q=location.comm%3A2+AND+search.resourcetype%3A2&rows=0&wt=json&indent=true
 
