@@ -200,6 +200,31 @@ cp dspace-api-4.2.jar $DS/lib
 ## to recompile:end
 
 -----------------------------------------  S O L R  --------------------------------------------------
+# rechercher un contributor dans son role, utiliser phrase query : "boever intervenant"
+http://localhost:8070/solr/search/select?q=contributor_partial%3A(%22boever+intervenant%22)&fl=contributor_partial&wt=json&indent=true
+
+# Number of doc that dateIssued.year is not 2015 # q=-dateIssued.year:2015 is sum of (#doc not exists date + #doc exists date != 2015)
+http://localhost:8070/solr/search/select?q=-dateIssued.year%3A2015&rows=0&wt=json&indent=true
+# Number of doc that not exists dateIssued.year # q=-dateIssued.year:[* TO *]
+http://localhost:8070/solr/search/select?q=-dateIssued.year%3A%5B*+TO+*%5D&rows=0&wt=json&indent=true
+
+### hierarchical faceting on typesupport
+# query on "BETA Digit" faceting on typesupport_tax_0_filter with facet_prefix "beta digit"
+http://localhost:8070/solr/search/select?q=typesupport_keyword%3A%22BETA+Digit%22&fl=typesupport%2Ctypesupport_tax_0_filter%2Ctypesupport_tax_0_filter&wt=json&indent=true&facet=true&facet.field=typesupport_tax_0_filter&facet.prefix=beta+digit
+# query on "BETA Digit" faceting on typesupport_tax_1_filter with facet_prefix "beta digit", give children hierarchy of "beta digit"
+http://localhost:8070/solr/search/select?q=typesupport_keyword%3A%22BETA+Digit%22&fl=typesupport%2Ctypesupport_tax_0_filter%2Ctypesupport_tax_0_filter&wt=json&indent=true&facet=true&facet.field=typesupport_tax_1_filter&facet.prefix=beta+digit
+# query on "BETA Digit" faceting on 2 facet fields : typesupport_tax_0_filter and tax_1, 
+# with facet.prefix "beta digit" applies to both facet fields, 
+# with facet.mincount >= 10 applies to 1 field f.<field_name>
+http://localhost:8070/solr/search/select?q=typesupport_keyword%3A%22BETA+Digit%22&fl=typesupport%2Ctypesupport_tax_0_filter%2Ctypesupport_tax_0_filter&wt=json&indent=true&facet=true&facet.field=typesupport_tax_0_filter&facet.field=typesupport_tax_1_filter&facet.prefix=beta+digit&f.typesupport_tax_1_filter.facet.mincount=10### Pivoting on typesupport NOOK
+
+### Pivoting an channel and date diffusion : NOOK but seems OK because in most of time, lower tax_level is from the UNIQUE upper tax_level
+### Not working for item with multiple broadcast dates
+http://localhost:8070/solr/search/select?q=channel_keyword%3A%22La+Une%2F2015%22&fl=channel%2Cchannel_tax_1_filter&wt=json&indent=true&facet=true&facet.pivot=channel_tax_1_filter,channel_tax_2_filter,channel_tax_3_filter
+
+### date_diffusion range
+http://localhost:8070/solr/search/select?q=rtbf.date_diffusion_dt%3A%5B2015-09-06T00%3A00%3A00Z%2FDAY+TO+NOW%5D&fl=rtbf.date_diffusion_dt&wt=json&indent=true
+
 ### docs issued since 2 days
 http://vm-dev4.inf.rtbf.be:8080/solr/search/select?q=dc.date.issued_dt%3A%5BNOW-2DAYS+TO+NOW%5D&wt=json&indent=true
 

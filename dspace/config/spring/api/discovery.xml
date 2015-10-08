@@ -99,16 +99,16 @@
         <property name="sidebarFacets">
             <list>
                 <ref bean="searchFilterIdAttributor" />
-                <!-- ref bean="searchFilterAuthor" /-->
+                <ref bean="searchFilterAuthor" />
                 <ref bean="searchFilterContributor" />
-                <ref bean="searchFilterSubject" />
                 <ref bean="searchFilterChannel" />
-                <ref bean="searchFilterDiffusion" />
                 <ref bean="searchFilterIssued" />
-                <!-- ref bean="searchFilterCodeOrigine" /-->
+                <ref bean="searchFilterSubject" />
                 <ref bean="searchFilterPlace" />
                 <ref bean="searchFilterImage" />
                 <ref bean="searchFilterSound" />
+                <ref bean="searchFilterTypeSupport" />
+                <!-- ref bean="searchFilterCodeOrigine" /-->
             </list>
         </property>
         <!-- Set TagCloud configuration per discovery configuration -->
@@ -118,18 +118,19 @@
             <list>
                 <ref bean="searchFilterIdAttributor" />
                 <!-- Lan 16.02.2015 Remove title, add titlecom to advanced search -->
-                <!--ref bean="searchFilterTitle" /-->
+                <!-- ref bean="searchFilterTitle" /-->
                 <ref bean="searchFilterTitleCommunity" />
                 <ref bean="searchFilterAuthor" />
                 <ref bean="searchFilterContributor" />
-                <ref bean="searchFilterSubject" />
+                <ref bean="searchFilterChannel" />
+                <ref bean="searchFilterDiffusion" />
                 <ref bean="searchFilterIssued" />
-                <ref bean="searchFilterCodeOrigine" />
+                <ref bean="searchFilterSubject" />
                 <ref bean="searchFilterPlace" />
                 <ref bean="searchFilterImage" />
                 <ref bean="searchFilterSound" />
-                <ref bean="searchFilterChannel" />
-                <ref bean="searchFilterDiffusion" />
+                <ref bean="searchFilterTypeSupport" />
+                <ref bean="searchFilterCodeOrigine" />
             </list>
         </property>
         <!--The sort filters for the discovery search-->
@@ -223,16 +224,16 @@
         <property name="sidebarFacets">
             <list>
                 <ref bean="searchFilterIdAttributor" />
-                <!-- ref bean="searchFilterAuthor" /-->
+                <ref bean="searchFilterAuthor" />
                 <ref bean="searchFilterContributor" />
-                <ref bean="searchFilterSubject" />
                 <ref bean="searchFilterChannel" />
-                <ref bean="searchFilterDiffusion" />
                 <ref bean="searchFilterIssued" />
-                <!-- ref bean="searchFilterCodeOrigine" /-->
+                <ref bean="searchFilterSubject" />
                 <ref bean="searchFilterPlace" />
                 <ref bean="searchFilterImage" />
                 <ref bean="searchFilterSound" />
+                <ref bean="searchFilterTypeSupport" />
+                <!-- ref bean="searchFilterCodeOrigine" /-->
             </list>
         </property>
         <!-- Set TagCloud configuration per discovery configuration -->
@@ -242,18 +243,19 @@
             <list>
                 <ref bean="searchFilterIdAttributor" />
                 <!-- Lan 16.02.2015 Remove title, add titlecom to advanced search -->
-                <!--ref bean="searchFilterTitle" /-->
+                <!-- ref bean="searchFilterTitle" /-->
                 <ref bean="searchFilterTitleCommunity" />
                 <ref bean="searchFilterAuthor" />
                 <ref bean="searchFilterContributor" />
-                <ref bean="searchFilterSubject" />
+                <ref bean="searchFilterChannel" />
+                <ref bean="searchFilterDiffusion" />
                 <ref bean="searchFilterIssued" />
-                <ref bean="searchFilterCodeOrigine" />
+                <ref bean="searchFilterSubject" />
                 <ref bean="searchFilterPlace" />
                 <ref bean="searchFilterImage" />
                 <ref bean="searchFilterSound" />
-                <ref bean="searchFilterChannel" />
-                <ref bean="searchFilterDiffusion" />
+                <ref bean="searchFilterTypeSupport" />
+                <ref bean="searchFilterCodeOrigine" />
             </list>
         </property>
         <!--The sort filters for the discovery search (same as defaultConfiguration above)-->
@@ -406,7 +408,7 @@
         <property name="indexFieldName" value="identifier_attributor"/>
         <property name="metadataFields">
             <list>
-                <value>ebucore.identifier/attributor@entityID</value>
+                <value>rtbf.identifier.attributor</value>
             </list>
         </property>
         <property name="facetLimit" value="10"/>
@@ -436,7 +438,7 @@
         <property name="indexFieldName" value="contributor"/>
         <property name="metadataFields">
             <list>
-                <value>rtbf.contributor/role</value>
+                <value>rtbf.contributor_plus_role</value>
             </list>
         </property>
         <property name="facetLimit" value="10"/>
@@ -455,7 +457,7 @@
         </property>
         <property name="facetLimit" value="10"/>
         <property name="sortOrder" value="COUNT"/>
-        <property name="splitter" value="/"/>
+        <property name="splitter" value="::"/>
         <property name="skipFirstNodeLevel" value="false"/>
     </bean>
 
@@ -541,7 +543,7 @@
         <property name="indexFieldName" value="channel"/>
         <property name="metadataFields">
             <list>
-                <value>rtbf.channel/date_diffusion.*</value>
+                <value>rtbf.channel_plus_date_diffusion.*</value>
            </list>
         </property>
         <property name="facetLimit" value="10"/>
@@ -551,6 +553,8 @@
     </bean>
 
     <!-- Lan 25.08.2015 - add this filter to advanced search -->
+    <!-- actually comment inside configuration beans because it results on solr error about date format while indexing -->
+    <!-- when it is used simultanously with copyField to a tdate type as defined in schema.xml -->
     <bean id="searchFilterDiffusion" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
         <property name="indexFieldName" value="datediffusion"/>
         <property name="metadataFields">
@@ -562,6 +566,20 @@
         <property name="sortOrder" value="VALUE"/>
     </bean>
 
+    <!-- Lan 04.10.2015 - add this filter to advanced search -->
+    <bean id="searchFilterTypeSupport" class="org.dspace.discovery.configuration.HierarchicalSidebarFacetConfiguration">
+        <property name="indexFieldName" value="typesupport"/>
+        <property name="metadataFields">
+            <list>
+                <value>rtbf.type_plus_set</value>
+           </list>
+        </property>
+        <property name="facetLimit" value="10"/>
+        <property name="sortOrder" value="COUNT"/>
+        <property name="splitter" value="::"/>
+        <property name="skipFirstNodeLevel" value="false"/>
+    </bean>
+    
     <!--Sort properties-->
     <bean id="sortTitle" class="org.dspace.discovery.configuration.DiscoverySortFieldConfiguration">
         <property name="metadataField" value="dc.title"/>

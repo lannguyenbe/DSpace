@@ -1077,7 +1077,8 @@
     <!-- Lan 20.01.2015 : add to update.chain to generate the field
          far earlier in the index time - before schema.xml - access to all fields of the doc -->
     <lst name="defaults">
-      <str name="update.chain">identifier_origin</str>
+      <!-- use only one update.chain -->
+      <str name="update.chain">rtbf_custom</str>
     </lst>
   </requestHandler>
 
@@ -1868,12 +1869,13 @@
 
     --> 
 
-  <!-- 28.07.2015 Lan : new identifier_origin -->
-  <updateRequestProcessorChain name="identifier_origin">
-    <!-- Add field identifier_origin -->
-    <!-- To guaranty the concat order use 2 separate processors for clone field -->
+  <!-- 07.10.2015 Lan : rename to rtbf_custom-->
+  <updateRequestProcessorChain name="rtbf_custom">
+    <!-- 28.07.2015 Lan : add field identifier_origin -->
+    <!-- To guaranty the concat order use 2 separate processors for CloneField -->
+    <!-- if it exists, owl.sameAs override rtbf.identifier.id -->
     <processor class="solr.CloneFieldUpdateProcessorFactory">
-        <str name="source">ebucore.identifier/dc:identifier</str>
+        <str name="source">rtbf.identifier.id</str>
         <str name="dest">identifier_origin</str>
     </processor>
     <processor class="solr.CloneFieldUpdateProcessorFactory">
@@ -1886,19 +1888,22 @@
     <!-- Add field identifier_origin_count -->
     <processor class="solr.CloneFieldUpdateProcessorFactory">
         <str name="source">owl.sameAs</str>
-        <str name="dest">identifier_origin_count</str>
+        <str name="dest">identifier_weight</str>
+        <!--str name="dest">identifier_origin_count</str-->
     </processor>
     <processor class="solr.processor.CountFieldValuesUpdateProcessorFactory">
-        <str name="fieldName">identifier_origin_count</str>
+        <str name="fieldName">identifier_weight</str>
+        <!--str name="fieldName">identifier_origin_count</str-->
     </processor>
     <processor class="solr.processor.DefaultValueUpdateProcessorFactory">
-      <str name="fieldName">identifier_origin_count</str>
-      <str name="value">1000</str>
+        <str name="fieldName">identifier_weight</str>
+        <!--str name="fieldName">identifier_origin_count</str-->
+        <str name="value">1000</str>
     </processor>
     <processor class="solr.LogUpdateProcessorFactory" />
     <processor class="solr.RunUpdateProcessorFactory" />
   </updateRequestProcessorChain>
-  
+    
   <!-- Deduplication
 
        An example dedup update processor that creates the "id" field
