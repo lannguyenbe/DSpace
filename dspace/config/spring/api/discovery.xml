@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
+    Update history :
+    13.10.2015 Lan : recentSubmissionConfiguration utilise dateIssued
+-->
+<!--
 
     The contents of this file are subject to the license and copyright
     detailed in the LICENSE and NOTICE files at the root of the source
@@ -99,7 +103,7 @@
         <property name="sidebarFacets">
             <list>
                 <ref bean="searchFilterIdAttributor" />
-                <ref bean="searchFilterAuthor" />
+                <!-- ref bean="searchFilterAuthor" /-->
                 <ref bean="searchFilterContributor" />
                 <ref bean="searchFilterChannel" />
                 <ref bean="searchFilterIssued" />
@@ -157,7 +161,9 @@
         <!--The configuration for the recent submissions-->
         <property name="recentSubmissionConfiguration">
             <bean class="org.dspace.discovery.configuration.DiscoveryRecentSubmissionsConfiguration">
-                <property name="metadataSortField" value="dc.date.accessioned" />
+                <!-- property name="metadataSortField" value="dc.date.accessioned" /-->
+                <!-- 13.10.2015 Lan : dateIssued parce que dateIssued_dt existe et comporte la partie HEURE -->
+                <property name="metadataSortField" value="dateIssued" />
                 <property name="type" value="date"/>
                 <property name="max" value="20"/>
                 <!-- If enabled the collection home page will not display metadata but show a pageable list of recent submissions -->
@@ -224,7 +230,7 @@
         <property name="sidebarFacets">
             <list>
                 <ref bean="searchFilterIdAttributor" />
-                <ref bean="searchFilterAuthor" />
+                <!-- ref bean="searchFilterAuthor" /-->
                 <ref bean="searchFilterContributor" />
                 <ref bean="searchFilterChannel" />
                 <ref bean="searchFilterIssued" />
@@ -275,7 +281,9 @@
         <!-- Limit recent submissions on homepage to only 5 (default is 20) -->
         <property name="recentSubmissionConfiguration">
             <bean class="org.dspace.discovery.configuration.DiscoveryRecentSubmissionsConfiguration">
-                <property name="metadataSortField" value="dc.date.accessioned" />
+                <!-- property name="metadataSortField" value="dc.date.accessioned" /-->
+                <!-- 13.10.2015 Lan : dateIssued parce que dateIssued_dt existe et comporte la partie HEURE -->
+                <property name="metadataSortField" value="dateIssued" />
                 <property name="type" value="date"/>
                 <property name="max" value="5"/>
                 <property name="useAsHomePage" value="false"/>

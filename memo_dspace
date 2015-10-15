@@ -202,6 +202,7 @@ cp dspace-api-4.2.jar $DS/lib
 -----------------------------------------  S O L R  --------------------------------------------------
 # rechercher un contributor dans son role, utiliser phrase query : "boever intervenant"
 http://localhost:8070/solr/search/select?q=contributor_partial%3A(%22boever+intervenant%22)&fl=contributor_partial&wt=json&indent=true
+http://localhost:8070/solr/search/select?q=contributor%3A(%22boever+intervenant%22)&fl=contributor&wt=json&indent=true
 
 # Number of doc that dateIssued.year is not 2015 # q=-dateIssued.year:2015 is sum of (#doc not exists date + #doc exists date != 2015)
 http://localhost:8070/solr/search/select?q=-dateIssued.year%3A2015&rows=0&wt=json&indent=true

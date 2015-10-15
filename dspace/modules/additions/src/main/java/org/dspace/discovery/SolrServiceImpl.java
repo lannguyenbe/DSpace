@@ -1407,6 +1407,10 @@ public class SolrServiceImpl implements SearchService, IndexingService {
      * @param item    The DSpace Item to be indexed
      * @throws SQLException
      * @throws IOException
+     * 
+     * 10.10.2015 Lan : si un field DB de type date fait l'objet d'un searchFilter, ajouter field index de nom getIndexFieldName() + "_dt"
+     * 		exemple: pour dc.date.issued, on crée dateIssued_dt qui comporte date et HEURE
+     * 			alors que dc.date.iddued_dt ne contient plus la partie heure
      */
     protected void buildDocument(Context context, Item item)
             throws SQLException, IOException {
