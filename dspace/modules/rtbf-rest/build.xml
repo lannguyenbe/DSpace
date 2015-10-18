@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<project name="rtbf-rest" basedir="." default="touch" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+  
+  <property environment="env"/>
+  
+  <condition property="os.unix">
+    <os family="unix"/>
+  </condition>
+
+  <target name="touch">
+    <touch file="${env.DS}/webapps/rtbf-rest.xml"/>
+  </target>
+
+</project>

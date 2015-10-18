@@ -26,6 +26,7 @@ import org.dspace.storage.rdbms.TableRowIterator;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -784,6 +785,30 @@ public class Community extends DSpaceObject
 
         return collectionArray;
     }
+    
+    // Lan 17.10.2015 : collection pagination
+    public CollectionIterator getCollections(Integer limit, Integer offset) throws SQLException
+    {
+        List<Serializable> params = new ArrayList<Serializable>();
+        StringBuffer myQuery = new StringBuffer(
+            "SELECT collection.* " + 
+            "FROM collection, community2collection " + 
+            "WHERE collection.collection_id = community2collection.collection_id " +
+              "AND community2collection.community_id = ? "
+        );
+        
+        params.add(getID());
+        
+        int iLimit = (limit != null) ? limit : 0;
+        int iOffset = (offset != null) ? offset : 0;
+        DatabaseManager.applyOffsetAndLimit(myQuery, params, iOffset, iLimit);
+
+        TableRowIterator rows = DatabaseManager.query(ourContext,
+                myQuery.toString(), params.toArray());
+
+        return new CollectionIterator(ourContext, rows);
+    }
+
 
     /**
      * Get the immediate sub-communities of this community. Throws an
@@ -932,6 +957,28 @@ public class Community extends DSpaceObject
         return communityArray;
     }
     
+    // Lan 17.10.2015 : subCommunities pagination
+    public CommunityIterator getSubCommunities(Integer limit, Integer offset) throws SQLException
+    {
+        List<Serializable> params = new ArrayList<Serializable>();
+        StringBuffer myQuery = new StringBuffer(
+            "SELECT c.* " + 
+            "FROM community c, community2community c2c " + 
+            "WHERE c.community_id = c2c.child_comm_id " +
+            "AND c2c.parent_comm_id = ? "
+        );
+
+        params.add(getID());
+        
+        int iLimit = (limit != null) ? limit : 0;
+        int iOffset = (offset != null) ? offset : 0;
+        DatabaseManager.applyOffsetAndLimit(myQuery, params, iOffset, iLimit);
+
+        TableRowIterator rows = DatabaseManager.query(ourContext,
+                myQuery.toString(), params.toArray());
+
+        return new CommunityIterator(ourContext, rows);
+    }
 
     /**
      * Return the parent community of this community, or null if the community
@@ -1557,7 +1604,30 @@ public class Community extends DSpaceObject
         }
         return total;
     }
-    
+
+    // Lan 17.10.2015
+    public void getCounts(int[] counts) throws SQLException
+    {       
+    	int total = 0;
+    	// add collection counts
+        Collection[] cols = getCollections();
+        for ( int i = 0; i < cols.length; i++)
+        {
+        	total += cols[i].countItems();
+        }
+        // add sub-community counts
+        Community[] comms = getSubcommunities();
+        for ( int j = 0; j < comms.length; j++ )
+        {
+        	total += comms[j].countItems();
+        }
+
+        counts[0] = total;        /* count of items */
+        counts[1] = cols.length;  /* count of collections */
+        counts[2] = comms.length; /* count of subcommunities */
+        
+    }
+
     public DSpaceObject getAdminObject(int action) throws SQLException
     {
         DSpaceObject adminObject = null;
