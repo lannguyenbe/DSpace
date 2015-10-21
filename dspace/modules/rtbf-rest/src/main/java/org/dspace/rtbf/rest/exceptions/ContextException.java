@@ -5,7 +5,7 @@
  *
  * http://www.dspace.org/license/
  */
-package org.dspace.rtbf.rs.exceptions;
+package org.dspace.rtbf.rest.exceptions;
 
 /**
  * Simple exception which only encapsulate classic exception. This exception is

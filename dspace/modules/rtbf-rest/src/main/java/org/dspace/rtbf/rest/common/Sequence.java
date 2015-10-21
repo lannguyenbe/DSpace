@@ -18,47 +18,56 @@ public class Sequence extends DSpaceObject{
 
     public Sequence() {}
     
-    public Sequence(org.dspace.content.Item item, String expand, Context context) throws SQLException, WebApplicationException {
-    	super(item, BASIC_VIEW);
-    	setup(item, expand, context);    	
+    public Sequence(int viewType, org.dspace.content.Item item) {
+    	super(viewType, item);
     }
     
-    private void setup(org.dspace.content.Item item, String expand, Context context) throws SQLException {
-    	this.setCountSupports(getAllSupports(item));
-    	this.setLastModified(item.getLastModified().toString());
-        this.setFirstBroadcasted(getDateIssued(item));
-        
-        List<String> expandFields = new ArrayList<String>();
+    public Sequence(int viewType, org.dspace.content.Item item, String expand, Context context) throws SQLException, WebApplicationException {
+    	this(viewType, item);
+    	setup(viewType, item, expand, context);    	
+    }
+    
+    private void setup(int viewType, org.dspace.content.Item item, String expand, Context context) throws SQLException {
+    	int innerViewType = 0;
+    	
+    	switch(viewType) {
+    	case SEARCH_RESULT_VIEW:
+        	this.setCountSupports(getCountAllSupports(item));
+            this.setFirstBroadcasted(getDateIssued(item));
+    		innerViewType = MIN_VIEW;
+    		break;
+    	default:
+    		innerViewType = viewType;
+    	}
+
+    	List<String> expandFields = new ArrayList<String>();
     	if (expand != null) {
     		expandFields = Arrays.asList(expand.split(","));
     	}
-    	
-        if(expandFields.contains("parentEpisode") || expandFields.contains("all")) {
-            this.parentEpisode = new Episode(item.getOwningCollection(), null, context, null, null);
+
+    	if(expandFields.contains("parentSerie") | expandFields.contains("all")) {
+            org.dspace.content.Community parentCommunity = (org.dspace.content.Community) item.getOwningCollection().getParentObject();
+            this.setParentSerie(new Serie(innerViewType, parentCommunity, null, context));
         } else {
-            this.addExpand("parentEpisode");
+            this.addExpand("parentSerie");
+        }
+    	
+        if(expandFields.contains("owningEpisode") || expandFields.contains("all")) {
+            this.owningEpisode = new Episode(innerViewType, item.getOwningCollection(), null, context);
+        } else {
+            this.addExpand("owningEpisode");
         }
     	
         if(expandFields.contains("parentEpisodeList") || expandFields.contains("all")) {
             this.parentEpisodeList = new ArrayList<Episode>();
             org.dspace.content.Collection[] collections = item.getCollections();
             for(org.dspace.content.Collection collection : collections) {
-                this.parentEpisodeList.add(new Episode(collection, null, context, null, null));
+                this.parentEpisodeList.add(new Episode(innerViewType, collection, null, context));
             }
         } else {
             this.addExpand("parentEpisodeList");
         }
-        
-        if(expandFields.contains("parentSerieList") || expandFields.contains("all")) {
-            this.parentSerieList = new ArrayList<Serie>();
-            org.dspace.content.Community[] communities = item.getCommunities();
-            for(org.dspace.content.Community community : communities) {
-                this.parentSerieList.add(new Serie(community, null, context));
-            }
-        } else {
-            this.addExpand("parentSerieList");
-        }
-        
+                
         if(expandFields.contains("metadata") || expandFields.contains("all")) {
     		metadata = new ArrayList<MetadataEntry>();
             Metadatum[] dcvs = item.getMetadata(org.dspace.content.Item.ANY, org.dspace.content.Item.ANY, org.dspace.content.Item.ANY, org.dspace.content.Item.ANY);
@@ -74,14 +83,6 @@ public class Sequence extends DSpaceObject{
         }
         
     }
-
-	private String getDateIssued(org.dspace.content.DSpaceObject dso) {
-		return getDsoMetadata("dc.date.issued",dso);
-	}
-
-	private int getAllSupports(org.dspace.content.DSpaceObject dso) {
-		return(dso.getMetadataByMetadataString("rtbf.code_origine.*").length);
-	}
 
 
 }

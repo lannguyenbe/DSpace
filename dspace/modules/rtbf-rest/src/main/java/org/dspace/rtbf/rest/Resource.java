@@ -18,13 +18,17 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
+import org.dspace.core.Constants;
+import org.dspace.core.Context;
 import org.dspace.discovery.DiscoverFacetField;
 import org.dspace.discovery.DiscoverQuery;
 import org.dspace.discovery.DiscoverResult;
 import org.dspace.discovery.SearchService;
 import org.dspace.discovery.DiscoverResult.FacetResult;
+import org.dspace.discovery.SearchServiceException;
 import org.dspace.discovery.configuration.DiscoveryConfigurationParameters;
 import org.dspace.rtbf.rest.common.SimpleNode;
+import org.dspace.rtbf.rest.common.SimpleNode.Attribute;
 import org.dspace.sort.OrderFormat;
 import org.dspace.utils.DSpace;
 
@@ -38,8 +42,7 @@ public abstract class Resource
     private static Logger log = Logger.getLogger(Resource.class);
     
     private static final int FACETLIMIT = 100;
-
-
+    
     /**
      * Process exception, print message to logger error stream and abort DSpace
      * context.
@@ -182,6 +185,39 @@ public abstract class Resource
 
         return (new ArrayList<SimpleNode>());
     }
+    
 
+    // TODO solr search fields to externalize in config
+    private static String[] searchFields = {
+    	"identifier_attributor", "handle", "search.resource_type", "search.resourceid"
+    	, "dc.title", "dateIssued_dt", "dc.description.abstract", "rtbf.royalty_code", "rtbf.royalty_remark"
+    	, "localion.coll", "location.comm"
+    };
+
+
+    public DiscoverResult getQueryResults(int resourceType, String qterms, String expand, Context context, 
+    		int limit, int offset) throws SearchServiceException 
+    {
+        DiscoverResult queryResults = null;
+
+        DiscoverQuery query = new DiscoverQuery();
+
+        query.setQuery(qterms);
+    	query.setDSpaceObjectFilter(resourceType);
+
+        query.setMaxResults(limit);
+        if (offset > 0) {
+            query.setStart(offset);
+        }
+
+        queryResults = getSearchService().search(context, query);
+        
+        if (queryResults != null) {
+        	log.info("debug :" + String.valueOf(queryResults.getTotalSearchResults()));
+        	log.info("debug2 :" + String.valueOf(queryResults.getDspaceObjects().size()));
+        }
+
+        return queryResults;    	
+    }
 
 }

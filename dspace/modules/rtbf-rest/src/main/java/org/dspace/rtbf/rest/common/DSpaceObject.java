@@ -9,6 +9,7 @@ package org.dspace.rtbf.rest.common;
 
 import org.atteo.evo.inflector.English;
 import org.dspace.content.Metadatum;
+import org.dspace.core.Constants;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -25,80 +26,86 @@ import java.util.List;
  */
 @XmlRootElement(name = "dspaceobject")
 public class DSpaceObject {
-    // Type of view determining minimum metadata for the element
-    public static final int MIN_VIEW = 0;
-    public static final int BASIC_VIEW = 1;
+    // Type of view determine the choice of metadata to show 
+    public static final int WITH_EXPANDELEM_VIEW = 1; // default
+    public static final int MIN_VIEW = 2;
+    public static final int SEARCH_RESULT_VIEW = 3;
+    //
+    public static final String[] TYPETEXT = { "none", "none", "SEQUENCE", "EPISODE", "SERIE", "none", "none", "none" };
+    public static final int LIMITMAX = 5000;
 
     // Keys for accessing  metadata
     public static final String REPOSITORY = "rtbf.identifier.attributor";
     public static final String ROYALTY = "rtbf.royalty_code";
     public static final String ROYALTY_TEXT = "rtbf.royalty_remark";
     public static final String SHORT_DESCRIPTION = "dc.description.abstract";
+    public static final String FIRST_BROADCASTED = "dc.date.issued";
+    public static final String CODE_ORIGINE = "rtbf.code_origine.*";
+    
 
-    // Common elements
+    // MIN_VIEW Minimum Identification elements
     private Integer id;
-
-    private String name;
     private String handle;
     private String type;
+    private String title;
 
+    // SEARCHRESULT_VIEW results basic elements
+    //
+    // Common metadata
     private String repository;
     private String royalty;
     private String royaltyText;
     private String shortDescription;
-    
-    
-    @XmlElement(name = "link", required = true)
-    private String link;
-
-    @XmlElement(required = true)
-    private ArrayList<String> expand = new ArrayList<String>();
-
-    //Expandable relationships
-    protected Serie parentSerie;
-    protected List<Serie> parentSerieList;
-    protected Episode parentEpisode;
-    protected List<Episode> parentEpisodeList;
-    protected List<Serie> subSeries;
-    protected List<Episode> episodes;
-    protected List<Sequence> sequences;
-    // TODO List<Diffusion> diffusions;
-    // TODO List<Support> supports;
-
-    //others metadata
-    protected List<MetadataEntry> metadata;
+    private String thumbnail; // TODO
+    //
+    // Specialized metadata
     protected String firstBroadcasted;
-    protected String lastModified;
-
-    //Calculated
+    //
+    // Calculated
     protected Integer countSubSeries;
     protected Integer countEpisodes;
 	protected Integer countSequences;
     protected Integer countSupports;
+    
+    @XmlElement(name = "link", required = true)
+    private String link;
 
+    //Expandable relationships
+    protected Serie parentSerie;
+    protected Episode owningEpisode;
+    protected List<Episode> parentEpisodeList;
+    protected List<Serie> subSeries;
+    protected List<Episode> episodes;
+    protected List<Sequence> sequences;
+    protected List<MetadataEntry> metadata;
+    // TODO List<Diffusion> diffusions;
+    // TODO List<Support> supports;
+
+    @XmlElement(required = true)
+    private ArrayList<String> expand = new ArrayList<String>();
 	
-	public DSpaceObject() {
-
-    }
+	public DSpaceObject() {}
 
     public DSpaceObject(org.dspace.content.DSpaceObject dso) {
-        setId(dso.getID());
-        setName(dso.getName());
         setHandle(dso.getHandle());
-        setType(dso.getTypeText().toLowerCase());
+        setType(TYPETEXT[dso.getType()].toLowerCase());
+        setId(dso.getID());
+        setTitle(dso.getName());
     }
 
-    public DSpaceObject(org.dspace.content.DSpaceObject dso, int viewType) {
+    public DSpaceObject(int viewType, org.dspace.content.DSpaceObject dso) {
     	
     	this(dso);
     	
     	switch (viewType) {
-    	case BASIC_VIEW:
-    	default:
+    	case SEARCH_RESULT_VIEW:
+    		disableExpand();
             setRepository(getDsoMetadata(REPOSITORY,dso));
             setRoyalty(getDsoMetadata(ROYALTY,dso));
             setRoyaltyText(getDsoMetadata(ROYALTY_TEXT,dso));
             setShortDescription(getDsoMetadata(SHORT_DESCRIPTION,dso));
+    	case MIN_VIEW:
+    		disableExpand();
     	}
     }
     
@@ -120,6 +127,14 @@ public class DSpaceObject {
         return null;
     }
 
+	protected String getDateIssued(org.dspace.content.DSpaceObject dso) {
+		return getDsoMetadata(FIRST_BROADCASTED,dso);
+	}
+
+	protected int getCountAllSupports(org.dspace.content.DSpaceObject dso) {
+		return(dso.getMetadataByMetadataString(CODE_ORIGINE).length);
+	}
+
     public Integer getId() {
         return id;
     }
@@ -128,12 +143,12 @@ public class DSpaceObject {
         this.id = id;
     }
 
-    public String getName(){
-        return this.name;
+    public String getTitle(){
+        return this.title;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getHandle() {
@@ -167,9 +182,21 @@ public class DSpaceObject {
     }
 
     public void addExpand(String expandableAttribute) {
-        this.expand.add(expandableAttribute);
+    	if (this.expand != null) {
+    		this.expand.add(expandableAttribute);
+    	}
+    }
+    
+    public void enableExpand() {
+    	if (this.expand == null) {
+    		expand = new ArrayList<String>();
+    	}
     }
 
+    public void disableExpand() {
+    	this.expand = null;    	
+    }
+    
 	public String getRepository() {
 		return repository;
 	}
@@ -202,7 +229,6 @@ public class DSpaceObject {
 		this.shortDescription = shortDescription;
 	}
 
-	// Lan
 	public Serie getParentSerie() {
 		return parentSerie;
 	}
@@ -258,14 +284,6 @@ public class DSpaceObject {
 	public void setCountSequences(Integer countSequences) {
 		this.countSequences = countSequences;
 	}
-// Lan 2
-	public List<Serie> getParentSerieList() {
-		return parentSerieList;
-	}
-
-	public void setParentSerieList(List<Serie> parentSerieList) {
-		this.parentSerieList = parentSerieList;
-	}
 
 	public List<Sequence> getSequences() {
 		return sequences;
@@ -283,14 +301,6 @@ public class DSpaceObject {
 		this.firstBroadcasted = firstBroadcasted;
 	}
 
-	public String getLastModified() {
-		return lastModified;
-	}
-
-	public void setLastModified(String lastModified) {
-		this.lastModified = lastModified;
-	}
-
 	public Integer getCountSupports() {
 		return countSupports;
 	}
@@ -298,13 +308,13 @@ public class DSpaceObject {
 	public void setCountSupports(Integer countSupports) {
 		this.countSupports = countSupports;
 	}
-// Lan 3
-	public Episode getParentEpisode() {
-		return parentEpisode;
+
+	public Episode getOwningEpisode() {
+		return owningEpisode;
 	}
 
-	public void setParentEpisode(Episode parentEpisode) {
-		this.parentEpisode = parentEpisode;
+	public void setOwningEpisode(Episode owningEpisode) {
+		this.owningEpisode = owningEpisode;
 	}
 
 	public List<Episode> getParentEpisodeList() {
@@ -314,4 +324,13 @@ public class DSpaceObject {
 	public void setParentEpisodeList(List<Episode> parentEpisodeList) {
 		this.parentEpisodeList = parentEpisodeList;
 	}
+
+	public String getThumbnail() {
+		return thumbnail;
+	}
+
+	public void setThumbnail(String thumbnail) {
+		this.thumbnail = thumbnail;
+	}
+	
 }

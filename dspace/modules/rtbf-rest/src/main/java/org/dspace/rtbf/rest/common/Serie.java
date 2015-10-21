@@ -27,23 +27,26 @@ public class Serie extends DSpaceObject{
 
     public Serie(){}
     
-    public Serie(org.dspace.content.Community community, String expand, Context context) throws SQLException, WebApplicationException{
-    	this(community, expand, context, null, null);
+    public Serie(int viewType, org.dspace.content.Community community, String expand, Context context, Integer limit, Integer offset) throws SQLException, WebApplicationException{
+        super(viewType, community);
+        setup(viewType, community, expand, context, limit, offset);
     }
 
-    public Serie(org.dspace.content.Community community, String expand, Context context, Integer limit, Integer offset) throws SQLException, WebApplicationException{
-        super(community, BASIC_VIEW);
-        setup(community, expand, context, limit, offset);
+    public Serie(int viewType, org.dspace.content.Community community, String expand, Context context) throws SQLException, WebApplicationException{
+    	this(viewType, community, expand, context, null, null);
     }
 
-    private void setup(org.dspace.content.Community community, String expand, Context context, Integer limit, Integer offset) throws SQLException{
+    private void setup(int viewType, org.dspace.content.Community community, String expand, Context context, Integer limit, Integer offset) throws SQLException{
     	
-        int[] counts = {0,0,0};
-    	community.getCounts(counts);
-        this.setCountSequences(counts[0]);
-        this.setCountEpisodes(counts[1]);
-        this.setCountSubSeries(counts[2]);
-
+    	switch (viewType) {
+    	case SEARCH_RESULT_VIEW:
+	        int[] counts = {0,0,0};
+	    	community.getCounts(counts);
+	        this.setCountSequences(counts[0]);
+	        this.setCountEpisodes(counts[1]);
+	        this.setCountSubSeries(counts[2]);
+    	}
+	        
         List<String> expandFields = new ArrayList<String>();
         if(expand != null) {
             expandFields = Arrays.asList(expand.split(","));
@@ -52,7 +55,7 @@ public class Serie extends DSpaceObject{
         if(expandFields.contains("parentSerie") || expandFields.contains("all")) {
             org.dspace.content.Community parentCommunity = community.getParentCommunity();
             if(parentCommunity != null) {
-                setParentSerie(new Serie(parentCommunity, null, context, null, null));
+                setParentSerie(new Serie(viewType, parentCommunity, null, context));
             }
         } else {
             this.addExpand("parentSerie");
@@ -61,36 +64,36 @@ public class Serie extends DSpaceObject{
         // Episodes pagination
         if(expandFields.contains("episodes") || expandFields.contains("all")) {
             episodes = new ArrayList<Episode>();
-        	if (limit != null && limit >= 0) {
-        		CollectionIterator childCollections = community.getCollections(limit, offset);
-                while(childCollections.hasNext()) {
-                    org.dspace.content.Collection collection = childCollections.next();
-                    	episodes.add(new Episode(collection, null, context, null, null));
-                }
-        	} else {
-                org.dspace.content.Collection[] collectionArray = community.getCollections();
-                for(org.dspace.content.Collection collection : collectionArray) {
-                    episodes.add(new Episode(collection, null, context, null, null));
-                }
-        	}
+            if (!((limit != null) && (limit >= 0) && (offset != null) && (offset >= 0))) {
+                log.warn("Pagging was badly set, using default values.");
+                limit = LIMITMAX;
+                offset = 0;
+            }
+            CollectionIterator childCollections = community.getCollections(limit, offset);
+            while(childCollections.hasNext()) {
+                org.dspace.content.Collection collection = childCollections.next();
+                	episodes.add(new Episode(viewType, collection, null, context));
+            }                    	
+        
         } else {
             this.addExpand("episodes");
         }
 
         if(expandFields.contains("subSeries") || expandFields.contains("all")) {
             subSeries = new ArrayList<Serie>();
-        	if (limit != null && limit >= 0) {
-        		CommunityIterator childCommunities = community.getSubCommunities(limit, offset);
-                while(childCommunities.hasNext()) {
-                    org.dspace.content.Community subCommunity = childCommunities.next();
-                    	subSeries.add(new Serie(subCommunity, null, context, null, null));
-                }
-        	} else {
-                org.dspace.content.Community[] communityArray = community.getSubcommunities();
-                for(org.dspace.content.Community subCommunity : communityArray) {
-                	subSeries.add(new Serie(subCommunity, null, context, null, null));
-                }
-        	}
+
+            if (!((limit != null) && (limit >= 0) && (offset != null) && (offset >= 0))) {
+                log.warn("Pagging was badly set, using default values.");
+                limit = LIMITMAX;
+                offset = 0;
+            }
+
+    		CommunityIterator childCommunities = community.getSubCommunities(limit, offset);
+            while(childCommunities.hasNext()) {
+                org.dspace.content.Community subCommunity = childCommunities.next();
+                	subSeries.add(new Serie(viewType, subCommunity, null, context));
+            }
+            
         } else {
             this.addExpand("subSeries");
         }

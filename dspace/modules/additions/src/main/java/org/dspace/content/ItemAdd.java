@@ -1,6 +1,9 @@
 package org.dspace.content;
 
+import java.io.Serializable;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.dspace.core.Context;
 import org.dspace.storage.rdbms.DatabaseManager;
@@ -20,6 +23,22 @@ public class ItemAdd extends Item {
                 + " ORDER BY item.item_id";
 
         TableRowIterator rows = DatabaseManager.queryTable(context, "item", myQuery);
+
+        return new ItemIterator(context, rows);
+    }
+
+    public static ItemIterator findAllUnfiltered(Context context, Integer limit, Integer offset) throws SQLException
+    {
+        List<Serializable> params = new ArrayList<Serializable>();
+        StringBuffer myQuery = new StringBuffer(
+            "SELECT item.*"
+            + " FROM item"
+        );
+
+        DatabaseManager.applyOffsetAndLimit(myQuery, params, offset, limit);
+
+        TableRowIterator rows = DatabaseManager.query(context,
+                myQuery.toString(), params.toArray());
 
         return new ItemIterator(context, rows);
     }

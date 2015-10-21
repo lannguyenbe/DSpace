@@ -42,8 +42,11 @@ public class HandleResource {
     @Path("/{prefix}/{suffix}")
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public org.dspace.rtbf.rest.common.DSpaceObject getObject(@PathParam("prefix") String prefix, @PathParam("suffix") String suffix
-    			, @QueryParam("expand") String expand, @QueryParam("limit") Integer limit, @QueryParam("offset") Integer offset) {
-        try {
+    			, @QueryParam("expand") String expand) {
+
+    	int viewType = org.dspace.rtbf.rest.common.DSpaceObject.MIN_VIEW;
+
+    	try {
             if(context == null || !context.isValid() ) {
                 context = new Context();
                 //Failed SQL is ignored as a failed SQL statement, prevent: current transaction is aborted, commands ignored until end of transaction block
@@ -59,14 +62,11 @@ public class HandleResource {
             if(AuthorizeManager.authorizeActionBoolean(context, dso, org.dspace.core.Constants.READ)) {
                 switch(dso.getType()) {
                     case Constants.COMMUNITY:
-                        return new Serie((org.dspace.content.Community) dso, expand, context, limit, offset);
-//                        return new Community((org.dspace.content.Community) dso, expand, context);
+                        return new Serie(viewType, (org.dspace.content.Community) dso, expand+"parentSerie,metadata", context);
                     case Constants.COLLECTION:
-                    	return new Episode((org.dspace.content.Collection) dso, expand, context, limit, offset);
-//                    	return new Collection((org.dspace.content.Collection) dso, expand, context, limit, offset);
+                    	return new Episode(viewType, (org.dspace.content.Collection) dso, expand+",parentSerie,metadata", context);
                     case Constants.ITEM:
-                        return new Sequence((org.dspace.content.Item) dso, expand, context);
-//                        return new Item((org.dspace.content.Item) dso, expand, context);
+                        return new Sequence(viewType, (org.dspace.content.Item) dso, expand+",parentSerie,owningEpisode,parentEpisodeList,metadata", context);
                     default:
                         return new DSpaceObject(dso);
                 }
