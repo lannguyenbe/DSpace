@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -86,6 +87,7 @@ public class SearchResponse {
         return expand;
     }
 
+    @XmlAttribute
     public Long getNumFound() {
 		return numFound;
 	}

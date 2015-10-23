@@ -13,6 +13,7 @@ import org.dspace.core.Constants;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +68,7 @@ public class DSpaceObject {
 	protected Integer countSequences;
     protected Integer countSupports;
     
-    @XmlElement(name = "link", required = true)
+//    @XmlElement(name = "link", required = true)
     private String link;
 
     //Expandable relationships
@@ -81,7 +82,7 @@ public class DSpaceObject {
     // TODO List<Diffusion> diffusions;
     // TODO List<Support> supports;
 
-    @XmlElement(required = true)
+//    @XmlElement(required = true)
     private ArrayList<String> expand = new ArrayList<String>();
 	
 	public DSpaceObject() {}
@@ -253,6 +254,7 @@ public class DSpaceObject {
 		this.episodes = episodes;
 	}
 
+	@XmlJavaTypeAdapter(MetadataAdapter.class)
 	public List<MetadataEntry> getMetadata() {
 		return metadata;
 	}

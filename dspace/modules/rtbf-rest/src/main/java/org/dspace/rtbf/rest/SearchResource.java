@@ -42,12 +42,13 @@ public class SearchResource extends Resource {
             response = new SequencesSearchResponse(queryResults, expand, context, limit, offset);
 
             context.complete();
-         } catch (Exception e) {
+
+        } catch (Exception e) {
            processException("Could not process search sequences. Message:"+e.getMessage(), context);
          } finally {
            processFinally(context);            
          }
-        
+
         return response;
 
     }

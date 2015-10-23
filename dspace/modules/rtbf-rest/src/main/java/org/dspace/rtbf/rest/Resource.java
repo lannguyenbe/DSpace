@@ -75,7 +75,7 @@ public abstract class Resource
      */
     protected void processFinally(org.dspace.core.Context context) throws WebApplicationException
     {
-        if ((context != null) && (context.isValid()))
+    	if ((context != null) && (context.isValid()))
         {
             context.abort();
             log.error("Something get wrong. Aborting context in finally statement.");
@@ -212,11 +212,6 @@ public abstract class Resource
 
         queryResults = getSearchService().search(context, query);
         
-        if (queryResults != null) {
-        	log.info("debug :" + String.valueOf(queryResults.getTotalSearchResults()));
-        	log.info("debug2 :" + String.valueOf(queryResults.getDspaceObjects().size()));
-        }
-
         return queryResults;    	
     }
 
