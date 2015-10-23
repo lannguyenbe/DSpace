@@ -11,6 +11,7 @@ import org.atteo.evo.inflector.English;
 import org.dspace.content.Metadatum;
 import org.dspace.core.Constants;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -136,6 +137,7 @@ public class DSpaceObject {
 		return(dso.getMetadataByMetadataString(CODE_ORIGINE).length);
 	}
 
+	@XmlAttribute
     public Integer getId() {
         return id;
     }
