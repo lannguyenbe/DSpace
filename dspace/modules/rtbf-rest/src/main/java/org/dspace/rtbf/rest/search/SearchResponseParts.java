@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
+import javax.xml.bind.annotation.XmlElement;
 
 import org.apache.log4j.Logger;
 import org.dspace.content.Item;
@@ -25,20 +26,20 @@ public class SearchResponseParts {
 	public static class Result {
 		
 	    private List<org.dspace.rtbf.rest.common.DSpaceObject> lst;
-		
-		public Result(DiscoverResult queryResults, Context context) {
+	    
+ 		public Result(DiscoverResult queryResults, Context context) {
 			int resultType = 0;
 					
 			if (queryResults != null && queryResults.getDspaceObjects().size() > 0) {
 				
 				lst = new ArrayList<org.dspace.rtbf.rest.common.DSpaceObject>();
-				List<org.dspace.content.DSpaceObject> resultItems = queryResults.getDspaceObjects();
+				List<org.dspace.content.DSpaceObject> dsoList = queryResults.getDspaceObjects();
 				
-				if (! resultItems.isEmpty()) {
-					resultType = resultItems.get(0).getType();
+				if (! dsoList.isEmpty()) {
+					resultType = dsoList.get(0).getType();
 				}
 				
-	            for (org.dspace.content.DSpaceObject result : resultItems) {
+	            for (org.dspace.content.DSpaceObject result : dsoList) {
 					try {
 						switch (resultType) {
 						case Constants.ITEM:

@@ -7,18 +7,15 @@
  */
 package org.dspace.rtbf.rest.common;
 
-import org.apache.log4j.Logger;
 import org.atteo.evo.inflector.English;
 import org.dspace.content.Metadatum;
 import org.dspace.core.Constants;
-import org.dspace.rtbf.rest.search.SearchResponseParts;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -75,6 +72,7 @@ public class DSpaceObject {
 	protected Integer countSequences;
     protected Integer countSupports;
     
+//    @XmlElement(name = "link", required = true)
     private String link;
 
     //Expandable relationships
@@ -84,11 +82,11 @@ public class DSpaceObject {
     protected List<Serie> subSeries;
     protected List<Episode> episodes;
     protected List<Sequence> sequences;
-    protected List<MetadataEntry> metadataEntries;
-	protected MetadataWrapper metadata;
+    protected List<MetadataEntry> metadata;
     // TODO List<Diffusion> diffusions;
     // TODO List<Support> supports;
 
+//    @XmlElement(required = true)
     private ArrayList<String> expand = new ArrayList<String>();
 	
 	public DSpaceObject() {}
@@ -260,21 +258,16 @@ public class DSpaceObject {
 	public void setEpisodes(List<Episode> episodes) {
 		this.episodes = episodes;
 	}
-    
-    @XmlTransient
-	public List<MetadataEntry> getMetadataEntries() {
-		return metadataEntries;
-	}
-	
-	public MetadataWrapper getMetadata() {
-		if (metadataEntries != null ) {
-			metadata = new MetadataWrapper(metadataEntries);
-		}
+
+
+	@XmlJavaTypeAdapter(MetadataAdapter.class)
+	public List<MetadataEntry> getMetadata() {
 		return metadata;
 	}
 
-	public void setMetadata(MetadataWrapper wrapper) {
-		this.metadata = wrapper;
+	
+	public void setMetadata(List<MetadataEntry> metadata) {
+		this.metadata = metadata;
 	}
 
 	public Integer getCountSubSeries() {
@@ -348,4 +341,5 @@ public class DSpaceObject {
 	public void setThumbnail(String thumbnail) {
 		this.thumbnail = thumbnail;
 	}
+	
 }

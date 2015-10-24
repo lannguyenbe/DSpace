@@ -83,10 +83,10 @@ public class Episode extends DSpaceObject {
         }
 
         if(expandFields.contains("metadata") || expandFields.contains("all")) {
-    		metadata = new ArrayList<MetadataEntry>();
+    		metadataEntries = new ArrayList<MetadataEntry>();
             Metadatum[] dcvs = getAllMetadata(collection);
             for (Metadatum dcv : dcvs) {
-                metadata.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
+                metadataEntries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
             }
      	} else {
      		this.addExpand("metadata");

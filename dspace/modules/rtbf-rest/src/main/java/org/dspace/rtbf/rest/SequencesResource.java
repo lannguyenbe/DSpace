@@ -13,8 +13,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.dspace.content.ItemIterator;
-import org.dspace.rtbf.rest.common.Item;
 import org.dspace.rtbf.rest.common.MetadataEntry;
+import org.dspace.rtbf.rest.common.MetadataWrapper;
 import org.dspace.rtbf.rest.common.Sequence;
 
 import javax.servlet.http.HttpServletRequest;
@@ -166,7 +166,7 @@ public class SequencesResource extends Resource
             context.getDBConnection().setAutoCommit(true);
             org.dspace.content.Item dspaceItem = findItem(context, itemId, org.dspace.core.Constants.READ);
 
-            metadata = new org.dspace.rtbf.rest.common.Sequence(viewType, dspaceItem, "metadata", context).getMetadata();
+            metadata = new org.dspace.rtbf.rest.common.Sequence(viewType, dspaceItem, "metadata", context).getMetadataEntries();
             context.complete();
         }
         catch (SQLException e)
@@ -179,7 +179,7 @@ public class SequencesResource extends Resource
         }
 
         log.trace("Item(id=" + itemId + ") metadata were successfully read.");
-        return metadata.toArray(new MetadataEntry[0]);
+      return metadata.toArray(new MetadataEntry[0]);
     }
 
 

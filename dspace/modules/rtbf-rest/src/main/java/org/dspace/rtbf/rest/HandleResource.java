@@ -12,11 +12,8 @@ import org.dspace.authorize.AuthorizeManager;
 import org.dspace.core.Constants;
 import org.dspace.core.Context;
 import org.dspace.handle.HandleManager;
-import org.dspace.rtbf.rest.common.Collection;
-import org.dspace.rtbf.rest.common.Community;
 import org.dspace.rtbf.rest.common.DSpaceObject;
 import org.dspace.rtbf.rest.common.Episode;
-import org.dspace.rtbf.rest.common.Item;
 import org.dspace.rtbf.rest.common.Sequence;
 import org.dspace.rtbf.rest.common.Serie;
 

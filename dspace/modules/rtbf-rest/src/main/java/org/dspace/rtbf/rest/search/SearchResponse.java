@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.dspace.discovery.DiscoverResult;
@@ -18,11 +19,11 @@ public class SearchResponse {
 
     private SearchResponseParts.ResponseHeader responseHeader;
     private List<DSpaceObject> results;
+//    private SearchResponseParts.Result results;
     private SearchResponseParts.FacetsCount facets;
 	private SearchResponseParts.Expanded expanded;
 	private SearchResponseParts.Highlighting highlighting;
 	
-    @XmlElement(required = true)
     private List<String> expand = new ArrayList<String>();
 	
 	public SearchResponse () {}
@@ -104,14 +105,6 @@ public class SearchResponse {
 		this.responseHeader = responseHeader;
 	}
 
-	public List<DSpaceObject> getResults() {
-		return results;
-	}
-
-	public void setResults(List<DSpaceObject> list) {
-		this.results = list;
-	}
-
 	public SearchResponseParts.FacetsCount getFacets() {
 		return facets;
 	}
@@ -135,5 +128,14 @@ public class SearchResponse {
 	public void setHighlighting(SearchResponseParts.Highlighting highlighting) {
 		this.highlighting = highlighting;
 	}
+
+	public List<DSpaceObject> getResults() {
+		return results;
+	}
+
+	public void setResults(List<DSpaceObject> results) {
+		this.results = results;
+	}
+
 
 }
