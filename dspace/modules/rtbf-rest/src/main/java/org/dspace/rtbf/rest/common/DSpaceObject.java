@@ -17,6 +17,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
@@ -78,7 +79,8 @@ public class DSpaceObject {
     private String link;
 
     //Expandable relationships
-    protected Serie parentSerie;
+    protected Serie owningSerie;
+    protected List<DSpaceObject> owningParentList;
     protected Episode owningEpisode;
     protected List<Episode> parentEpisodeList;
     protected List<Serie> subSeries;
@@ -237,14 +239,16 @@ public class DSpaceObject {
 		this.shortDescription = shortDescription;
 	}
 
-	public Serie getParentSerie() {
-		return parentSerie;
+	public Serie getOwningSerie() {
+		return owningSerie;
 	}
 
-	public void setParentSerie(Serie parentSerie) {
-		this.parentSerie = parentSerie;
+	public void setOwningSerie(Serie parentSerie) {
+		this.owningSerie = parentSerie;
 	}
 
+	@XmlElementWrapper( name = "subSeries")
+	@XmlElement( name = "subSerie")
 	public List<Serie> getSubSeries() {
 		return subSeries;
 	}
@@ -253,6 +257,8 @@ public class DSpaceObject {
 		this.subSeries = subSeries;
 	}
 
+	@XmlElementWrapper( name = "episodes")
+	@XmlElement( name = "episode")
 	public List<Episode> getEpisodes() {
 		return episodes;
 	}
@@ -301,6 +307,8 @@ public class DSpaceObject {
 		this.countSequences = countSequences;
 	}
 
+	@XmlElementWrapper( name = "sequences")
+	@XmlElement( name = "sequence")
 	public List<Sequence> getSequences() {
 		return sequences;
 	}
@@ -333,6 +341,8 @@ public class DSpaceObject {
 		this.owningEpisode = owningEpisode;
 	}
 
+	@XmlElementWrapper( name = "parentEpisodeList")
+	@XmlElement( name = "parentEpisode")
 	public List<Episode> getParentEpisodeList() {
 		return parentEpisodeList;
 	}
@@ -347,5 +357,15 @@ public class DSpaceObject {
 
 	public void setThumbnail(String thumbnail) {
 		this.thumbnail = thumbnail;
+	}
+
+	@XmlElementWrapper( name = "owningParentList")
+	@XmlElement( name = "owningParent")
+	public List<DSpaceObject> getOwningParentList() {
+		return owningParentList;
+	}
+
+	public void setOwningParentList(List<DSpaceObject> parentsList) {
+		this.owningParentList = parentsList;
 	}
 }

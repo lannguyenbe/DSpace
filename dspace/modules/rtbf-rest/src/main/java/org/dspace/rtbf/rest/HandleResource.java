@@ -59,11 +59,11 @@ public class HandleResource {
             if(AuthorizeManager.authorizeActionBoolean(context, dso, org.dspace.core.Constants.READ)) {
                 switch(dso.getType()) {
                     case Constants.COMMUNITY:
-                        return new Serie(viewType, (org.dspace.content.Community) dso, expand+"parentSerie,metadata", context);
+                        return new Serie(viewType, (org.dspace.content.Community) dso, expand+",owningSerie,metadata", context);
                     case Constants.COLLECTION:
-                    	return new Episode(viewType, (org.dspace.content.Collection) dso, expand+",parentSerie,metadata", context);
+                    	return new Episode(viewType, (org.dspace.content.Collection) dso, expand+",owningSerie,metadata", context);
                     case Constants.ITEM:
-                        return new Sequence(viewType, (org.dspace.content.Item) dso, expand+",parentSerie,owningEpisode,parentEpisodeList,metadata", context);
+                        return new Sequence(viewType, (org.dspace.content.Item) dso, expand+",owningSerie,owningEpisode,parentEpisodeList,metadata", context);
                     default:
                         return new DSpaceObject(dso);
                 }

@@ -43,7 +43,7 @@ public class SearchResponseParts {
 					try {
 						switch (resultType) {
 						case Constants.ITEM:
-							lst.add(new Sequence(org.dspace.rtbf.rest.common.DSpaceObject.SEARCH_RESULT_VIEW, (Item) result, "parentSerie,owningEpisode", null));
+							lst.add(new Sequence(org.dspace.rtbf.rest.common.DSpaceObject.SEARCH_RESULT_VIEW, (Item) result, "owningParentList", null));
 						case Constants.COLLECTION:
 //							lst.add(new Episode(org.dspace.rtbf.rest.common.DSpaceObject.SEARCH_RESULT_VIEW, (Collection) result, null, null));
 						case Constants.COMMUNITY:

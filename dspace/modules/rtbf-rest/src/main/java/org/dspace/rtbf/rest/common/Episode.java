@@ -8,7 +8,6 @@
 package org.dspace.rtbf.rest.common;
 
 import org.apache.log4j.Logger;
-import org.dspace.content.Collection;
 import org.dspace.content.ItemIterator;
 import org.dspace.content.Metadatum;
 import org.dspace.core.Context;
@@ -55,11 +54,23 @@ public class Episode extends DSpaceObject {
             expandFields = Arrays.asList(expand.split(","));
         }
         
-        if(expandFields.contains("parentSerie") | expandFields.contains("all")) {
+        if(expandFields.contains("owningSerie") | expandFields.contains("all")) {
             org.dspace.content.Community parentCommunity = (org.dspace.content.Community) collection.getParentObject();
-            this.setParentSerie(new Serie(viewType, parentCommunity, null, context));
+            this.setOwningSerie(new Serie(viewType, parentCommunity, null, context));
         } else {
-            this.addExpand("parentSerie");
+            this.addExpand("owningSerie");
+        }
+
+        if(expandFields.contains("owningParentList") || expandFields.contains("all")) {
+            this.owningParentList = new ArrayList<DSpaceObject>();
+            org.dspace.content.Community parentCommunity = (org.dspace.content.Community) collection.getParentObject();
+            this.owningParentList.add(new Serie(viewType, parentCommunity, null, context));
+            org.dspace.content.Community topparentCommunity = parentCommunity.getParentCommunity();
+            if (topparentCommunity != null) { // already at top for orphan episode
+            	this.owningParentList.add(new Serie(viewType, topparentCommunity, null, context));
+            }
+        } else {
+            this.addExpand("owningParentListt");
         }
 
         //Item paging : limit, offset/page

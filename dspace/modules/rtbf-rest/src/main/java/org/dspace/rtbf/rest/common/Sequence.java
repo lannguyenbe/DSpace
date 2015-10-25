@@ -1,6 +1,8 @@
 package org.dspace.rtbf.rest.common;
 
 import org.apache.log4j.Logger;
+import org.dspace.content.Community;
+import org.dspace.content.ItemAdd;
 import org.dspace.content.Metadatum;
 import org.dspace.core.Context;
 
@@ -45,13 +47,29 @@ public class Sequence extends DSpaceObject{
     		expandFields = Arrays.asList(expand.split(","));
     	}
 
-    	if(expandFields.contains("parentSerie") | expandFields.contains("all")) {
+    	if(expandFields.contains("owningSerie") | expandFields.contains("all")) {
             org.dspace.content.Community parentCommunity = (org.dspace.content.Community) item.getOwningCollection().getParentObject();
-            this.setParentSerie(new Serie(innerViewType, parentCommunity, null, context));
+            this.setOwningSerie(new Serie(innerViewType, parentCommunity, null, context));
         } else {
-            this.addExpand("parentSerie");
+            this.addExpand("owningSerie");
         }
     	
+        if(expandFields.contains("owningParentList") || expandFields.contains("all")) {
+            this.owningParentList = new ArrayList<DSpaceObject>();
+
+            org.dspace.content.Collection owningCollection = item.getOwningCollection();
+            
+            this.owningParentList.add(new Episode(innerViewType, owningCollection, null, context));
+            org.dspace.content.Community parentCommunity = (org.dspace.content.Community) owningCollection.getParentObject();
+            this.owningParentList.add(new Serie(innerViewType, parentCommunity, null, context));
+            org.dspace.content.Community topparentCommunity = parentCommunity.getParentCommunity();
+            if (topparentCommunity != null) { // already at top for orphan item
+            	this.owningParentList.add(new Serie(innerViewType, topparentCommunity, null, context));
+            }
+        } else {
+            this.addExpand("owningParentList");
+        }
+
         if(expandFields.contains("owningEpisode") || expandFields.contains("all")) {
             this.owningEpisode = new Episode(innerViewType, item.getOwningCollection(), null, context);
         } else {

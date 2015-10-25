@@ -29,7 +29,7 @@ import javax.ws.rs.core.Response;
  * Class which provide all CRUD methods over items.
  * 
  * @author Rostislav Novak (Computing and Information Centre, CTU in Prague)
-
+ *
  * 18.10.2015 Lan : Restrict to GET only
  * 
  */
@@ -112,7 +112,6 @@ public class SequencesResource extends Resource
             @QueryParam("xforwardedfor") String xforwardedfor, @Context HttpHeaders headers, @Context HttpServletRequest request)
             throws WebApplicationException
     {
-
     	int viewType = org.dspace.rtbf.rest.common.DSpaceObject.MIN_VIEW;
     	
     	log.info("Reading item(id=" + itemId + ") metadata.");
@@ -125,7 +124,7 @@ public class SequencesResource extends Resource
             context.getDBConnection().setAutoCommit(true);
             org.dspace.content.Item dspaceItem = findItem(context, itemId, org.dspace.core.Constants.READ);
 
-            sequence = new org.dspace.rtbf.rest.common.Sequence(viewType, dspaceItem, expand+",parentSerie,owningEpisode,parentEpisodeList,metadata", context);
+            sequence = new org.dspace.rtbf.rest.common.Sequence(viewType, dspaceItem, expand+",owningSerie,owningEpisode,parentEpisodeList,metadata", context);
             context.complete();
         }
         catch (SQLException e)

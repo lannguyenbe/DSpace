@@ -52,13 +52,22 @@ public class Serie extends DSpaceObject{
             expandFields = Arrays.asList(expand.split(","));
         }
 
-        if(expandFields.contains("parentSerie") || expandFields.contains("all")) {
+        if(expandFields.contains("owningSerie") || expandFields.contains("all")) {
             org.dspace.content.Community parentCommunity = community.getParentCommunity();
             if(parentCommunity != null) {
-                setParentSerie(new Serie(viewType, parentCommunity, null, context));
+                setOwningSerie(new Serie(viewType, parentCommunity, null, context));
             }
         } else {
-            this.addExpand("parentSerie");
+            this.addExpand("owningSerie");
+        }
+
+        if(expandFields.contains("owningParentList") || expandFields.contains("all")) {
+            org.dspace.content.Community parentCommunity = community.getParentCommunity();
+            if(parentCommunity != null) {
+                setOwningSerie(new Serie(viewType, parentCommunity, null, context));
+            }
+        } else {
+            this.addExpand("owningParentList");
         }
 
         // Episodes pagination

@@ -129,6 +129,8 @@ public class SearchResponse {
 		this.highlighting = highlighting;
 	}
 
+	@XmlElementWrapper( name = "results" )
+	@XmlElement( name = "result" )
 	public List<DSpaceObject> getResults() {
 		return results;
 	}

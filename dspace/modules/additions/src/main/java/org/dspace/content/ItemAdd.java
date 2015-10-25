@@ -3,14 +3,18 @@ package org.dspace.content;
 import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.dspace.core.Context;
 import org.dspace.storage.rdbms.DatabaseManager;
 import org.dspace.storage.rdbms.TableRow;
 import org.dspace.storage.rdbms.TableRowIterator;
 
 public class ItemAdd extends Item {
+	private static Logger log = Logger.getLogger(ItemAdd.class);
+
     
     ItemAdd(Context context, TableRow row) throws SQLException
     {
@@ -135,5 +139,6 @@ public class ItemAdd extends Item {
 
         return new ItemIterator(context, rows);
     }
+    
     
 }
