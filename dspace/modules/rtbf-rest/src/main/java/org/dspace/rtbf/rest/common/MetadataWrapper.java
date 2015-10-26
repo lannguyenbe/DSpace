@@ -31,7 +31,8 @@ public class MetadataWrapper {
 		
 		for (MetadataEntry entry : v) {
 			elements.add(new JAXBElement<String>(
-					new javax.xml.namespace.QName(getPreferredLabel(entry.getKey()))
+					new javax.xml.namespace.QName(entry.getKey())
+//					new javax.xml.namespace.QName(getPreferredLabel(entry.getKey()))
 					, String.class
 					, entry.getValue()
 			));

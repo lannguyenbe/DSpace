@@ -5,15 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
-import javax.xml.bind.annotation.XmlElement;
-
 import org.apache.log4j.Logger;
 import org.dspace.content.Item;
-import org.dspace.core.Constants;
 import org.dspace.core.Context;
 import org.dspace.discovery.DiscoverResult;
-import org.dspace.rtbf.rest.common.DSpaceObject;
-import org.dspace.rtbf.rest.common.Episode;
+import org.dspace.rtbf.rest.common.Constants;
 import org.dspace.rtbf.rest.common.Sequence;
 
 public class SearchResponseParts {
@@ -43,11 +39,11 @@ public class SearchResponseParts {
 					try {
 						switch (resultType) {
 						case Constants.ITEM:
-							lst.add(new Sequence(org.dspace.rtbf.rest.common.DSpaceObject.SEARCH_RESULT_VIEW, (Item) result, "owningParentList", null));
+							lst.add(new Sequence(Constants.SEARCH_RESULT_VIEW, (Item) result, Constants.SEARCH_SEQUENCE_EXPAND_OPTIONS, null));
 						case Constants.COLLECTION:
-//							lst.add(new Episode(org.dspace.rtbf.rest.common.DSpaceObject.SEARCH_RESULT_VIEW, (Collection) result, null, null));
+//							lst.add(new Episode(Constants.SEARCH_RESULT_VIEW, (Collection) result, null, null));
 						case Constants.COMMUNITY:
-//							lst.add(new Serie(org.dspace.rtbf.rest.common.DSpaceObject.SEARCH_RESULT_VIEW, (Community) result, null, null));
+//							lst.add(new Serie(Constants.SEARCH_RESULT_VIEW, (Community) result, null, null));
 						}
 					} catch (WebApplicationException e) {
 						log.error("Unable to add to result list: "+ e);

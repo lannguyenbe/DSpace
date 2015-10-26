@@ -9,13 +9,16 @@ package org.dspace.rtbf.rest;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.dspace.content.ItemIterator;
+import org.dspace.rtbf.rest.common.Constants;
 import org.dspace.rtbf.rest.common.MetadataEntry;
 import org.dspace.rtbf.rest.common.MetadataWrapper;
 import org.dspace.rtbf.rest.common.Sequence;
+import org.dspace.rtbf.rest.common.Serie;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -59,7 +62,7 @@ public class SequencesResource extends Resource
             @Context HttpHeaders headers, @Context HttpServletRequest request) throws WebApplicationException
     {
 
-    	int viewType = org.dspace.rtbf.rest.common.DSpaceObject.MIN_VIEW;
+    	int viewType = Constants.MIN_VIEW;
 
         log.info("Reading items.(offset=" + offset + ",limit=" + limit + ").");
         org.dspace.core.Context context = null;
@@ -112,7 +115,14 @@ public class SequencesResource extends Resource
             @QueryParam("xforwardedfor") String xforwardedfor, @Context HttpHeaders headers, @Context HttpServletRequest request)
             throws WebApplicationException
     {
-    	int viewType = org.dspace.rtbf.rest.common.DSpaceObject.MIN_VIEW;
+    	int viewType = Constants.MIN_VIEW;
+    	
+    	if (expand != null) {
+    		List<String> expandFields = Arrays.asList(expand.split(","));
+        	if(expandFields.contains("enable")) {
+        		viewType = Constants.EXPANDELEM_VIEW;
+            }
+    	}
     	
     	log.info("Reading item(id=" + itemId + ") metadata.");
         org.dspace.core.Context context = null;
@@ -124,7 +134,7 @@ public class SequencesResource extends Resource
             context.getDBConnection().setAutoCommit(true);
             org.dspace.content.Item dspaceItem = findItem(context, itemId, org.dspace.core.Constants.READ);
 
-            sequence = new org.dspace.rtbf.rest.common.Sequence(viewType, dspaceItem, expand+",owningSerie,owningEpisode,parentEpisodeList,metadata", context);
+            sequence = new org.dspace.rtbf.rest.common.Sequence(viewType, dspaceItem, expand+","+Constants.SEQUENCE_EXPAND_OPTIONS, context);
             context.complete();
         }
         catch (SQLException e)
@@ -153,7 +163,7 @@ public class SequencesResource extends Resource
             @Context HttpHeaders headers, @Context HttpServletRequest request) throws WebApplicationException
     {
 
-    	int viewType = org.dspace.rtbf.rest.common.DSpaceObject.MIN_VIEW;
+    	int viewType = Constants.MIN_VIEW;
     	
     	log.info("Reading item(id=" + itemId + ") metadata.");
         org.dspace.core.Context context = null;

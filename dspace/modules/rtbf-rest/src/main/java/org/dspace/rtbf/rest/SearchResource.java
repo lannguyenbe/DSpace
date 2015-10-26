@@ -22,6 +22,7 @@ public class SearchResource extends Resource {
     @Path("sequences")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public SearchResponse getSearchResponse(
+    		@QueryParam("scope") String scope,
     		@QueryParam("q") String qterms,
     		@QueryParam("expand") @DefaultValue("results") String expand, @QueryParam("limit") @DefaultValue("100") Integer limit,
             @QueryParam("offset") @DefaultValue("0") Integer offset, @QueryParam("userIP") String user_ip,
@@ -37,7 +38,7 @@ public class SearchResource extends Resource {
             context = new org.dspace.core.Context();
             context.getDBConnection().setAutoCommit(true);
 
-            queryResults = getQueryResults(org.dspace.core.Constants.ITEM, qterms, expand, context, limit, offset);
+            queryResults = getQueryResults(org.dspace.core.Constants.ITEM, scope, qterms, expand, context, limit, offset);
             
             response = new SequencesSearchResponse(queryResults, expand, context, limit, offset);
 

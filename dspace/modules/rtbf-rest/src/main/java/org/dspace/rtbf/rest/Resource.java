@@ -7,9 +7,11 @@
  */
 package org.dspace.rtbf.rest;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,8 +29,8 @@ import org.dspace.discovery.SearchService;
 import org.dspace.discovery.DiscoverResult.FacetResult;
 import org.dspace.discovery.SearchServiceException;
 import org.dspace.discovery.configuration.DiscoveryConfigurationParameters;
+import org.dspace.handle.HandleManager;
 import org.dspace.rtbf.rest.common.SimpleNode;
-import org.dspace.rtbf.rest.common.SimpleNode.Attribute;
 import org.dspace.sort.OrderFormat;
 import org.dspace.utils.DSpace;
 
@@ -187,15 +189,7 @@ public abstract class Resource
     }
     
 
-    // TODO solr search fields to externalize in config
-    private static String[] searchFields = {
-    	"identifier_attributor", "handle", "search.resource_type", "search.resourceid"
-    	, "dc.title", "dateIssued_dt", "dc.description.abstract", "rtbf.royalty_code", "rtbf.royalty_remark"
-    	, "localion.coll", "location.comm"
-    };
-
-
-    public DiscoverResult getQueryResults(int resourceType, String qterms, String expand, Context context, 
+    public DiscoverResult getQueryResults(int resourceType, String scope, String qterms, String expand, Context context, 
     		int limit, int offset) throws SearchServiceException 
     {
         DiscoverResult queryResults = null;
@@ -204,6 +198,44 @@ public abstract class Resource
 
         query.setQuery(qterms);
     	query.setDSpaceObjectFilter(resourceType);
+    	
+    	if (scope != null) { // scope contains logical expression of handles
+    		// 1. Replace handle by m{community_id} or l{collection_id}
+    		StringBuffer sb = new StringBuffer();    		
+    		Pattern pattern = Pattern.compile("\\d+/\\d+");
+    		Matcher matcher = pattern.matcher(scope);
+
+    		while (matcher.find()) {
+    			String handle = matcher.group();
+    			String replacement;
+
+    			org.dspace.content.DSpaceObject dso = null;
+    			try {
+    				dso = HandleManager.resolveToObject(context, handle);
+    			} catch (Exception e) {
+    				processException("Could not process getQueryResults. Message:"+e.getMessage(), context);
+    			};
+
+    			if(dso == null) {
+    				replacement = handle;
+    			} else {
+    				switch (dso.getType()) {
+    				case Constants.COMMUNITY:
+    					replacement = "m" + dso.getID();
+    					break;
+    				case Constants.COLLECTION:
+    					replacement = "l" + dso.getID();
+    					break;
+    				default :
+    					replacement = handle;
+    				}
+    			}
+    			matcher.appendReplacement(sb, replacement);
+    		}
+
+    		// 2. Add filter query
+    		query.addFilterQueries("{!q.op=OR}" + "location:(" + sb.toString() + ")");
+    	}
 
         query.setMaxResults(limit);
         if (offset > 0) {

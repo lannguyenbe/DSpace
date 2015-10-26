@@ -9,6 +9,7 @@ package org.dspace.rtbf.rest;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,6 +29,7 @@ import org.apache.log4j.Logger;
 import org.dspace.authorize.AuthorizeManager;
 import org.dspace.content.CollectionIterator;
 import org.dspace.content.CommunityIterator;
+import org.dspace.rtbf.rest.common.Constants;
 import org.dspace.rtbf.rest.common.Episode;
 import org.dspace.rtbf.rest.common.MetadataEntry;
 import org.dspace.rtbf.rest.common.Serie;
@@ -55,9 +57,16 @@ public class SeriesResource extends Resource
             @QueryParam("xforwardedfor") String xforwardedfor, @Context HttpHeaders headers, @Context HttpServletRequest request)
             throws WebApplicationException
     {
-    	int viewType = org.dspace.rtbf.rest.common.DSpaceObject.MIN_VIEW;
+    	int viewType = Constants.MIN_VIEW;
 
-        log.info("Reading community(id=" + communityId + ").");
+    	if (expand != null) {
+    		List<String> expandFields = Arrays.asList(expand.split(","));
+        	if(expandFields.contains("enable")) {
+        		viewType = Constants.EXPANDELEM_VIEW;
+            }
+    	}
+
+    	log.info("Reading community(id=" + communityId + ").");
         org.dspace.core.Context context = null;
         Serie serie = null;
 
@@ -68,7 +77,7 @@ public class SeriesResource extends Resource
 
             org.dspace.content.Community dspaceCommunity = findCommunity(context, communityId, org.dspace.core.Constants.READ);
 
-            serie = new Serie(viewType, dspaceCommunity, expand+",owningSerie,metadata", context);
+            serie = new Serie(viewType, dspaceCommunity, expand+","+Constants.SERIE_EXPAND_OPTIONS, context);
             context.complete();
 
         }
@@ -101,7 +110,7 @@ public class SeriesResource extends Resource
             @QueryParam("xforwardedfor") String xforwardedfor, @Context HttpHeaders headers, @Context HttpServletRequest request)
             throws WebApplicationException
     {
-    	int viewType = org.dspace.rtbf.rest.common.DSpaceObject.MIN_VIEW;
+    	int viewType = Constants.MIN_VIEW;
 
         log.info("Reading all top communities.(offset=" + offset + " ,limit=" + limit + ").");
         org.dspace.core.Context context = null;
@@ -159,7 +168,7 @@ public class SeriesResource extends Resource
             @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor,
             @Context HttpHeaders headers, @Context HttpServletRequest request) throws WebApplicationException
     {
-    	int viewType = org.dspace.rtbf.rest.common.DSpaceObject.MIN_VIEW;
+    	int viewType = Constants.MIN_VIEW;
 
         log.info("Reading community(id=" + communityId + ") collections.");
         org.dspace.core.Context context = null;
@@ -207,7 +216,7 @@ public class SeriesResource extends Resource
             @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor,
             @Context HttpHeaders headers, @Context HttpServletRequest request) throws WebApplicationException
     {
-    	int viewType = org.dspace.rtbf.rest.common.DSpaceObject.MIN_VIEW;
+    	int viewType = Constants.MIN_VIEW;
 
         log.info("Reading community(id=" + communityId + ") subcommunities.");
         org.dspace.core.Context context = null;
@@ -256,7 +265,7 @@ public class SeriesResource extends Resource
             @Context HttpHeaders headers, @Context HttpServletRequest request) throws WebApplicationException
     {
 
-    	int viewType = org.dspace.rtbf.rest.common.DSpaceObject.MIN_VIEW;
+    	int viewType = Constants.MIN_VIEW;
     	
     	log.info("Reading community(id=" + communityId + ") metadata.");
         org.dspace.core.Context context = null;

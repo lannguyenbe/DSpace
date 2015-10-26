@@ -1,8 +1,6 @@
 package org.dspace.rtbf.rest.common;
 
 import org.apache.log4j.Logger;
-import org.dspace.content.Community;
-import org.dspace.content.ItemAdd;
 import org.dspace.content.Metadatum;
 import org.dspace.core.Context;
 
@@ -33,10 +31,10 @@ public class Sequence extends DSpaceObject{
     	int innerViewType = 0;
     	
     	switch(viewType) {
-    	case SEARCH_RESULT_VIEW:
+    	case Constants.SEARCH_RESULT_VIEW:
         	this.setCountSupports(getCountAllSupports(item));
             this.setFirstBroadcasted(getDateIssued(item));
-    		innerViewType = MIN_VIEW;
+    		innerViewType = Constants.MIN_VIEW;
     		break;
     	default:
     		innerViewType = viewType;
@@ -47,7 +45,7 @@ public class Sequence extends DSpaceObject{
     		expandFields = Arrays.asList(expand.split(","));
     	}
 
-    	if(expandFields.contains("owningSerie") | expandFields.contains("all")) {
+    	if(expandFields.contains("owningSerie") || expandFields.contains("all")) {
             org.dspace.content.Community parentCommunity = (org.dspace.content.Community) item.getOwningCollection().getParentObject();
             this.setOwningSerie(new Serie(innerViewType, parentCommunity, null, context));
         } else {

@@ -9,9 +9,9 @@ package org.dspace.rtbf.rest;
 
 import org.apache.log4j.Logger;
 import org.dspace.authorize.AuthorizeManager;
-import org.dspace.core.Constants;
 import org.dspace.core.Context;
 import org.dspace.handle.HandleManager;
+import org.dspace.rtbf.rest.common.Constants;
 import org.dspace.rtbf.rest.common.DSpaceObject;
 import org.dspace.rtbf.rest.common.Episode;
 import org.dspace.rtbf.rest.common.Sequence;
@@ -22,6 +22,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -41,7 +43,14 @@ public class HandleResource {
     public org.dspace.rtbf.rest.common.DSpaceObject getObject(@PathParam("prefix") String prefix, @PathParam("suffix") String suffix
     			, @QueryParam("expand") String expand) {
 
-    	int viewType = org.dspace.rtbf.rest.common.DSpaceObject.MIN_VIEW;
+    	int viewType = Constants.MIN_VIEW;
+
+    	if (expand != null) {
+    		List<String> expandFields = Arrays.asList(expand.split(","));
+        	if(expandFields.contains("enable")) {
+        		viewType = Constants.EXPANDELEM_VIEW;
+            }
+    	}
 
     	try {
             if(context == null || !context.isValid() ) {
@@ -59,11 +68,11 @@ public class HandleResource {
             if(AuthorizeManager.authorizeActionBoolean(context, dso, org.dspace.core.Constants.READ)) {
                 switch(dso.getType()) {
                     case Constants.COMMUNITY:
-                        return new Serie(viewType, (org.dspace.content.Community) dso, expand+",owningSerie,metadata", context);
+                        return new Serie(viewType, (org.dspace.content.Community) dso, expand+","+Constants.SERIE_EXPAND_OPTIONS, context);
                     case Constants.COLLECTION:
-                    	return new Episode(viewType, (org.dspace.content.Collection) dso, expand+",owningSerie,metadata", context);
+                    	return new Episode(viewType, (org.dspace.content.Collection) dso, expand+","+Constants.EPISODE_EXPAND_OPTIONS, context);
                     case Constants.ITEM:
-                        return new Sequence(viewType, (org.dspace.content.Item) dso, expand+",owningSerie,owningEpisode,parentEpisodeList,metadata", context);
+                        return new Sequence(viewType, (org.dspace.content.Item) dso, expand+","+Constants.SEQUENCE_EXPAND_OPTIONS, context);
                     default:
                         return new DSpaceObject(dso);
                 }

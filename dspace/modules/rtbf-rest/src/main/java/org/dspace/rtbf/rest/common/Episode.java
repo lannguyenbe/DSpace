@@ -42,7 +42,7 @@ public class Episode extends DSpaceObject {
     private void setup(int viewType, org.dspace.content.Collection collection, String expand, Context context, Integer limit, Integer offset) throws SQLException{
     	
     	switch (viewType) {
-    	case SEARCH_RESULT_VIEW:
+    	case Constants.SEARCH_RESULT_VIEW:
         	this.setFirstBroadcasted(getDateIssued(collection));
             this.setCountSupports(getCountAllSupports(collection));
             this.setCountSequences(collection.countItems());
@@ -79,7 +79,7 @@ public class Episode extends DSpaceObject {
             
             if (!((limit != null) && (limit >= 0) && (offset != null) && (offset >= 0))) {
                 log.warn("Pagging was badly set, using default values.");
-                limit = LIMITMAX;
+                limit = Constants.LIMITMAX;
                 offset = 0;
             }
             

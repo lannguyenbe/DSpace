@@ -10,19 +10,12 @@ package org.dspace.rtbf.rest.common;
 import org.apache.log4j.Logger;
 import org.atteo.evo.inflector.English;
 import org.dspace.content.Metadatum;
-import org.dspace.core.Constants;
-import org.dspace.rtbf.rest.search.SearchResponseParts;
-
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.annotation.XmlAnyElement;
+import org.dspace.rtbf.rest.common.Constants;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,23 +28,8 @@ import java.util.List;
  */
 @XmlRootElement(name = "dspaceobject")
 public class DSpaceObject {
-    // Type of view determine the choice of metadata to show 
-    public static final int WITH_EXPANDELEM_VIEW = 1; // default
-    public static final int MIN_VIEW = 2;
-    public static final int SEARCH_RESULT_VIEW = 3;
-    //
-    public static final String[] TYPETEXT = { "none", "none", "SEQUENCE", "EPISODE", "SERIE", "none", "none", "none" };
-    public static final int LIMITMAX = 5000;
-
-    // Keys for accessing  metadata
-    public static final String REPOSITORY = "rtbf.identifier.attributor";
-    public static final String ROYALTY = "rtbf.royalty_code";
-    public static final String ROYALTY_TEXT = "rtbf.royalty_remark";
-    public static final String SHORT_DESCRIPTION = "dc.description.abstract";
-    public static final String FIRST_BROADCASTED = "dc.date.issued";
-    public static final String CODE_ORIGINE = "rtbf.code_origine.*";
+    private static Logger log = Logger.getLogger(DSpaceObject.class);
     
-
     // MIN_VIEW Minimum Identification elements
     private Integer id;
     private String handle;
@@ -76,6 +54,7 @@ public class DSpaceObject {
 	protected Integer countSequences;
     protected Integer countSupports;
     
+    @XmlElement(name = "link", required = true)
     private String link;
 
     //Expandable relationships
@@ -91,13 +70,14 @@ public class DSpaceObject {
     // TODO List<Diffusion> diffusions;
     // TODO List<Support> supports;
 
+    @XmlElement(required = true)
     private ArrayList<String> expand = new ArrayList<String>();
 	
 	public DSpaceObject() {}
 
     public DSpaceObject(org.dspace.content.DSpaceObject dso) {
         setHandle(dso.getHandle());
-        setType(TYPETEXT[dso.getType()].toLowerCase());
+        setType(Constants.TYPETEXT[dso.getType()].toLowerCase());
         setId(dso.getID());
         setTitle(dso.getName());
     }
@@ -107,14 +87,19 @@ public class DSpaceObject {
     	this(dso);
     	
     	switch (viewType) {
-    	case SEARCH_RESULT_VIEW:
+    	case Constants.SEARCH_RESULT_VIEW:
     		disableExpand();
-            setRepository(getDsoMetadata(REPOSITORY,dso));
-            setRoyalty(getDsoMetadata(ROYALTY,dso));
-            setRoyaltyText(getDsoMetadata(ROYALTY_TEXT,dso));
-            setShortDescription(getDsoMetadata(SHORT_DESCRIPTION,dso));
-    	case MIN_VIEW:
+            setRepository(getDsoMetadata(Constants.REPOSITORY,dso));
+            setRoyalty(getDsoMetadata(Constants.ROYALTY,dso));
+            setRoyaltyText(getDsoMetadata(Constants.ROYALTY_TEXT,dso));
+            setShortDescription(getDsoMetadata(Constants.SHORT_DESCRIPTION,dso));
+            break;
+    	case Constants.MIN_VIEW:
     		disableExpand();
+    		break;
+    	case Constants.EXPANDELEM_VIEW:
+    		log.info("debug 500");
+    		enableExpand();
     	}
     }
     
@@ -137,11 +122,11 @@ public class DSpaceObject {
     }
 
 	protected String getDateIssued(org.dspace.content.DSpaceObject dso) {
-		return getDsoMetadata(FIRST_BROADCASTED,dso);
+		return getDsoMetadata(Constants.FIRST_BROADCASTED,dso);
 	}
 
 	protected int getCountAllSupports(org.dspace.content.DSpaceObject dso) {
-		return(dso.getMetadataByMetadataString(CODE_ORIGINE).length);
+		return(dso.getMetadataByMetadataString(Constants.CODE_ORIGINE).length);
 	}
 
 	@XmlAttribute
@@ -193,6 +178,7 @@ public class DSpaceObject {
 
     public void addExpand(String expandableAttribute) {
     	if (this.expand != null) {
+    		log.info("debug 600 :"+ this.expand.size());
     		this.expand.add(expandableAttribute);
     	}
     }
