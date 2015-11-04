@@ -8,9 +8,13 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
+import org.dspace.content.Metadatum;
 import org.dspace.discovery.DiscoverResult;
 import org.dspace.rtbf.rest.common.DSpaceObject;
+import org.dspace.rtbf.rest.common.MetadataEntry;
+import org.dspace.rtbf.rest.common.MetadataWrapper;
 
 @XmlRootElement(name = "searchResponse")
 public class SearchResponse {
@@ -18,6 +22,7 @@ public class SearchResponse {
 	private Long numFound = 0L;
 
     private SearchResponseParts.ResponseHeader responseHeader;
+    private SearchResponseParts.Meta meta;
     private List<DSpaceObject> results;
 //    private SearchResponseParts.Result results;
     private SearchResponseParts.FacetsCount facets;
@@ -42,6 +47,14 @@ public class SearchResponse {
 			expandFields = Arrays.asList(expand.split(","));
 		}
 
+        if(expandFields.contains("meta") || expandFields.contains("all")) {
+        	setMeta(new SearchResponseParts.Meta());
+//            setMetadataEntries(new SearchResponseParts.Meta().getLst());
+     	} else {
+     		this.addExpand("meta");
+     	}
+
+        
         if(expandFields.contains("responseHeader") || expandFields.contains("all")) {
         	setResponseHeader(new SearchResponseParts.ResponseHeader());
         } else {
@@ -139,5 +152,12 @@ public class SearchResponse {
 		this.results = results;
 	}
 
+	public SearchResponseParts.Meta getMeta() {
+		return meta;
+	}
+
+	public void setMeta(SearchResponseParts.Meta meta) {
+		this.meta = meta;
+	}
 
 }

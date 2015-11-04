@@ -31,6 +31,7 @@ import org.dspace.rtbf.rest.common.Constants;
 import org.dspace.rtbf.rest.common.Episode;
 import org.dspace.rtbf.rest.common.MetadataEntry;
 import org.dspace.rtbf.rest.common.Sequence;
+import org.dspace.rtbf.rest.search.Resource;
 
 /**
  * This class provides all CRUD operation over collections.
@@ -52,18 +53,14 @@ public class EpisodesResource extends Resource
     @Path("/{collection_id}")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public Episode getEpisode(@PathParam("collection_id") Integer collectionId, @QueryParam("expand") String expand, 
+    		@QueryParam("omitExpand") @DefaultValue("true") boolean omitExpand,
             @QueryParam("userIP") String user_ip, @QueryParam("userAgent") String user_agent,
             @QueryParam("xforwardedfor") String xforwardedfor, @Context HttpHeaders headers, @Context HttpServletRequest request) 
             throws WebApplicationException
     {
     	int viewType = Constants.MIN_VIEW;
 
-    	if (expand != null) {
-    		List<String> expandFields = Arrays.asList(expand.split(","));
-        	if(expandFields.contains("enable")) {
-        		viewType = Constants.EXPANDELEM_VIEW;
-            }
-    	}
+    	if (!omitExpand) { viewType = Constants.EXPANDELEM_VIEW; }
     	
         log.info("Reading collection(id=" + collectionId + ").");
         org.dspace.core.Context context = null;
@@ -102,7 +99,7 @@ public class EpisodesResource extends Resource
     @Path("/{collection_id}/sequences")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public Sequence[] getEpisodeSequences(@PathParam("collection_id") Integer collectionId,
-            @QueryParam("expand") String expand, @QueryParam("limit") @DefaultValue("100") Integer limit,
+            @QueryParam("expand") String expand, @QueryParam("limit") @DefaultValue(Constants.LIMIT_DEFAULT) Integer limit,
             @QueryParam("offset") @DefaultValue("0") Integer offset, @QueryParam("userIP") String user_ip,
             @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor,
             @Context HttpHeaders headers, @Context HttpServletRequest request) throws WebApplicationException

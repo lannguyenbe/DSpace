@@ -2,14 +2,21 @@ package org.dspace.rtbf.rest.search;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
+import javax.xml.bind.annotation.XmlTransient;
+
 import org.apache.log4j.Logger;
 import org.dspace.content.Item;
+import org.dspace.content.Metadatum;
+import org.dspace.core.ConfigurationManager;
 import org.dspace.core.Context;
 import org.dspace.discovery.DiscoverResult;
 import org.dspace.rtbf.rest.common.Constants;
+import org.dspace.rtbf.rest.common.MetadataEntry;
+import org.dspace.rtbf.rest.common.MetadataWrapper;
 import org.dspace.rtbf.rest.common.Sequence;
 
 public class SearchResponseParts {
@@ -65,6 +72,46 @@ public class SearchResponseParts {
 		
 	}
 
+	public static class Meta {
+
+		private List<MetadataEntry> sortEntries;
+		private MetadataWrapper sortMeta;
+
+	    public Meta() {
+	    	int idx = 1;
+	    	String definition;
+	    	
+	    	sortEntries = new ArrayList<MetadataEntry>();
+		    while ((definition = ConfigurationManager.getProperty(Constants.WEBAPP_NAME, Constants.SORTMETA+".field." + idx)) != null) {
+		        List<String> fields = new ArrayList<String>();
+		        fields = Arrays.asList(definition.split(":"));
+	            sortEntries.add(new MetadataEntry(fields.get(0), fields.get(1), null));
+		    	
+		    	idx++;
+		    }
+	    }
+
+	    @XmlTransient
+	    public List<MetadataEntry> getSortEntries() {
+			return sortEntries;
+		}
+
+		public void setSortEntriest(List<MetadataEntry> entries) {
+			this.sortEntries = entries;
+		}
+
+		public MetadataWrapper getSortMeta() {
+			if (sortEntries != null ) {
+				sortMeta = new MetadataWrapper(sortEntries);
+			}
+			return sortMeta;
+		}
+
+		public void setSortMeta(MetadataWrapper wrapper) {
+			this.sortMeta = wrapper;
+		}
+	}
+
 	public static class FacetsCount {
 		
 	}
@@ -76,4 +123,5 @@ public class SearchResponseParts {
 	public static class Highlighting {
 		
 	}
+	
 }

@@ -200,6 +200,12 @@ cp dspace-api-4.2.jar $DS/lib
 ## to recompile:end
 
 -----------------------------------------  S O L R  --------------------------------------------------
+# collapse sur location.coll
+http://vm-dev4.inf.rtbf.be:8080/solr/search/selectNoCollapse?q=location%3Am1+AND+search.resourcetype%3A2+AND+search_text%3Atoto&fq=%7B!collapse+field%3Dlocation.coll%7D&rows=10&fl=dc.title%2Clocation.*%2Clocation%2Chandle%2Csearch.resourceid&wt=json&indent=true&facet=true&facet.field=dc.title_sort
+
+# reschercher les fiches liées dans Sonuma : 1 fiche TV peut être liée a plusieurs fiches Sonuma
+http://vm-dev4.inf.rtbf.be:8080/solr/search/select?q=location%3Am2+AND+identifier_weight%3A1&rows=0&wt=json&indent=true&facet=true&facet.field=identifier_origin
+
 # rechercher un contributor dans son role, utiliser phrase query : "boever intervenant"
 http://localhost:8070/solr/search/select?q=contributor_partial%3A(%22boever+intervenant%22)&fl=contributor_partial&wt=json&indent=true
 http://localhost:8070/solr/search/select?q=contributor%3A(%22boever+intervenant%22)&fl=contributor&wt=json&indent=true

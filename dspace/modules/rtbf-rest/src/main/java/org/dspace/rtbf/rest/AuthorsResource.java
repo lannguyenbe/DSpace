@@ -15,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
 import org.dspace.rtbf.rest.common.SimpleNode;
+import org.dspace.rtbf.rest.search.Resource;
 
 /**
  * Root resource (exposed at "authors" path)

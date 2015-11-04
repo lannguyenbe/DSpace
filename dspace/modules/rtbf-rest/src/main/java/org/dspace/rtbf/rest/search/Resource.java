@@ -5,7 +5,7 @@
  *
  * http://www.dspace.org/license/
  */
-package org.dspace.rtbf.rest;
+package org.dspace.rtbf.rest.search;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -189,18 +189,20 @@ public abstract class Resource
     }
     
 
-    public DiscoverResult getQueryResults(int resourceType, String scope, String qterms, String expand, Context context, 
-    		int limit, int offset) throws SearchServiceException 
-    {
-        DiscoverResult queryResults = null;
-
+	protected DiscoverResult getQueryResult(int resourceType, Context context, Request searchRequest) throws SearchServiceException {
+		// 1. Prepare the query
         DiscoverQuery query = new DiscoverQuery();
 
-        query.setQuery(qterms);
-    	query.setDSpaceObjectFilter(resourceType);
+        // q terms
+        query.setQuery(searchRequest.getQuery());
+
+        // return which resourcetype document (community/collection/item)
+        query.setDSpaceObjectFilter(resourceType);
     	
+        // limit the search within community/collection
+        String scope = searchRequest.getScope();
     	if (scope != null) { // scope contains logical expression of handles
-    		// 1. Replace handle by m{community_id} or l{collection_id}
+    		// a. Replace handle by m{community_id} or l{collection_id}
     		StringBuffer sb = new StringBuffer();    		
     		Pattern pattern = Pattern.compile("\\d+/\\d+");
     		Matcher matcher = pattern.matcher(scope);
@@ -233,18 +235,27 @@ public abstract class Resource
     			matcher.appendReplacement(sb, replacement);
     		}
 
-    		// 2. Add filter query
+    		// b. Add filter query
     		query.addFilterQueries("{!q.op=OR}" + "location:(" + sb.toString() + ")");
     	}
 
-        query.setMaxResults(limit);
-        if (offset > 0) {
-            query.setStart(offset);
-        }
 
-        queryResults = getSearchService().search(context, query);
+    	// Pagination
+    	query.setMaxResults(searchRequest.getLimit());
+        if (searchRequest.getOffset() > 0) {
+            query.setStart(searchRequest.getOffset());
+        }
         
-        return queryResults;    	
-    }
+        // Order
+        if (searchRequest.getSortField() != null) {
+        	query.setSortField(searchRequest.getSortField(), searchRequest.getSortOrder());
+        }
+        
+        // 2. Perform query
+
+		return (getSearchService().search(context, query));
+	}
 
 }
+
+

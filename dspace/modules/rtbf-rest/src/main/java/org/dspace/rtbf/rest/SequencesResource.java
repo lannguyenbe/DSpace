@@ -19,6 +19,7 @@ import org.dspace.rtbf.rest.common.MetadataEntry;
 import org.dspace.rtbf.rest.common.MetadataWrapper;
 import org.dspace.rtbf.rest.common.Sequence;
 import org.dspace.rtbf.rest.common.Serie;
+import org.dspace.rtbf.rest.search.Resource;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -46,64 +47,6 @@ public class SequencesResource extends Resource
 
 
     /**
-     * It returns an array of items in DSpace. You can define how many items in
-     * list will be and from which index will start. Items in list are sorted item_id
-     * 
-     * @param limit
-     *            How many items in array will be. Default value is 100.
-     * @param offset
-     *            On which index will array start. Default value is 0.
-     */
-    @GET
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    public Sequence[] getSequences(@QueryParam("expand") String expand, @QueryParam("limit") @DefaultValue("100") Integer limit,
-            @QueryParam("offset") @DefaultValue("0") Integer offset, @QueryParam("userIP") String user_ip,
-            @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor,
-            @Context HttpHeaders headers, @Context HttpServletRequest request) throws WebApplicationException
-    {
-
-    	int viewType = Constants.MIN_VIEW;
-
-        log.info("Reading items.(offset=" + offset + ",limit=" + limit + ").");
-        org.dspace.core.Context context = null;
-        List<Sequence> sequences = null;
-
-        try
-        {
-            context = new org.dspace.core.Context();
-            context.getDBConnection().setAutoCommit(true);
-
-            if (!((limit != null) && (limit >= 0) && (offset != null) && (offset >= 0)))
-            {
-                log.warn("Pagging was badly set, using default values.");
-                limit = 100;
-                offset = 0;
-            }
-
-            ItemIterator dspaceItems = org.dspace.content.ItemAdd.findAllUnfiltered(context, limit, offset);
-            sequences = new ArrayList<Sequence>();
-
-            while(dspaceItems.hasNext()) {
-                org.dspace.content.Item item = dspaceItems.next();
-                	sequences.add(new Sequence(viewType, item, null, context));
-            }
-
-            context.complete();
-        }
-        catch (SQLException e)
-        {
-            processException("Something went wrong while reading items from database. Message: " + e, context);
-        }
-        finally
-        {
-            processFinally(context);
-        }
-
-        log.trace("Items were successfully read.");
-        return sequences.toArray(new Sequence[0]);
-    }
-
-    /**
      * Returns item
      * 
      */
@@ -111,19 +54,15 @@ public class SequencesResource extends Resource
     @Path("/{item_id}")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public Sequence getSequence(@PathParam("item_id") Integer itemId, @QueryParam("expand") String expand,
+    		@QueryParam("omitExpand") @DefaultValue("true") boolean omitExpand,
             @QueryParam("userIP") String user_ip, @QueryParam("userAgent") String user_agent,
             @QueryParam("xforwardedfor") String xforwardedfor, @Context HttpHeaders headers, @Context HttpServletRequest request)
             throws WebApplicationException
     {
     	int viewType = Constants.MIN_VIEW;
     	
-    	if (expand != null) {
-    		List<String> expandFields = Arrays.asList(expand.split(","));
-        	if(expandFields.contains("enable")) {
-        		viewType = Constants.EXPANDELEM_VIEW;
-            }
-    	}
-    	
+    	if (!omitExpand) { viewType = Constants.EXPANDELEM_VIEW; }
+
     	log.info("Reading item(id=" + itemId + ") metadata.");
         org.dspace.core.Context context = null;
         Sequence sequence = null;
@@ -131,7 +70,7 @@ public class SequencesResource extends Resource
         try
         {
             context = new org.dspace.core.Context();
-            context.getDBConnection().setAutoCommit(true);
+            context.getDBConnection();
             org.dspace.content.Item dspaceItem = findItem(context, itemId, org.dspace.core.Constants.READ);
 
             sequence = new org.dspace.rtbf.rest.common.Sequence(viewType, dspaceItem, expand+","+Constants.SEQUENCE_EXPAND_OPTIONS, context);
@@ -172,7 +111,7 @@ public class SequencesResource extends Resource
         try
         {
             context = new org.dspace.core.Context();
-            context.getDBConnection().setAutoCommit(true);
+            context.getDBConnection();
             org.dspace.content.Item dspaceItem = findItem(context, itemId, org.dspace.core.Constants.READ);
 
             metadata = new org.dspace.rtbf.rest.common.Sequence(viewType, dspaceItem, "metadata", context).getMetadataEntries();

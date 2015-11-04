@@ -41,22 +41,19 @@ public class HandleResource {
     @Path("/{prefix}/{suffix}")
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public org.dspace.rtbf.rest.common.DSpaceObject getObject(@PathParam("prefix") String prefix, @PathParam("suffix") String suffix
-    			, @QueryParam("expand") String expand) {
+    			, @QueryParam("expand") String expand
+        		, @QueryParam("omitExpand") @DefaultValue("true") boolean omitExpand)
+    {
 
     	int viewType = Constants.MIN_VIEW;
 
-    	if (expand != null) {
-    		List<String> expandFields = Arrays.asList(expand.split(","));
-        	if(expandFields.contains("enable")) {
-        		viewType = Constants.EXPANDELEM_VIEW;
-            }
-    	}
+    	if (!omitExpand) { viewType = Constants.EXPANDELEM_VIEW; }
 
     	try {
             if(context == null || !context.isValid() ) {
                 context = new Context();
                 //Failed SQL is ignored as a failed SQL statement, prevent: current transaction is aborted, commands ignored until end of transaction block
-                context.getDBConnection().setAutoCommit(true);
+                context.getDBConnection();
             }
 
             org.dspace.content.DSpaceObject dso = HandleManager.resolveToObject(context, prefix + "/" + suffix);

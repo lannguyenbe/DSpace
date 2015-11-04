@@ -33,6 +33,7 @@ import org.dspace.rtbf.rest.common.Constants;
 import org.dspace.rtbf.rest.common.Episode;
 import org.dspace.rtbf.rest.common.MetadataEntry;
 import org.dspace.rtbf.rest.common.Serie;
+import org.dspace.rtbf.rest.search.Resource;
 
 /**
  * Class which provides CRUD methods over communities.
@@ -46,6 +47,59 @@ public class SeriesResource extends Resource
     private static Logger log = Logger.getLogger(SeriesResource.class);
 
     /**
+     * It returns an array of series
+     * 
+     */
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public Serie[] getSeries(@QueryParam("expand") String expand, @QueryParam("limit") @DefaultValue(Constants.LIMIT_DEFAULT) Integer limit,
+            @QueryParam("offset") @DefaultValue("0") Integer offset, @QueryParam("userIP") String user_ip,
+            @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor,
+            @Context HttpHeaders headers, @Context HttpServletRequest request) throws WebApplicationException
+    {
+
+    	int viewType = Constants.MIN_VIEW;
+
+        log.info("Reading communities.(offset=" + offset + ",limit=" + limit + ").");
+        org.dspace.core.Context context = null;
+        List<Serie> series = null;
+
+        try
+        {
+            context = new org.dspace.core.Context();
+            context.getDBConnection();
+
+            if (!((limit != null) && (limit >= 0) && (offset != null) && (offset >= 0)))
+            {
+                log.warn("Pagging was badly set, using default values.");
+                limit = 100;
+                offset = 0;
+            }
+
+            CommunityIterator dspaceCommunities = org.dspace.content.CommunityAdd.findAllCursor(context);
+            series = new ArrayList<Serie>();
+
+            while(dspaceCommunities.hasNext()) {
+                org.dspace.content.Community community = dspaceCommunities.next();
+                	series.add(new Serie(viewType, community, null, context));
+            }
+
+            context.complete();
+        }
+        catch (SQLException e)
+        {
+            processException("Something went wrong while reading communitites from database. Message: " + e, context);
+        }
+        finally
+        {
+            processFinally(context);
+        }
+
+        log.trace("Items were successfully read.");
+        return series.toArray(new Serie[0]);
+    }
+
+    /**
      * Returns community with basic properties
      * 
      */
@@ -53,19 +107,15 @@ public class SeriesResource extends Resource
     @Path("/{community_id}")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public Serie getSerie(@PathParam("community_id") Integer communityId, @QueryParam("expand") String expand,
+    		@QueryParam("omitExpand") @DefaultValue("true") boolean omitExpand,
             @QueryParam("userIP") String user_ip, @QueryParam("userAgent") String user_agent,
             @QueryParam("xforwardedfor") String xforwardedfor, @Context HttpHeaders headers, @Context HttpServletRequest request)
             throws WebApplicationException
     {
     	int viewType = Constants.MIN_VIEW;
 
-    	if (expand != null) {
-    		List<String> expandFields = Arrays.asList(expand.split(","));
-        	if(expandFields.contains("enable")) {
-        		viewType = Constants.EXPANDELEM_VIEW;
-            }
-    	}
-
+    	if (!omitExpand) { viewType = Constants.EXPANDELEM_VIEW; }
+    	
     	log.info("Reading community(id=" + communityId + ").");
         org.dspace.core.Context context = null;
         Serie serie = null;
@@ -163,7 +213,7 @@ public class SeriesResource extends Resource
     @Path("/{community_id}/episodes")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public Episode[] getSerieEpisodes(@PathParam("community_id") Integer communityId,
-            @QueryParam("expand") String expand, @QueryParam("limit") @DefaultValue("100") Integer limit,
+            @QueryParam("expand") String expand, @QueryParam("limit") @DefaultValue(Constants.LIMIT_DEFAULT) Integer limit,
             @QueryParam("offset") @DefaultValue("0") Integer offset, @QueryParam("userIP") String user_ip,
             @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor,
             @Context HttpHeaders headers, @Context HttpServletRequest request) throws WebApplicationException
