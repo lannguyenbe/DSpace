@@ -8,17 +8,12 @@
 package org.dspace.rtbf.rest;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.dspace.content.ItemIterator;
 import org.dspace.rtbf.rest.common.Constants;
 import org.dspace.rtbf.rest.common.MetadataEntry;
-import org.dspace.rtbf.rest.common.MetadataWrapper;
 import org.dspace.rtbf.rest.common.Sequence;
-import org.dspace.rtbf.rest.common.Serie;
 import org.dspace.rtbf.rest.search.Resource;
 
 import javax.servlet.http.HttpServletRequest;
@@ -44,6 +39,7 @@ public class SequencesResource extends Resource
 {
 
     private static final Logger log = Logger.getLogger(SequencesResource.class);
+    private static org.dspace.core.Context context;
 
 
     /**
@@ -64,13 +60,15 @@ public class SequencesResource extends Resource
     	if (!omitExpand) { viewType = Constants.EXPANDELEM_VIEW; }
 
     	log.info("Reading item(id=" + itemId + ") metadata.");
-        org.dspace.core.Context context = null;
         Sequence sequence = null;
 
         try
         {
-            context = new org.dspace.core.Context();
-            context.getDBConnection();
+            if(context == null || !context.isValid() ) {
+                context = new org.dspace.core.Context();
+                context.getDBConnection();
+            }
+
             org.dspace.content.Item dspaceItem = findItem(context, itemId, org.dspace.core.Constants.READ);
 
             sequence = new org.dspace.rtbf.rest.common.Sequence(viewType, dspaceItem, expand+","+Constants.SEQUENCE_EXPAND_OPTIONS, context);
@@ -105,13 +103,15 @@ public class SequencesResource extends Resource
     	int viewType = Constants.MIN_VIEW;
     	
     	log.info("Reading item(id=" + itemId + ") metadata.");
-        org.dspace.core.Context context = null;
         List<MetadataEntry> metadata = null;
 
         try
         {
-            context = new org.dspace.core.Context();
-            context.getDBConnection();
+            if(context == null || !context.isValid() ) {
+                context = new org.dspace.core.Context();
+                context.getDBConnection();
+            }
+
             org.dspace.content.Item dspaceItem = findItem(context, itemId, org.dspace.core.Constants.READ);
 
             metadata = new org.dspace.rtbf.rest.common.Sequence(viewType, dspaceItem, "metadata", context).getMetadataEntries();

@@ -43,7 +43,7 @@ public class Episode extends DSpaceObject {
     	
     	switch (viewType) {
     	case Constants.SEARCH_RESULT_VIEW:
-        	this.setFirstBroadcasted(getDateIssued(collection));
+    		this.setDateIssued(getMetadataEntry(Constants.DATE_ISSUED,collection));
             this.setCountSupports(getCountAllSupports(collection));
             this.setCountSequences(collection.countItems());
             break;
@@ -97,6 +97,7 @@ public class Episode extends DSpaceObject {
     		metadataEntries = new ArrayList<MetadataEntry>();
             Metadatum[] dcvs = getAllMetadata(collection);
             for (Metadatum dcv : dcvs) {
+//                metadataEntries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
                 metadataEntries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
             }
      	} else {

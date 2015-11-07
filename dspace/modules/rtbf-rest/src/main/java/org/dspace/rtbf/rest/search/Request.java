@@ -1,11 +1,13 @@
 package org.dspace.rtbf.rest.search;
 
 import javax.ws.rs.core.MultivaluedMap;
+
 import java.util.Properties;
 
 import org.dspace.discovery.DiscoverQuery.SORT_ORDER;
 import org.dspace.rtbf.rest.common.Constants;
-import org.dspace.rtbf.rest.util.RsContext;
+import org.dspace.rtbf.rest.util.RsConfigurationManager;
+import org.dspace.core.Context;
 
 public class Request {
 	private String scope;
@@ -16,15 +18,15 @@ public class Request {
 	private SORT_ORDER sortOrder;
 
 
-	public Request(MultivaluedMap<String, String> params, RsContext context) {
+	public Request(MultivaluedMap<String, String> params, Context context) {
 		String str;
 		
 		scope = params.getFirst("scope");
 		query = params.getFirst("q");
 		
 		str = params.getFirst("limit");
-		limit = Integer.parseInt((str == null ||  str.length() == 0) ? Constants.LIMIT_DEFAULT : str);
-		if (limit < 0) { limit = Constants.RPP_DEFAULT; }
+		limit = Integer.parseInt((str == null ||  str.length() == 0) ? Constants.DEFAULT_LIMIT : str);
+		if (limit < 0) { limit = Constants.DEFAULT_RPP; }
 		
 		str = params.getFirst("offset");
 		offset = Integer.parseInt((str == null ||  str.length() == 0) ? "0" : str );
@@ -33,7 +35,7 @@ public class Request {
 		str = params.getFirst("sort-by");
 		if (str != null &&  str.length() > 0) {
 			// retrieve solr sort field corresponding to the frontend field
-			sortField = ((Properties) context.getAttribute(Constants.SORTMETA)).getProperty(str);
+			sortField = ((Properties) RsConfigurationManager.getInstance().getAttribute(Constants.SORTMETA)).getProperty(str);
 			if (sortField == null) { sortField = str; }
 	        str = params.getFirst("order");        
 	        try {

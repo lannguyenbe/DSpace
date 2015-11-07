@@ -2,6 +2,7 @@ package org.dspace.rtbf.rest.common;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAnyElement;
@@ -9,6 +10,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.apache.log4j.Logger;
 import org.dspace.rtbf.rest.search.SearchResponseParts;
+import org.dspace.rtbf.rest.util.RsConfigurationManager;
 
 public class MetadataWrapper {
     private static Logger log = Logger.getLogger(MetadataWrapper.class);
@@ -31,8 +33,8 @@ public class MetadataWrapper {
 		
 		for (MetadataEntry entry : v) {
 			elements.add(new JAXBElement<String>(
-					new javax.xml.namespace.QName(entry.getKey())
-//					new javax.xml.namespace.QName(getPreferredLabel(entry.getKey()))
+//					new javax.xml.namespace.QName(entry.getKey())
+					new javax.xml.namespace.QName(getPreferredLabel(entry.getKey()))
 					, String.class
 					, entry.getValue()
 			));
@@ -42,7 +44,12 @@ public class MetadataWrapper {
     }
     
 
-	private String getPreferredLabel(String key) { // strip schema part of the metadata name, concat the other parts with "_"
+	private String getPreferredLabel(String key) { 
+    	String label = ((Properties) RsConfigurationManager.getInstance().getAttribute(Constants.NAMINGMETA)).getProperty(key);
+    	return ((label != null)? label : key);
+	}
+
+	private String getDot2UnderscoreLabel(String key) { // strip schema part of the metadata name, concat the other parts with "_"
 		StringBuilder label = new StringBuilder();
 		String keyParts[] = key.split("\\.");
 		for (int i = 1, len = keyParts.length; i < len; i++) {
@@ -54,5 +61,5 @@ public class MetadataWrapper {
 
 		return label.toString();
 	}
-
+	
 }

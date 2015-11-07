@@ -51,7 +51,7 @@ public class DSpaceObject {
     private String thumbnail; // TODO
     //
     // Specialized metadata
-    private MetadataEntry dateIssued;
+    private MetadataEntry date_issued;
     //
     // Calculated
     protected Integer countSubSeries;
@@ -154,8 +154,8 @@ public class DSpaceObject {
         this.handle = handle;
     }
 
-//	@XmlJavaTypeAdapter(MetadataEntryAdapter.class)
-//  @XmlAnyElement
+	@XmlJavaTypeAdapter(MetadataEntryAdapter.class)
+    @XmlAnyElement
     public MetadataEntry getTitle(){
         return this.title;
     }
@@ -193,9 +193,9 @@ public class DSpaceObject {
     public void disableExpand() {
     	this.expand = null;    	
     }
-   
-//  @XmlJavaTypeAdapter(MetadataEntryAdapter.class)
-//  @XmlAnyElement
+    
+	@XmlJavaTypeAdapter(MetadataEntryAdapter.class)
+    @XmlAnyElement
 	public MetadataEntry getRoyalty_code() {
 		return royalty_code;
 	}
@@ -204,8 +204,8 @@ public class DSpaceObject {
 		this.royalty_code = royalty;
 	}
 
-//	@XmlJavaTypeAdapter(MetadataEntryAdapter.class)
-//  @XmlAnyElement
+	@XmlJavaTypeAdapter(MetadataEntryAdapter.class)
+    @XmlAnyElement
 	public MetadataEntry getRoyalty_remark() {
 		return royalty_remark;
 	}
@@ -214,8 +214,8 @@ public class DSpaceObject {
 		this.royalty_remark = royaltyText;
 	}
 
-//	@XmlJavaTypeAdapter(MetadataEntryAdapter.class)
-//  @XmlAnyElement
+	@XmlJavaTypeAdapter(MetadataEntryAdapter.class)
+    @XmlAnyElement
 	public MetadataEntry getDescription_abstract() {
 		return description_abstract;
 	}
@@ -303,14 +303,13 @@ public class DSpaceObject {
 	}
 
 	@XmlJavaTypeAdapter(MetadataEntryAdapter.class)
-//	@XmlAnyElement
-	public MetadataEntry getDateIssued() {
-		return dateIssued;
+    @XmlAnyElement
+	public MetadataEntry getDate_issued() {
+		return date_issued;
 	}
 
-	
-	public void setDateIssued(MetadataEntry dateIssued) {
-		this.dateIssued = dateIssued;
+	public void setDate_issued(MetadataEntry date_issued) {
+		this.date_issued = date_issued;
 	}
 
 	public Integer getCountSupports() {
@@ -357,8 +356,8 @@ public class DSpaceObject {
 		this.owningParentList = parentsList;
 	}
 
-//	@XmlJavaTypeAdapter(MetadataEntryAdapter.class)
-//  @XmlAnyElement
+	@XmlJavaTypeAdapter(MetadataEntryAdapter.class)
+    @XmlAnyElement
 	public MetadataEntry getIdentifier_attributor() {
 		return identifier_attributor;
 	}

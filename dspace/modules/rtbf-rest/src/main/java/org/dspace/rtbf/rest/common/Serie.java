@@ -12,7 +12,6 @@ import org.dspace.content.CollectionIterator;
 import org.dspace.content.CommunityIterator;
 import org.dspace.content.Metadatum;
 import org.dspace.core.Context;
-
 import javax.ws.rs.WebApplicationException;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -111,8 +110,9 @@ public class Serie extends DSpaceObject{
     		metadataEntries = new ArrayList<MetadataEntry>();
             Metadatum[] dcvs = getAllMetadata(community);
             for (Metadatum dcv : dcvs) {
+//                metadataEntries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
                 metadataEntries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
-            }
+           }
      	} else {
      		this.addExpand("metadata");
      	}

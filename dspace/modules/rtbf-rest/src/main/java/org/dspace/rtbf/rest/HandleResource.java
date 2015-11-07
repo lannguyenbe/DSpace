@@ -9,7 +9,6 @@ package org.dspace.rtbf.rest;
 
 import org.apache.log4j.Logger;
 import org.dspace.authorize.AuthorizeManager;
-import org.dspace.core.Context;
 import org.dspace.handle.HandleManager;
 import org.dspace.rtbf.rest.common.Constants;
 import org.dspace.rtbf.rest.common.DSpaceObject;
@@ -17,9 +16,13 @@ import org.dspace.rtbf.rest.common.Episode;
 import org.dspace.rtbf.rest.common.Sequence;
 import org.dspace.rtbf.rest.common.Serie;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -42,7 +45,11 @@ public class HandleResource {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public org.dspace.rtbf.rest.common.DSpaceObject getObject(@PathParam("prefix") String prefix, @PathParam("suffix") String suffix
     			, @QueryParam("expand") String expand
-        		, @QueryParam("omitExpand") @DefaultValue("true") boolean omitExpand)
+        		, @QueryParam("omitExpand") @DefaultValue("true") boolean omitExpand
+        		, @Context UriInfo info
+        		, @QueryParam("userIP") String user_ip, @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor
+                , @Context HttpHeaders headers, @Context HttpServletRequest request)
+                throws WebApplicationException
     {
 
     	int viewType = Constants.MIN_VIEW;
@@ -51,8 +58,7 @@ public class HandleResource {
 
     	try {
             if(context == null || !context.isValid() ) {
-                context = new Context();
-                //Failed SQL is ignored as a failed SQL statement, prevent: current transaction is aborted, commands ignored until end of transaction block
+                context = new org.dspace.core.Context();
                 context.getDBConnection();
             }
 

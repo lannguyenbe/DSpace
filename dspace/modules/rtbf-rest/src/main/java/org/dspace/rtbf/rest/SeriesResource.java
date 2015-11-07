@@ -45,6 +45,7 @@ import org.dspace.rtbf.rest.search.Resource;
 public class SeriesResource extends Resource
 {
     private static Logger log = Logger.getLogger(SeriesResource.class);
+    private static org.dspace.core.Context context;
 
     /**
      * It returns an array of series
@@ -52,7 +53,7 @@ public class SeriesResource extends Resource
      */
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    public Serie[] getSeries(@QueryParam("expand") String expand, @QueryParam("limit") @DefaultValue(Constants.LIMIT_DEFAULT) Integer limit,
+    public Serie[] getSeries(@QueryParam("expand") String expand, @QueryParam("limit") @DefaultValue(Constants.DEFAULT_LIMIT) Integer limit,
             @QueryParam("offset") @DefaultValue("0") Integer offset, @QueryParam("userIP") String user_ip,
             @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor,
             @Context HttpHeaders headers, @Context HttpServletRequest request) throws WebApplicationException
@@ -61,14 +62,15 @@ public class SeriesResource extends Resource
     	int viewType = Constants.MIN_VIEW;
 
         log.info("Reading communities.(offset=" + offset + ",limit=" + limit + ").");
-        org.dspace.core.Context context = null;
         List<Serie> series = null;
 
         try
         {
-            context = new org.dspace.core.Context();
-            context.getDBConnection();
-
+            if(context == null || !context.isValid() ) {
+                context = new org.dspace.core.Context();
+                context.getDBConnection();
+            }
+            
             if (!((limit != null) && (limit >= 0) && (offset != null) && (offset >= 0)))
             {
                 log.warn("Pagging was badly set, using default values.");
@@ -117,14 +119,15 @@ public class SeriesResource extends Resource
     	if (!omitExpand) { viewType = Constants.EXPANDELEM_VIEW; }
     	
     	log.info("Reading community(id=" + communityId + ").");
-        org.dspace.core.Context context = null;
         Serie serie = null;
 
         try
         {
-            context = new org.dspace.core.Context();
-            context.getDBConnection();
-
+            if(context == null || !context.isValid() ) {
+                context = new org.dspace.core.Context();
+                context.getDBConnection();
+            }
+            
             org.dspace.content.Community dspaceCommunity = findCommunity(context, communityId, org.dspace.core.Constants.READ);
 
             serie = new Serie(viewType, dspaceCommunity, expand+","+Constants.SERIE_EXPAND_OPTIONS, context);
@@ -163,13 +166,14 @@ public class SeriesResource extends Resource
     	int viewType = Constants.MIN_VIEW;
 
         log.info("Reading all top communities.(offset=" + offset + " ,limit=" + limit + ").");
-        org.dspace.core.Context context = null;
         List<Serie> series = null;
 
         try
         {
-            context = new org.dspace.core.Context();
-            context.getDBConnection();
+            if(context == null || !context.isValid() ) {
+                context = new org.dspace.core.Context();
+                context.getDBConnection();
+            }
             
             org.dspace.content.Community[] dspaceCommunities = org.dspace.content.Community.findAllTop(context);
             series = new ArrayList<Serie>();
@@ -213,7 +217,7 @@ public class SeriesResource extends Resource
     @Path("/{community_id}/episodes")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public Episode[] getSerieEpisodes(@PathParam("community_id") Integer communityId,
-            @QueryParam("expand") String expand, @QueryParam("limit") @DefaultValue(Constants.LIMIT_DEFAULT) Integer limit,
+            @QueryParam("expand") String expand, @QueryParam("limit") @DefaultValue(Constants.DEFAULT_LIMIT) Integer limit,
             @QueryParam("offset") @DefaultValue("0") Integer offset, @QueryParam("userIP") String user_ip,
             @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor,
             @Context HttpHeaders headers, @Context HttpServletRequest request) throws WebApplicationException
@@ -221,14 +225,15 @@ public class SeriesResource extends Resource
     	int viewType = Constants.MIN_VIEW;
 
         log.info("Reading community(id=" + communityId + ") collections.");
-        org.dspace.core.Context context = null;
         List<Episode> episodes = null;
 
         try
         {
-            context = new org.dspace.core.Context();
-            context.getDBConnection();
-
+            if(context == null || !context.isValid() ) {
+                context = new org.dspace.core.Context();
+                context.getDBConnection();
+            }
+            
             org.dspace.content.Community dspaceCommunity = findCommunity(context, communityId, org.dspace.core.Constants.READ);            
             
             episodes = new ArrayList<Episode>();
@@ -269,14 +274,15 @@ public class SeriesResource extends Resource
     	int viewType = Constants.MIN_VIEW;
 
         log.info("Reading community(id=" + communityId + ") subcommunities.");
-        org.dspace.core.Context context = null;
         List<Serie> series = null;
 
         try
         {
-            context = new org.dspace.core.Context();
-            context.getDBConnection();
-
+            if(context == null || !context.isValid() ) {
+                context = new org.dspace.core.Context();
+                context.getDBConnection();
+            }
+            
             org.dspace.content.Community dspaceCommunity = findCommunity(context, communityId, org.dspace.core.Constants.READ);
 
             series = new ArrayList<Serie>();
@@ -318,14 +324,15 @@ public class SeriesResource extends Resource
     	int viewType = Constants.MIN_VIEW;
     	
     	log.info("Reading community(id=" + communityId + ") metadata.");
-        org.dspace.core.Context context = null;
         List<MetadataEntry> metadata = null;
 
         try
         {
-            context = new org.dspace.core.Context();
-            context.getDBConnection();
-
+            if(context == null || !context.isValid() ) {
+                context = new org.dspace.core.Context();
+                context.getDBConnection();
+            }
+            
             org.dspace.content.Community dspaceCommunity = findCommunity(context, communityId, org.dspace.core.Constants.READ);
 
             metadata = new org.dspace.rtbf.rest.common.Serie(viewType, dspaceCommunity, "metadata", context).getMetadataEntries();

@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 @XmlRootElement(name = "sequence")
 public class Sequence extends DSpaceObject{
@@ -33,7 +34,7 @@ public class Sequence extends DSpaceObject{
     	switch(viewType) {
     	case Constants.SEARCH_RESULT_VIEW:
         	this.setCountSupports(getCountAllSupports(item));
-            this.setFirstBroadcasted(getDateIssued(item));
+    		this.setDateIssued(getMetadataEntry(Constants.DATE_ISSUED,item));
     		innerViewType = Constants.MIN_VIEW;
     		break;
     	default:
@@ -88,7 +89,8 @@ public class Sequence extends DSpaceObject{
     		metadataEntries = new ArrayList<MetadataEntry>();
             Metadatum[] dcvs = item.getMetadata(org.dspace.content.Item.ANY, org.dspace.content.Item.ANY, org.dspace.content.Item.ANY, org.dspace.content.Item.ANY);
             for (Metadatum dcv : dcvs) {
-                metadataEntries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
+//                metadataEntries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
+              metadataEntries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
             }
      	} else {
      		this.addExpand("metadata");
@@ -99,6 +101,5 @@ public class Sequence extends DSpaceObject{
         }
         
     }
-
-
+    
 }

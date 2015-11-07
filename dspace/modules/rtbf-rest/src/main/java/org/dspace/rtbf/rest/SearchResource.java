@@ -1,10 +1,6 @@
 package org.dspace.rtbf.rest;
 
-import java.sql.SQLException;
-import java.util.Properties;
-
 import org.apache.log4j.Logger;
-import org.dspace.core.ConfigurationManager;
 import org.dspace.discovery.DiscoverResult;
 import org.dspace.rtbf.rest.common.Constants;
 import org.dspace.rtbf.rest.search.Request;
@@ -23,6 +19,7 @@ import javax.ws.rs.core.UriInfo;
 public class SearchResource extends Resource {
 	
 	private static final Logger log = Logger.getLogger(SearchResource.class);
+    private static org.dspace.core.Context context;
 	
     @GET
     @Path("sequences")
@@ -30,7 +27,7 @@ public class SearchResource extends Resource {
     public SearchResponse getSearchResponse(
     		@QueryParam("scope") String scope
     		, @QueryParam("q") String qterms
-    		, @QueryParam("limit") @DefaultValue(Constants.LIMIT_DEFAULT) Integer limit, @QueryParam("offset") @DefaultValue("0") Integer offset
+    		, @QueryParam("limit") @DefaultValue(Constants.DEFAULT_LIMIT) Integer limit, @QueryParam("offset") @DefaultValue("0") Integer offset
     		, @QueryParam("sort-by") String orderBy, @QueryParam("order") String order
     		, @QueryParam("expand") String expand
     		, @Context UriInfo info
@@ -39,14 +36,15 @@ public class SearchResource extends Resource {
     {
 
         log.info("Searching sequences(q=" + qterms + ").");
-        org.dspace.rtbf.rest.util.RsContext context = null;
         SearchResponse response = null;
         DiscoverResult queryResults = null;
         try {
         	
-            context = new org.dspace.rtbf.rest.util.RsContext();
-            context.getDBConnection();
-            context.setServletContext(request.getSession().getServletContext());
+            if(context == null || !context.isValid() ) {
+                context = new org.dspace.core.Context();
+                context.getDBConnection();
+            }
+
             
             Request searchRequest = new Request(info.getQueryParameters(), context);
             
