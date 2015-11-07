@@ -34,7 +34,7 @@ public class Sequence extends DSpaceObject{
     	switch(viewType) {
     	case Constants.SEARCH_RESULT_VIEW:
         	this.setCountSupports(getCountAllSupports(item));
-    		this.setDateIssued(getMetadataEntry(Constants.DATE_ISSUED,item));
+    		this.setDateIssued(getMetadataEntry2(Constants.DATE_ISSUED,item));
     		innerViewType = Constants.MIN_VIEW;
     		break;
     	default:

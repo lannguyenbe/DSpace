@@ -43,7 +43,7 @@ public class Episode extends DSpaceObject {
     	
     	switch (viewType) {
     	case Constants.SEARCH_RESULT_VIEW:
-    		this.setDateIssued(getMetadataEntry(Constants.DATE_ISSUED,collection));
+    		this.setDateIssued(getMetadataEntry2(Constants.DATE_ISSUED,collection));
             this.setCountSupports(getCountAllSupports(collection));
             this.setCountSequences(collection.countItems());
             break;

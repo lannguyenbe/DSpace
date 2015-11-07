@@ -51,7 +51,7 @@ public class DSpaceObject {
     private String thumbnail; // TODO
     //
     // Specialized metadata
-    private MetadataEntry dateIssued;
+    private MetadataEntry2 dateIssued;
     //
     // Calculated
     protected Integer countSubSeries;
@@ -116,6 +116,15 @@ public class DSpaceObject {
         return null;
     }
     
+    protected MetadataEntry2 getMetadataEntry2(String value, org.dspace.content.DSpaceObject dso){
+        Metadatum[] dcv = dso.getMetadataByMetadataString(value);
+
+        if(dcv.length>0) {
+            return new MetadataEntry2(dcv[0].getField(), dcv[0].value, dcv[0].language);
+        }
+        return null;
+    }
+
     protected Metadatum[] getAllMetadata(org.dspace.content.DSpaceObject dso){
         Metadatum[] dcvalues = dso.getMetadataByMetadataString("*.*.*");
 
@@ -302,14 +311,13 @@ public class DSpaceObject {
 		this.sequences = sequences;
 	}
 
-	@XmlJavaTypeAdapter(MetadataEntryAdapter.class)
-//	@XmlAnyElement
-	public MetadataEntry getDateIssued() {
+	@XmlAnyElement
+	public MetadataEntry2 getDateIssued() {
 		return dateIssued;
 	}
 
 	
-	public void setDateIssued(MetadataEntry dateIssued) {
+	public void setDateIssued(MetadataEntry2 dateIssued) {
 		this.dateIssued = dateIssued;
 	}
 
