@@ -39,7 +39,6 @@ public class SequencesResource extends Resource
 {
 
     private static final Logger log = Logger.getLogger(SequencesResource.class);
-    private static org.dspace.core.Context context;
 
 
     /**
@@ -55,6 +54,7 @@ public class SequencesResource extends Resource
             @QueryParam("xforwardedfor") String xforwardedfor, @Context HttpHeaders headers, @Context HttpServletRequest request)
             throws WebApplicationException
     {
+        org.dspace.core.Context context = null;
     	int viewType = Constants.MIN_VIEW;
     	
     	if (!omitExpand) { viewType = Constants.EXPANDELEM_VIEW; }
@@ -64,10 +64,8 @@ public class SequencesResource extends Resource
 
         try
         {
-            if(context == null || !context.isValid() ) {
-                context = new org.dspace.core.Context();
-                context.getDBConnection();
-            }
+            context = new org.dspace.core.Context();
+            context.getDBConnection();
 
             org.dspace.content.Item dspaceItem = findItem(context, itemId, org.dspace.core.Constants.READ);
 
@@ -99,7 +97,7 @@ public class SequencesResource extends Resource
             @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor,
             @Context HttpHeaders headers, @Context HttpServletRequest request) throws WebApplicationException
     {
-
+        org.dspace.core.Context context = null;
     	int viewType = Constants.MIN_VIEW;
     	
     	log.info("Reading item(id=" + itemId + ") metadata.");
@@ -107,10 +105,8 @@ public class SequencesResource extends Resource
 
         try
         {
-            if(context == null || !context.isValid() ) {
-                context = new org.dspace.core.Context();
-                context.getDBConnection();
-            }
+            context = new org.dspace.core.Context();
+            context.getDBConnection();
 
             org.dspace.content.Item dspaceItem = findItem(context, itemId, org.dspace.core.Constants.READ);
 

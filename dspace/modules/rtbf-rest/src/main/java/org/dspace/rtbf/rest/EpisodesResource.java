@@ -45,7 +45,6 @@ import org.dspace.rtbf.rest.search.Resource;
 public class EpisodesResource extends Resource
 {
     private static Logger log = Logger.getLogger(EpisodesResource.class);
-    private static org.dspace.core.Context context;
 
     /**
      * Return instance of collection with passed id
@@ -59,6 +58,7 @@ public class EpisodesResource extends Resource
             @QueryParam("xforwardedfor") String xforwardedfor, @Context HttpHeaders headers, @Context HttpServletRequest request) 
             throws WebApplicationException
     {
+        org.dspace.core.Context context = null;
     	int viewType = Constants.MIN_VIEW;
 
     	if (!omitExpand) { viewType = Constants.EXPANDELEM_VIEW; }
@@ -68,10 +68,8 @@ public class EpisodesResource extends Resource
 
         try
         {
-            if(context == null || !context.isValid() ) {
-                context = new org.dspace.core.Context();
-                context.getDBConnection();
-            }
+            context = new org.dspace.core.Context();
+            context.getDBConnection();
             
             org.dspace.content.Collection dspaceCollection = findCollection(context, collectionId, org.dspace.core.Constants.READ);
 
@@ -106,6 +104,7 @@ public class EpisodesResource extends Resource
             @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor,
             @Context HttpHeaders headers, @Context HttpServletRequest request) throws WebApplicationException
     {
+        org.dspace.core.Context context = null;
     	int viewType = Constants.MIN_VIEW;
 
         log.info("Reading collection(id=" + collectionId + ") items.");
@@ -113,10 +112,8 @@ public class EpisodesResource extends Resource
 
         try
         {
-            if(context == null || !context.isValid() ) {
-                context = new org.dspace.core.Context();
-                context.getDBConnection();
-            }
+            context = new org.dspace.core.Context();
+            context.getDBConnection();
             
             org.dspace.content.Collection dspaceCollection = findCollection(context, collectionId, org.dspace.core.Constants.READ);
 
@@ -156,7 +153,7 @@ public class EpisodesResource extends Resource
             @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor,
             @Context HttpHeaders headers, @Context HttpServletRequest request) throws WebApplicationException
     {
-
+        org.dspace.core.Context context = null;
     	int viewType = Constants.MIN_VIEW;
     	
     	log.info("Reading collection(id=" + collectionId + ") metadata.");
@@ -164,10 +161,8 @@ public class EpisodesResource extends Resource
 
         try
         {
-            if(context == null || !context.isValid() ) {
-                context = new org.dspace.core.Context();
-                context.getDBConnection();
-            }
+            context = new org.dspace.core.Context();
+            context.getDBConnection();
 
             org.dspace.content.Collection dspaceCollection = findCollection(context, collectionId, org.dspace.core.Constants.READ);
 

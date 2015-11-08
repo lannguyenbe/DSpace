@@ -19,7 +19,6 @@ import javax.ws.rs.core.UriInfo;
 public class SearchResource extends Resource {
 	
 	private static final Logger log = Logger.getLogger(SearchResource.class);
-    private static org.dspace.core.Context context;
 	
     @GET
     @Path("sequences")
@@ -34,17 +33,14 @@ public class SearchResource extends Resource {
     		, @QueryParam("userIP") String user_ip, @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor
             , @Context HttpHeaders headers, @Context HttpServletRequest request) throws WebApplicationException
     {
-
+        org.dspace.core.Context context = null;
         log.info("Searching sequences(q=" + qterms + ").");
         SearchResponse response = null;
         DiscoverResult queryResults = null;
-        try {
-        	
-            if(context == null || !context.isValid() ) {
-                context = new org.dspace.core.Context();
-                context.getDBConnection();
-            }
 
+        try {        	
+            context = new org.dspace.core.Context();
+            context.getDBConnection();
             
             Request searchRequest = new Request(info.getQueryParameters(), context);
             

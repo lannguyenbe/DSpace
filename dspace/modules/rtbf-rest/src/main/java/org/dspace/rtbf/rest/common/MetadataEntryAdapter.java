@@ -5,24 +5,27 @@ import java.util.Properties;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-import org.apache.log4j.Logger;
 import org.dspace.rtbf.rest.util.RsConfigurationManager;
 
-public class MetadataEntryAdapter extends XmlAdapter<MetadataEntryWrapper, MetadataEntry> {
-    private static Logger log = Logger.getLogger(MetadataEntryAdapter.class);
+/*
+ * Use only by Jabx for xml output
+ */
+public class MetadataEntryAdapter extends XmlAdapter<JAXBElement<String>, MetadataEntry> {
 
 	@Override
-	public MetadataEntryWrapper marshal(MetadataEntry entry) throws Exception {
-
-		if (entry == null) { return null; }
-		
-		return(new MetadataEntryWrapper(entry));
+	public MetadataEntry unmarshal(JAXBElement<String> v) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
-	public MetadataEntry unmarshal(MetadataEntryWrapper v) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+	public JAXBElement<String> marshal(MetadataEntry entry) throws Exception {
+		if (entry == null) { return null; }
+		return(new JAXBElement<String>(
+				new javax.xml.namespace.QName(getPreferredLabel(entry.getKey()))
+				, String.class
+				, entry.getValue()
+		));
 	}
 
 	private String getPreferredLabel(String key) { 

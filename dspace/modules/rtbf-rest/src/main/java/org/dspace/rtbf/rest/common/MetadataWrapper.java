@@ -12,6 +12,9 @@ import org.apache.log4j.Logger;
 import org.dspace.rtbf.rest.search.SearchResponseParts;
 import org.dspace.rtbf.rest.util.RsConfigurationManager;
 
+/*
+ * Use only by Jabx for xml output
+ */
 public class MetadataWrapper {
     private static Logger log = Logger.getLogger(MetadataWrapper.class);
 
@@ -34,7 +37,7 @@ public class MetadataWrapper {
 		for (MetadataEntry entry : v) {
 			elements.add(new JAXBElement<String>(
 //					new javax.xml.namespace.QName(entry.getKey())
-					new javax.xml.namespace.QName(getPreferredLabel(entry.getKey()))
+					new javax.xml.namespace.QName(MetadataEntry.getPreferredLabel(entry.getKey()))
 					, String.class
 					, entry.getValue()
 			));
@@ -43,11 +46,6 @@ public class MetadataWrapper {
           return elements;
     }
     
-
-	private String getPreferredLabel(String key) { 
-    	String label = ((Properties) RsConfigurationManager.getInstance().getAttribute(Constants.NAMINGMETA)).getProperty(key);
-    	return ((label != null)? label : key);
-	}
 
 	private String getDot2UnderscoreLabel(String key) { // strip schema part of the metadata name, concat the other parts with "_"
 		StringBuilder label = new StringBuilder();

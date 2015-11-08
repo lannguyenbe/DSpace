@@ -62,19 +62,29 @@
             <!-- artifactId>jersey-container-servlet</artifactId -->
         </dependency>
 
-<!-- get JSON support -->
+<!-- get JSON support : using MOXY 
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-moxy</artifactId>
         </dependency>
+-->
 
-        <!-- JSON serialization, should I use jackson?
+<!-- get JSON support : using Jackson 2 -->
         <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-json</artifactId>
-            <version>1.17.1</version>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <!-- version>2.22.1</version -->
         </dependency>
-        -->
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
+            <version>1.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr353</artifactId>
+            <version>2.3.2</version>
+        </dependency>
 
         <dependency>
             <groupId>org.dspace.modules</groupId>

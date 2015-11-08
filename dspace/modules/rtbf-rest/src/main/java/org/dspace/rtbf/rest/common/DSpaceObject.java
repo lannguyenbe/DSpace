@@ -12,17 +12,21 @@ import org.atteo.evo.inflector.English;
 import org.dspace.content.Metadatum;
 import org.dspace.rtbf.rest.common.Constants;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -35,31 +39,36 @@ import java.util.List;
 public class DSpaceObject {
     private static Logger log = Logger.getLogger(DSpaceObject.class);
     
-    // MIN_VIEW Minimum Identification elements
+    // MIN_VIEW minimum Identification elements
     private Integer id;
     private String handle;
     private String type;
     private MetadataEntry title;
 
-    // SEARCHRESULT_VIEW results basic elements
+    // SEARCH_RESULT_VIEW results basic elements
     //
-    // Common metadata
-    private MetadataEntry identifier_attributor;
-    private MetadataEntry royalty_code;
-    private MetadataEntry royalty_remark;
-    private MetadataEntry description_abstract;
+    // Common elements
+    @JsonProperty("rtbf.identifier.attributor")
+    private MetadataEntry identifierAttributor;
+    @JsonProperty("rtbf.royalty_code")
+    private MetadataEntry royaltyCode;
+    @JsonProperty("rtbf.royalty_remark")
+    private MetadataEntry royaltyRemark;
+    @JsonProperty("dc.description.abstract")
+    private MetadataEntry descriptionAbstract;
     private String thumbnail; // TODO
     //
-    // Specialized metadata
-    private MetadataEntry2 dateIssued;
-    //
-    // Calculated
+    // Specialized elements
+    @JsonProperty("dc.date.issued")
+    private MetadataEntry dateIssued;
+	//
+    // Calculated elements
     protected Integer countSubSeries;
     protected Integer countEpisodes;
 	protected Integer countSequences;
     protected Integer countSupports;
     
-    @XmlElement(name = "link", required = true)
+//    @XmlElement(name = "link", required = true)
     private String link;
 
     //Expandable relationships
@@ -70,8 +79,10 @@ public class DSpaceObject {
     protected List<Serie> subSeries;
     protected List<Episode> episodes;
     protected List<Sequence> sequences;
-    protected List<MetadataEntry> metadataEntries;
-	protected MetadataWrapper metadata;
+    @JsonIgnore
+    protected List<MetadataEntry> metadataEntries; // neither by Jaxb, nor Jackson
+    @JsonIgnore
+    protected MetadataWrapper metadata; // use by Jaxb, not by Jackson
     // TODO List<Diffusion> diffusions;
     // TODO List<Support> supports;
 
@@ -94,10 +105,10 @@ public class DSpaceObject {
     	switch (viewType) {
     	case Constants.SEARCH_RESULT_VIEW:
     		disableExpand();
-    		setIdentifier_attributor(getMetadataEntry(Constants.ATTRIBUTOR,dso));
-            setRoyalty_code(getMetadataEntry(Constants.ROYALTY,dso));
-            setRoyalty_remark(getMetadataEntry(Constants.ROYALTY_REMARK,dso));
-            setDescription_abstract(getMetadataEntry(Constants.ABSTRACT,dso));
+    		setIdentifierAttributor(getMetadataEntry(Constants.ATTRIBUTOR,dso));
+            setRoyaltyCode(getMetadataEntry(Constants.ROYALTY,dso));
+            setRoyaltyRemark(getMetadataEntry(Constants.ROYALTY_REMARK,dso));
+            setDescriptionAbstract(getMetadataEntry(Constants.ABSTRACT,dso));
             break;
     	case Constants.MIN_VIEW:
     		disableExpand();
@@ -116,15 +127,6 @@ public class DSpaceObject {
         return null;
     }
     
-    protected MetadataEntry2 getMetadataEntry2(String value, org.dspace.content.DSpaceObject dso){
-        Metadatum[] dcv = dso.getMetadataByMetadataString(value);
-
-        if(dcv.length>0) {
-            return new MetadataEntry2(dcv[0].getField(), dcv[0].value, dcv[0].language);
-        }
-        return null;
-    }
-
     protected Metadatum[] getAllMetadata(org.dspace.content.DSpaceObject dso){
         Metadatum[] dcvalues = dso.getMetadataByMetadataString("*.*.*");
 
@@ -163,8 +165,7 @@ public class DSpaceObject {
         this.handle = handle;
     }
 
-//	@XmlJavaTypeAdapter(MetadataEntryAdapter.class)
-//  @XmlAnyElement
+    @XmlAnyElement
     public MetadataEntry getTitle(){
         return this.title;
     }
@@ -173,9 +174,15 @@ public class DSpaceObject {
         this.title = title;
     }
 
+    @XmlTransient
+    @JsonIgnore
     public String getLink() {
         //TODO, get actual contextPath of /rest/
         return "/RESTapi/" + English.plural(getType()) + "/" + getId();
+    }
+
+    public void setLink(String link) {
+    	this.link = link;
     }
 
     public List<String> getExpand() {
@@ -203,34 +210,31 @@ public class DSpaceObject {
     	this.expand = null;    	
     }
    
-//  @XmlJavaTypeAdapter(MetadataEntryAdapter.class)
-//  @XmlAnyElement
-	public MetadataEntry getRoyalty_code() {
-		return royalty_code;
+    @XmlAnyElement
+	public MetadataEntry getRoyaltyCode() {
+		return royaltyCode;
 	}
 
-	public void setRoyalty_code(MetadataEntry royalty) {
-		this.royalty_code = royalty;
+	public void setRoyaltyCode(MetadataEntry royalty) {
+		this.royaltyCode = royalty;
 	}
 
-//	@XmlJavaTypeAdapter(MetadataEntryAdapter.class)
-//  @XmlAnyElement
-	public MetadataEntry getRoyalty_remark() {
-		return royalty_remark;
+	@XmlAnyElement
+	public MetadataEntry getRoyaltyRemark() {
+		return royaltyRemark;
 	}
 
-	public void setRoyalty_remark(MetadataEntry royaltyText) {
-		this.royalty_remark = royaltyText;
+	public void setRoyaltyRemark(MetadataEntry royaltyText) {
+		this.royaltyRemark = royaltyText;
 	}
 
-//	@XmlJavaTypeAdapter(MetadataEntryAdapter.class)
-//  @XmlAnyElement
-	public MetadataEntry getDescription_abstract() {
-		return description_abstract;
+	@XmlAnyElement
+	public MetadataEntry getDescriptionAbstract() {
+		return descriptionAbstract;
 	}
 
-	public void setDescription_abstract(MetadataEntry description) {
-		this.description_abstract = description;
+	public void setDescriptionAbstract(MetadataEntry description) {
+		this.descriptionAbstract = description;
 	}
 
 	public Serie getOwningSerie() {
@@ -261,12 +265,14 @@ public class DSpaceObject {
 		this.episodes = episodes;
 	}
     
-    @XmlTransient
-	public List<MetadataEntry> getMetadataEntries() {
+	@JsonIgnore
+	@XmlTransient
+	public List<MetadataEntry> getMetadataEntries() { // neither by Jaxb, nor Jackson
 		return metadataEntries;
 	}
 	
-	public MetadataWrapper getMetadata() {
+    @JsonIgnore
+	public MetadataWrapper getMetadata() { // use by Jaxb, not by Jackson
 		if (metadataEntries != null ) {
 			metadata = new MetadataWrapper(metadataEntries);
 		}
@@ -312,12 +318,11 @@ public class DSpaceObject {
 	}
 
 	@XmlAnyElement
-	public MetadataEntry2 getDateIssued() {
+	public MetadataEntry getDateIssued() {
 		return dateIssued;
 	}
-
 	
-	public void setDateIssued(MetadataEntry2 dateIssued) {
+	public void setDateIssued(MetadataEntry dateIssued) {
 		this.dateIssued = dateIssued;
 	}
 
@@ -365,15 +370,19 @@ public class DSpaceObject {
 		this.owningParentList = parentsList;
 	}
 
-//	@XmlJavaTypeAdapter(MetadataEntryAdapter.class)
-//  @XmlAnyElement
-	public MetadataEntry getIdentifier_attributor() {
-		return identifier_attributor;
+	@XmlAnyElement
+	public MetadataEntry getIdentifierAttributor() {
+		return identifierAttributor;
 	}
 
-	public void setIdentifier_attributor(MetadataEntry identifier_attributor) {
-		this.identifier_attributor = identifier_attributor;
+	public void setIdentifierAttributor(MetadataEntry m) {
+		this.identifierAttributor = m;
 	}
 
+	@JsonGetter("metadata")
+	@XmlTransient
+	protected Map<String, Object> getMetadataEntriesAsMap() { // use by Jackson, not by Jaxb
+		return MetadataEntry.listAsMap(this.metadataEntries);
+	}
 
 }

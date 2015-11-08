@@ -45,7 +45,6 @@ import org.dspace.rtbf.rest.search.Resource;
 public class SeriesResource extends Resource
 {
     private static Logger log = Logger.getLogger(SeriesResource.class);
-    private static org.dspace.core.Context context;
 
     /**
      * It returns an array of series
@@ -58,7 +57,7 @@ public class SeriesResource extends Resource
             @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor,
             @Context HttpHeaders headers, @Context HttpServletRequest request) throws WebApplicationException
     {
-
+        org.dspace.core.Context context = null;
     	int viewType = Constants.MIN_VIEW;
 
         log.info("Reading communities.(offset=" + offset + ",limit=" + limit + ").");
@@ -66,10 +65,8 @@ public class SeriesResource extends Resource
 
         try
         {
-            if(context == null || !context.isValid() ) {
-                context = new org.dspace.core.Context();
-                context.getDBConnection();
-            }
+            context = new org.dspace.core.Context();
+            context.getDBConnection();
             
             if (!((limit != null) && (limit >= 0) && (offset != null) && (offset >= 0)))
             {
@@ -114,6 +111,7 @@ public class SeriesResource extends Resource
             @QueryParam("xforwardedfor") String xforwardedfor, @Context HttpHeaders headers, @Context HttpServletRequest request)
             throws WebApplicationException
     {
+        org.dspace.core.Context context = null;
     	int viewType = Constants.MIN_VIEW;
 
     	if (!omitExpand) { viewType = Constants.EXPANDELEM_VIEW; }
@@ -123,10 +121,8 @@ public class SeriesResource extends Resource
 
         try
         {
-            if(context == null || !context.isValid() ) {
-                context = new org.dspace.core.Context();
-                context.getDBConnection();
-            }
+            context = new org.dspace.core.Context();
+            context.getDBConnection();
             
             org.dspace.content.Community dspaceCommunity = findCommunity(context, communityId, org.dspace.core.Constants.READ);
 
@@ -163,6 +159,7 @@ public class SeriesResource extends Resource
             @QueryParam("xforwardedfor") String xforwardedfor, @Context HttpHeaders headers, @Context HttpServletRequest request)
             throws WebApplicationException
     {
+        org.dspace.core.Context context = null;
     	int viewType = Constants.MIN_VIEW;
 
         log.info("Reading all top communities.(offset=" + offset + " ,limit=" + limit + ").");
@@ -170,10 +167,8 @@ public class SeriesResource extends Resource
 
         try
         {
-            if(context == null || !context.isValid() ) {
-                context = new org.dspace.core.Context();
-                context.getDBConnection();
-            }
+            context = new org.dspace.core.Context();
+            context.getDBConnection();
             
             org.dspace.content.Community[] dspaceCommunities = org.dspace.content.Community.findAllTop(context);
             series = new ArrayList<Serie>();
@@ -222,6 +217,7 @@ public class SeriesResource extends Resource
             @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor,
             @Context HttpHeaders headers, @Context HttpServletRequest request) throws WebApplicationException
     {
+        org.dspace.core.Context context = null;
     	int viewType = Constants.MIN_VIEW;
 
         log.info("Reading community(id=" + communityId + ") collections.");
@@ -229,10 +225,8 @@ public class SeriesResource extends Resource
 
         try
         {
-            if(context == null || !context.isValid() ) {
-                context = new org.dspace.core.Context();
-                context.getDBConnection();
-            }
+            context = new org.dspace.core.Context();
+            context.getDBConnection();
             
             org.dspace.content.Community dspaceCommunity = findCommunity(context, communityId, org.dspace.core.Constants.READ);            
             
@@ -271,6 +265,7 @@ public class SeriesResource extends Resource
             @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor,
             @Context HttpHeaders headers, @Context HttpServletRequest request) throws WebApplicationException
     {
+        org.dspace.core.Context context = null;
     	int viewType = Constants.MIN_VIEW;
 
         log.info("Reading community(id=" + communityId + ") subcommunities.");
@@ -278,10 +273,8 @@ public class SeriesResource extends Resource
 
         try
         {
-            if(context == null || !context.isValid() ) {
-                context = new org.dspace.core.Context();
-                context.getDBConnection();
-            }
+            context = new org.dspace.core.Context();
+            context.getDBConnection();
             
             org.dspace.content.Community dspaceCommunity = findCommunity(context, communityId, org.dspace.core.Constants.READ);
 
@@ -320,7 +313,7 @@ public class SeriesResource extends Resource
             @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor,
             @Context HttpHeaders headers, @Context HttpServletRequest request) throws WebApplicationException
     {
-
+        org.dspace.core.Context context = null;
     	int viewType = Constants.MIN_VIEW;
     	
     	log.info("Reading community(id=" + communityId + ") metadata.");
@@ -328,11 +321,9 @@ public class SeriesResource extends Resource
 
         try
         {
-            if(context == null || !context.isValid() ) {
-                context = new org.dspace.core.Context();
-                context.getDBConnection();
-            }
-            
+            context = new org.dspace.core.Context();
+            context.getDBConnection();
+
             org.dspace.content.Community dspaceCommunity = findCommunity(context, communityId, org.dspace.core.Constants.READ);
 
             metadata = new org.dspace.rtbf.rest.common.Serie(viewType, dspaceCommunity, "metadata", context).getMetadataEntries();
