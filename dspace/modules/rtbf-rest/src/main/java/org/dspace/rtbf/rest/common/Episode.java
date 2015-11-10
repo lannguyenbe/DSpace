@@ -70,7 +70,7 @@ public class Episode extends RTBObject {
             	this.owningParentList.add(new Serie(viewType, topparentCommunity, null, context));
             }
         } else {
-            this.addExpand("owningParentListt");
+            this.addExpand("owningParentList");
         }
 
         //Item paging : limit, offset/page
@@ -78,7 +78,7 @@ public class Episode extends RTBObject {
             ItemIterator childItems;
             
             if (!((limit != null) && (limit >= 0) && (offset != null) && (offset >= 0))) {
-                log.warn("Pagging was badly set, using default values.");
+                log.warn("Paging was badly set, using default values.");
                 limit = Constants.LIMITMAX;
                 offset = 0;
             }
@@ -97,7 +97,6 @@ public class Episode extends RTBObject {
     		metadataEntries = new ArrayList<MetadataEntry>();
             Metadatum[] dcvs = getAllMetadata(collection);
             for (Metadatum dcv : dcvs) {
-//                metadataEntries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
                 metadataEntries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
             }
      	} else {

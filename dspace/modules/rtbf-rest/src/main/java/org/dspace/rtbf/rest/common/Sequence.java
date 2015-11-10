@@ -89,7 +89,6 @@ public class Sequence extends RTBObject{
     		metadataEntries = new ArrayList<MetadataEntry>();
             Metadatum[] dcvs = item.getMetadata(org.dspace.content.Item.ANY, org.dspace.content.Item.ANY, org.dspace.content.Item.ANY, org.dspace.content.Item.ANY);
             for (Metadatum dcv : dcvs) {
-//                metadataEntries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
               metadataEntries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
             }
      	} else {

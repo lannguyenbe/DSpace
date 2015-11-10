@@ -19,7 +19,7 @@
     <properties>
         <!-- This is the path to the root [dspace-src] directory. -->
         <root.basedir>${basedir}/../../..</root.basedir>
-        <jersey.version>2.16</jersey.version>
+        <jersey.version>2.22.1</jersey.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -73,8 +73,8 @@
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-jackson</artifactId>
-            <!-- version>2.22.1</version -->
         </dependency>
+<!--  10.11.2015 Lan: not currently using javax?json      
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.json</artifactId>
@@ -85,7 +85,7 @@
             <artifactId>jackson-datatype-jsr353</artifactId>
             <version>2.3.2</version>
         </dependency>
-
+-->
         <dependency>
             <groupId>org.dspace.modules</groupId>
             <artifactId>additions</artifactId>

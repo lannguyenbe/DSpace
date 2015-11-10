@@ -91,7 +91,7 @@ public class Serie extends RTBObject{
             subSeries = new ArrayList<Serie>();
 
             if (!((limit != null) && (limit >= 0) && (offset != null) && (offset >= 0))) {
-                log.warn("Pagging was badly set, using default values.");
+                log.warn("Paging was badly set, using default values.");
                 limit = Constants.LIMITMAX;
                 offset = 0;
             }
@@ -110,7 +110,6 @@ public class Serie extends RTBObject{
     		metadataEntries = new ArrayList<MetadataEntry>();
             Metadatum[] dcvs = getAllMetadata(community);
             for (Metadatum dcv : dcvs) {
-//                metadataEntries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
                 metadataEntries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
            }
      	} else {
