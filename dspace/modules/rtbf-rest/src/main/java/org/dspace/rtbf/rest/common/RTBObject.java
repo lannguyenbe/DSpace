@@ -11,18 +11,22 @@ import org.apache.log4j.Logger;
 import org.atteo.evo.inflector.English;
 import org.dspace.content.Metadatum;
 import org.dspace.rtbf.rest.common.Constants;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -32,74 +36,79 @@ import java.util.Properties;
  * To change this template use File | Settings | File Templates.
  */
 @XmlRootElement(name = "dspaceobject")
-public class DSpaceObject {
-    private static Logger log = Logger.getLogger(DSpaceObject.class);
+public class RTBObject {
+    private static Logger log = Logger.getLogger(RTBObject.class);
     
-    // MIN_VIEW Minimum Identification elements
+    // MIN_VIEW minimum Identification elements
     private Integer id;
     private String handle;
     private String type;
-    private String title;
+    private MetadataEntry title;
 
-    // SEARCHRESULT_VIEW results basic elements
+    // SEARCH_RESULT_VIEW results basic elements
     //
-    // Common metadata
-    private MetadataEntry identifier_attributor;
-    private String repository;
-    private String royalty;
-    private String royaltyText;
-    private String shortDescription;
+    // Common elements
+    @JsonProperty("rtbf.identifier.attributor")
+    private MetadataEntry identifierAttributor;
+    @JsonProperty("rtbf.royalty_code")
+    private MetadataEntry royaltyCode;
+    @JsonProperty("rtbf.royalty_remark")
+    private MetadataEntry royaltyRemark;
+    @JsonProperty("dc.description.abstract")
+    private MetadataEntry descriptionAbstract;
     private String thumbnail; // TODO
     //
-    // Specialized metadata
-    protected String firstBroadcasted;
-    //
-    // Calculated
+    // Specialized elements
+    @JsonProperty("dc.date.issued")
+    private MetadataEntry dateIssued;
+	//
+    // Calculated elements
     protected Integer countSubSeries;
     protected Integer countEpisodes;
 	protected Integer countSequences;
     protected Integer countSupports;
     
-    @XmlElement(name = "link", required = true)
+//    @XmlElement(name = "link", required = true)
     private String link;
 
     //Expandable relationships
     protected Serie owningSerie;
-    protected List<DSpaceObject> owningParentList;
+    protected List<RTBObject> owningParentList;
     protected Episode owningEpisode;
     protected List<Episode> parentEpisodeList;
     protected List<Serie> subSeries;
     protected List<Episode> episodes;
     protected List<Sequence> sequences;
-    protected List<MetadataEntry> metadataEntries;
-	protected MetadataWrapper metadata;
+    @JsonIgnore
+    protected List<MetadataEntry> metadataEntries; // neither by Jaxb, nor Jackson
+    @JsonIgnore
+    protected MetadataWrapper metadata; // use by Jaxb, not by Jackson
     // TODO List<Diffusion> diffusions;
     // TODO List<Support> supports;
 
     @XmlElement(required = true)
     private ArrayList<String> expand = new ArrayList<String>();
 	
-	public DSpaceObject() {}
+	public RTBObject() {}
 
-    public DSpaceObject(org.dspace.content.DSpaceObject dso) {
+    public RTBObject(org.dspace.content.DSpaceObject dso) {
         setHandle(dso.getHandle());
         setType(Constants.TYPETEXT[dso.getType()].toLowerCase());
         setId(dso.getID());
-        setTitle(dso.getName());
+        setTitle(getMetadataEntry(Constants.TITLE,dso));
     }
 
-    public DSpaceObject(int viewType, org.dspace.content.DSpaceObject dso) {
+    public RTBObject(int viewType, org.dspace.content.DSpaceObject dso) {
     	
     	this(dso);
     	
     	switch (viewType) {
     	case Constants.SEARCH_RESULT_VIEW:
     		disableExpand();
-    		setIdentifier_attributor(getMetadataEntry(Constants.REPOSITORY,dso));
-            setRepository(getDsoMetadata(Constants.REPOSITORY,dso));
-            setRoyalty(getDsoMetadata(Constants.ROYALTY,dso));
-            setRoyaltyText(getDsoMetadata(Constants.ROYALTY_TEXT,dso));
-            setShortDescription(getDsoMetadata(Constants.SHORT_DESCRIPTION,dso));
+    		setIdentifierAttributor(getMetadataEntry(Constants.ATTRIBUTOR,dso));
+            setRoyaltyCode(getMetadataEntry(Constants.ROYALTY,dso));
+            setRoyaltyRemark(getMetadataEntry(Constants.ROYALTY_REMARK,dso));
+            setDescriptionAbstract(getMetadataEntry(Constants.ABSTRACT,dso));
             break;
     	case Constants.MIN_VIEW:
     		disableExpand();
@@ -117,15 +126,6 @@ public class DSpaceObject {
         }
         return null;
     }
-
-    protected String getDsoMetadata(String value, org.dspace.content.DSpaceObject dso){
-        Metadatum[] dcvalues = dso.getMetadataByMetadataString(value);
-
-        if(dcvalues.length>0) {
-            return dcvalues[0].value;
-        }
-        return null;
-    }
     
     protected Metadatum[] getAllMetadata(org.dspace.content.DSpaceObject dso){
         Metadatum[] dcvalues = dso.getMetadataByMetadataString("*.*.*");
@@ -135,10 +135,6 @@ public class DSpaceObject {
         }
         return null;
     }
-
-	protected String getDateIssued(org.dspace.content.DSpaceObject dso) {
-		return getDsoMetadata(Constants.FIRST_BROADCASTED,dso);
-	}
 
 	protected int getCountAllSupports(org.dspace.content.DSpaceObject dso) {
 		return(dso.getMetadataByMetadataString(Constants.CODE_ORIGINE).length);
@@ -153,12 +149,12 @@ public class DSpaceObject {
         this.id = id;
     }
 
-    public String getTitle(){
-        return this.title;
+    public String getType() {
+        return this.type;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getHandle() {
@@ -169,19 +165,25 @@ public class DSpaceObject {
         this.handle = handle;
     }
 
+    @XmlAnyElement
+    public MetadataEntry getTitle(){
+        return this.title;
+    }
+
+    public void setTitle(MetadataEntry title) {
+        this.title = title;
+    }
+
+    @XmlTransient
+    @JsonIgnore
     public String getLink() {
         //TODO, get actual contextPath of /rest/
         return "/RESTapi/" + English.plural(getType()) + "/" + getId();
     }
 
-    public String getType() {
-        return this.type;
+    public void setLink(String link) {
+    	this.link = link;
     }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
 
     public List<String> getExpand() {
         return expand;
@@ -207,37 +209,32 @@ public class DSpaceObject {
     public void disableExpand() {
     	this.expand = null;    	
     }
-    
-	public String getRepository() {
-		return repository;
+   
+    @XmlAnyElement
+	public MetadataEntry getRoyaltyCode() {
+		return royaltyCode;
 	}
 
-	public void setRepository(String repository) {
-		this.repository = repository;
+	public void setRoyaltyCode(MetadataEntry royalty) {
+		this.royaltyCode = royalty;
 	}
 
-	public String getRoyalty() {
-		return royalty;
+	@XmlAnyElement
+	public MetadataEntry getRoyaltyRemark() {
+		return royaltyRemark;
 	}
 
-	public void setRoyalty(String royalty) {
-		this.royalty = royalty;
+	public void setRoyaltyRemark(MetadataEntry royaltyText) {
+		this.royaltyRemark = royaltyText;
 	}
 
-	public String getRoyaltyText() {
-		return royaltyText;
+	@XmlAnyElement
+	public MetadataEntry getDescriptionAbstract() {
+		return descriptionAbstract;
 	}
 
-	public void setRoyaltyText(String royaltyText) {
-		this.royaltyText = royaltyText;
-	}
-
-	public String getShortDescription() {
-		return shortDescription;
-	}
-
-	public void setShortDescription(String shortDescription) {
-		this.shortDescription = shortDescription;
+	public void setDescriptionAbstract(MetadataEntry description) {
+		this.descriptionAbstract = description;
 	}
 
 	public Serie getOwningSerie() {
@@ -268,12 +265,14 @@ public class DSpaceObject {
 		this.episodes = episodes;
 	}
     
-    @XmlTransient
-	public List<MetadataEntry> getMetadataEntries() {
+	@JsonIgnore
+	@XmlTransient
+	public List<MetadataEntry> getMetadataEntries() { // neither by Jaxb, nor Jackson
 		return metadataEntries;
 	}
 	
-	public MetadataWrapper getMetadata() {
+    @JsonIgnore
+	public MetadataWrapper getMetadata() { // use by Jaxb, not by Jackson
 		if (metadataEntries != null ) {
 			metadata = new MetadataWrapper(metadataEntries);
 		}
@@ -318,13 +317,13 @@ public class DSpaceObject {
 		this.sequences = sequences;
 	}
 
-	@XmlElement( name = "date_issued")
-	public String getFirstBroadcasted() {
-		return firstBroadcasted;
+	@XmlAnyElement
+	public MetadataEntry getDateIssued() {
+		return dateIssued;
 	}
-
-	public void setFirstBroadcasted(String firstBroadcasted) {
-		this.firstBroadcasted = firstBroadcasted;
+	
+	public void setDateIssued(MetadataEntry dateIssued) {
+		this.dateIssued = dateIssued;
 	}
 
 	public Integer getCountSupports() {
@@ -363,23 +362,27 @@ public class DSpaceObject {
 
 	@XmlElementWrapper( name = "owningParentList")
 	@XmlElement( name = "owningParent")
-	public List<DSpaceObject> getOwningParentList() {
+	public List<RTBObject> getOwningParentList() {
 		return owningParentList;
 	}
 
-	public void setOwningParentList(List<DSpaceObject> parentsList) {
+	public void setOwningParentList(List<RTBObject> parentsList) {
 		this.owningParentList = parentsList;
 	}
 
-	@XmlJavaTypeAdapter(MetadataEntryAdapter.class)
-    @XmlAnyElement
-	public MetadataEntry getIdentifier_attributor() {
-		return identifier_attributor;
+	@XmlAnyElement
+	public MetadataEntry getIdentifierAttributor() {
+		return identifierAttributor;
 	}
 
-	public void setIdentifier_attributor(MetadataEntry identifier_attributor) {
-		this.identifier_attributor = identifier_attributor;
+	public void setIdentifierAttributor(MetadataEntry m) {
+		this.identifierAttributor = m;
 	}
 
+	@JsonGetter("metadata")
+	@XmlTransient
+	protected Map<String, Object> getMetadataEntriesAsMap() { // use by Jackson, not by Jaxb
+		return MetadataEntry.listAsMap(this.metadataEntries);
+	}
 
 }

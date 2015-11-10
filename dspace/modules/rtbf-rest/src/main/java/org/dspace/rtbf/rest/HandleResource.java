@@ -11,7 +11,7 @@ import org.apache.log4j.Logger;
 import org.dspace.authorize.AuthorizeManager;
 import org.dspace.handle.HandleManager;
 import org.dspace.rtbf.rest.common.Constants;
-import org.dspace.rtbf.rest.common.DSpaceObject;
+import org.dspace.rtbf.rest.common.RTBObject;
 import org.dspace.rtbf.rest.common.Episode;
 import org.dspace.rtbf.rest.common.Sequence;
 import org.dspace.rtbf.rest.common.Serie;
@@ -43,7 +43,7 @@ public class HandleResource {
     @GET
     @Path("/{prefix}/{suffix}")
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public org.dspace.rtbf.rest.common.DSpaceObject getObject(@PathParam("prefix") String prefix, @PathParam("suffix") String suffix
+    public org.dspace.rtbf.rest.common.RTBObject getObject(@PathParam("prefix") String prefix, @PathParam("suffix") String suffix
     			, @QueryParam("expand") String expand
         		, @QueryParam("omitExpand") @DefaultValue("true") boolean omitExpand
         		, @Context UriInfo info
@@ -77,7 +77,7 @@ public class HandleResource {
                     case Constants.ITEM:
                         return new Sequence(viewType, (org.dspace.content.Item) dso, expand+","+Constants.SEQUENCE_EXPAND_OPTIONS, context);
                     default:
-                        return new DSpaceObject(dso);
+                        return new RTBObject(dso);
                 }
             } else {
                 throw new WebApplicationException(Response.Status.UNAUTHORIZED);

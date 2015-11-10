@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @XmlRootElement(name = "serie")
-public class Serie extends DSpaceObject{
+public class Serie extends RTBObject{
     private static Logger log = Logger.getLogger(Serie.class);
 
     public Serie(){}

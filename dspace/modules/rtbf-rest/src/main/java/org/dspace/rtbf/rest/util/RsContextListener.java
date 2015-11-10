@@ -7,20 +7,21 @@ import java.util.Properties;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 
-import org.dspace.app.util.DSpaceContextListener;
 import org.dspace.core.ConfigurationManager;
 import org.dspace.rtbf.rest.common.Constants;
-import org.dspace.rtbf.rest.common.MetadataEntry;
 
-public class RsContextListener extends DSpaceContextListener {
+public class RsContextListener implements ServletContextListener {
 
-
-    @Override
-	public void contextInitialized(ServletContextEvent event) {
-
-    	super.contextInitialized(event);
+	@Override
+	public void contextDestroyed(ServletContextEvent arg0) {
+		// noop
 		
+	}
+
+	@Override
+	public void contextInitialized(ServletContextEvent event) {
     	int idx;
 		String definition;    	
         RsConfigurationManager configManager = RsConfigurationManager.getInstance();
@@ -51,7 +52,7 @@ public class RsContextListener extends DSpaceContextListener {
 
         ServletContext sc = event.getServletContext();
         sc.setAttribute(Constants.WEBAPP_NAME, configManager); // keep ref to avoid garbage collector
-        
-    }
+		
+	}
 
 }

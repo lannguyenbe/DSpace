@@ -16,6 +16,7 @@ import java.util.Properties;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.apache.log4j.Logger;
 import org.dspace.rtbf.rest.util.RsConfigurationManager;
 
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -29,6 +30,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 @XmlRootElement(name = "metadataentry")
 public class MetadataEntry
 {
+    private static Logger log = Logger.getLogger(MetadataEntry.class);
+
     String key;
 
     String value;
@@ -77,12 +80,29 @@ public class MetadataEntry
         this.language = language;
     }
     
-	protected static String getPreferredLabel(String key) { 
-    	String label = ((Properties) RsConfigurationManager.getInstance().getAttribute(Constants.NAMINGMETA)).getProperty(key);
-    	return ((label != null)? label : key);
+	public static String getPreferredLabel(String key) {
+		Properties mapper = (Properties) RsConfigurationManager.getInstance().getAttribute(Constants.NAMINGMETA);
+		if (mapper != null) {
+	    	String label = mapper.getProperty(key);
+	    	if (label != null) {
+	    		return label;
+	    	}
+		}
+    	return key;
 	}
 
-    protected static Map<String,Object> listAsMap(List<MetadataEntry> entries) {
+	public static String getSortLabel(String key) {
+		Properties mapper = (Properties) RsConfigurationManager.getInstance().getAttribute(Constants.SORTMETA);
+		if (mapper != null) {
+	    	String label = mapper.getProperty(key);
+	    	if (label != null) {
+	    		return label;
+	    	}
+		}
+    	return key;
+	}
+
+	public static Map<String,Object> listAsMap(List<MetadataEntry> entries) {
     	if (entries == null || entries.isEmpty()) {
     		return null;
     	}

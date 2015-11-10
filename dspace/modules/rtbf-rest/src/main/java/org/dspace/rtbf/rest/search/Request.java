@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import org.dspace.discovery.DiscoverQuery.SORT_ORDER;
 import org.dspace.rtbf.rest.common.Constants;
+import org.dspace.rtbf.rest.common.MetadataEntry;
 import org.dspace.rtbf.rest.util.RsConfigurationManager;
 import org.dspace.core.Context;
 
@@ -35,7 +36,7 @@ public class Request {
 		str = params.getFirst("sort-by");
 		if (str != null &&  str.length() > 0) {
 			// retrieve solr sort field corresponding to the frontend field
-			sortField = ((Properties) RsConfigurationManager.getInstance().getAttribute(Constants.SORTMETA)).getProperty(str);
+			sortField = MetadataEntry.getSortLabel(str);
 			if (sortField == null) { sortField = str; }
 	        str = params.getFirst("order");        
 	        try {

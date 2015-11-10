@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 import javax.xml.bind.annotation.XmlTransient;
@@ -19,6 +20,9 @@ import org.dspace.rtbf.rest.common.MetadataEntry;
 import org.dspace.rtbf.rest.common.MetadataWrapper;
 import org.dspace.rtbf.rest.common.Sequence;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class SearchResponseParts {
     private static Logger log = Logger.getLogger(SearchResponseParts.class);
 	
@@ -28,14 +32,14 @@ public class SearchResponseParts {
 
 	public static class Result {
 		
-	    private List<org.dspace.rtbf.rest.common.DSpaceObject> lst;
+	    private List<org.dspace.rtbf.rest.common.RTBObject> lst;
 	    
  		public Result(DiscoverResult queryResults, Context context) {
 			int resultType = 0;
 					
 			if (queryResults != null && queryResults.getDspaceObjects().size() > 0) {
 				
-				lst = new ArrayList<org.dspace.rtbf.rest.common.DSpaceObject>();
+				lst = new ArrayList<org.dspace.rtbf.rest.common.RTBObject>();
 				List<org.dspace.content.DSpaceObject> dsoList = queryResults.getDspaceObjects();
 				
 				if (! dsoList.isEmpty()) {
@@ -62,11 +66,11 @@ public class SearchResponseParts {
 			
 		}
 
-		public List<org.dspace.rtbf.rest.common.DSpaceObject> getLst() {
+		public List<org.dspace.rtbf.rest.common.RTBObject> getLst() {
 			return lst;
 		}
 
-		public void setLst(List<org.dspace.rtbf.rest.common.DSpaceObject> lst) {
+		public void setLst(List<org.dspace.rtbf.rest.common.RTBObject> lst) {
 			this.lst = lst;
 		}
 		
@@ -91,16 +95,18 @@ public class SearchResponseParts {
 		    }
 	    }
 
+	    @JsonIgnore
 	    @XmlTransient
 	    public List<MetadataEntry> getSortEntries() {
 			return sortEntries;
 		}
 
-		public void setSortEntriest(List<MetadataEntry> entries) {
+		public void setSortEntriest(List<MetadataEntry> entries) { // neither jaxb mor jackson
 			this.sortEntries = entries;
 		}
 
-		public MetadataWrapper getSortMeta() {
+	    @JsonIgnore
+		public MetadataWrapper getSortMeta() { // jaxb only
 			if (sortEntries != null ) {
 				sortMeta = new MetadataWrapper(sortEntries);
 			}
@@ -109,6 +115,12 @@ public class SearchResponseParts {
 
 		public void setSortMeta(MetadataWrapper wrapper) {
 			this.sortMeta = wrapper;
+		}
+
+		@JsonGetter("sortMeta")
+		@XmlTransient
+		protected Map<String, Object> getMetadataEntriesAsMap() { // Jackson only
+			return MetadataEntry.listAsMap(this.sortEntries);
 		}
 	}
 

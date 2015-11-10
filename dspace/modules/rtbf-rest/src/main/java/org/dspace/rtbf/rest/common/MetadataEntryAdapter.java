@@ -22,15 +22,10 @@ public class MetadataEntryAdapter extends XmlAdapter<JAXBElement<String>, Metada
 	public JAXBElement<String> marshal(MetadataEntry entry) throws Exception {
 		if (entry == null) { return null; }
 		return(new JAXBElement<String>(
-				new javax.xml.namespace.QName(getPreferredLabel(entry.getKey()))
+				new javax.xml.namespace.QName(MetadataEntry.getPreferredLabel(entry.getKey()))
 				, String.class
 				, entry.getValue()
 		));
-	}
-
-	private String getPreferredLabel(String key) { 
-    	String label = ((Properties) RsConfigurationManager.getInstance().getAttribute(Constants.NAMINGMETA)).getProperty(key);
-    	return ((label != null)? label : key);
 	}
 
 }

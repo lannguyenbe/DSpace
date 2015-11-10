@@ -6,7 +6,6 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.dspace.rtbf.rest.common.Constants;
-import org.dspace.rtbf.rest.common.DSpaceObject;
 import org.dspace.rtbf.rest.util.RsConfigurationManager;
 import org.mortbay.log.Log;
 
@@ -24,19 +23,15 @@ public class NMSerializerModifier extends BeanSerializerModifier {
             List<BeanPropertyWriter> beanProperties) {
 
         List<NameMapper> propertyMappings = getNameMappingsFromConfig();
-Log.info("debug 011: propertyMappings"+ ((propertyMappings == null) ? "is null" : "is not null"));
-        NameMapper mapping = mappingsForClass(propertyMappings,
-                beanDesc.getBeanClass());
-Log.info("debug 101:"+beanDesc.getBeanClass().getName());
-        if (mapping == null) {
+        NameMapper mapper = mapperForClass(propertyMappings, beanDesc.getBeanClass());
+        if (mapper == null) {
             return beanProperties;
         }
-Log.info("debug 102");
-
+        
         List<BeanPropertyWriter> propsToWrite = new ArrayList<BeanPropertyWriter>();
         for (BeanPropertyWriter propWriter : beanProperties) {
             String propName = propWriter.getName();
-            String outputName = mapping.nameMappings.getProperty(propName);
+            String outputName = mapper.nameMappings.getProperty(propName);
             if (outputName != null) {
                 BeanPropertyWriter modifiedWriter = new NameMappingWriter(
                         propWriter, outputName);
@@ -48,40 +43,28 @@ Log.info("debug 102");
         return propsToWrite;
     }
 
-	private NameMapper mappingsForClass(
-			List<NameMapper> nameMappings, Class<?> beanClass) {
+	private NameMapper mapperForClass(List<NameMapper> nameMappings, Class<?> beanClass) {
         for (NameMapper mapping : nameMappings) {
             if (mapping.classToFilter.equals(beanClass)) {
                 return mapping;
             }
         }
+    	log.warn("Name mapping not found for "+ beanClass.getName());
         return null;
 	}
 
-/*
-	private List<PropertyNameMapper> getNameMappingsFromRequest() {
-        RequestAttributes requestAttribs = RequestContextHolder
-                .getRequestAttributes();
-        List<PropertyNameMapper> nameMappings = (List<PropertyNameMapper>) requestAttribs
-                .getAttribute("nameMappings",
-                        RequestAttributes.SCOPE_REQUEST);
-        return nameMappings;
-    }
-*/
 
 	private List<NameMapper> getNameMappingsFromConfig() {
 		List<NameMapper> nameMappings = new ArrayList<>();
 		Properties props;
 		
 		props = (Properties) RsConfigurationManager.getInstance().getAttribute(Constants.NAMINGMETA);
-		nameMappings.add(new NameMapper(org.dspace.rtbf.rest.common.DSpaceObject.class
-//				, (Properties) RsConfigurationManager.getInstance().getAttribute(Constants.NAMINGMETA)
-				, props
-				));
-		nameMappings.add(new NameMapper(org.dspace.rtbf.rest.common.Sequence.class, props));
-		nameMappings.add(new NameMapper(org.dspace.rtbf.rest.common.Episode.class, props));
-		nameMappings.add(new NameMapper(org.dspace.rtbf.rest.common.Serie.class, props));
-		
+		if (props != null && !props.isEmpty()) {
+			nameMappings.add(new NameMapper(org.dspace.rtbf.rest.common.RTBObject.class, props));
+			nameMappings.add(new NameMapper(org.dspace.rtbf.rest.common.Sequence.class, props));
+			nameMappings.add(new NameMapper(org.dspace.rtbf.rest.common.Episode.class, props));
+			nameMappings.add(new NameMapper(org.dspace.rtbf.rest.common.Serie.class, props));
+		}
 		return nameMappings;
 		
 	}

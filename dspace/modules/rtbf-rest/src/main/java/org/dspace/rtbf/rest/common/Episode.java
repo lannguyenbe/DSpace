@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @XmlRootElement(name = "episode")
-public class Episode extends DSpaceObject {
+public class Episode extends RTBObject {
 	Logger log = Logger.getLogger(Episode.class);
 
 	public Episode(){}
@@ -62,7 +62,7 @@ public class Episode extends DSpaceObject {
         }
 
         if(expandFields.contains("owningParentList") || expandFields.contains("all")) {
-            this.owningParentList = new ArrayList<DSpaceObject>();
+            this.owningParentList = new ArrayList<RTBObject>();
             org.dspace.content.Community parentCommunity = (org.dspace.content.Community) collection.getParentObject();
             this.owningParentList.add(new Serie(viewType, parentCommunity, null, context));
             org.dspace.content.Community topparentCommunity = parentCommunity.getParentCommunity();

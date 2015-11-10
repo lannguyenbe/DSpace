@@ -70,11 +70,17 @@
       <listener-class>
          org.springframework.web.context.ContextLoaderListener
       </listener-class>
-   </listener>
+    </listener>
+
+    <!-- 09.11.2015 Lan: to support name mapping of metadata -->
+    <listener>
+        <listener-class>org.dspace.rtbf.rest.util.RsContextListener</listener-class>
+    </listener>
 
     <!-- Lan 17.03.2015
         Set server response Access-Control-Allow-Origin for Testing purpose
         Add jetty-servlets.jar to webapps/<app>/WEB-INF/lib
+    -->
     <filter>
         <filter-name>cross-origin</filter-name>
         <filter-class>org.eclipse.jetty.servlets.CrossOriginFilter</filter-class>
@@ -95,6 +101,5 @@
         <filter-name>cross-origin</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>   
-    -->
 
 </web-app>

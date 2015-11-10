@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.dspace.content.Metadatum;
 import org.dspace.discovery.DiscoverResult;
-import org.dspace.rtbf.rest.common.DSpaceObject;
+import org.dspace.rtbf.rest.common.RTBObject;
 import org.dspace.rtbf.rest.common.MetadataEntry;
 import org.dspace.rtbf.rest.common.MetadataWrapper;
 
@@ -23,7 +23,7 @@ public class SearchResponse {
 
     private SearchResponseParts.ResponseHeader responseHeader;
     private SearchResponseParts.Meta meta;
-    private List<DSpaceObject> results;
+    private List<RTBObject> results;
 //    private SearchResponseParts.Result results;
     private SearchResponseParts.FacetsCount facets;
 	private SearchResponseParts.Expanded expanded;
@@ -49,7 +49,6 @@ public class SearchResponse {
 
         if(expandFields.contains("meta") || expandFields.contains("all")) {
         	setMeta(new SearchResponseParts.Meta());
-//            setMetadataEntries(new SearchResponseParts.Meta().getLst());
      	} else {
      		this.addExpand("meta");
      	}
@@ -144,11 +143,11 @@ public class SearchResponse {
 
 	@XmlElementWrapper( name = "results" )
 	@XmlElement( name = "result" )
-	public List<DSpaceObject> getResults() {
+	public List<RTBObject> getResults() {
 		return results;
 	}
 
-	public void setResults(List<DSpaceObject> results) {
+	public void setResults(List<RTBObject> results) {
 		this.results = results;
 	}
 

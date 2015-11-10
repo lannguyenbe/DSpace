@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Properties;
 
 @XmlRootElement(name = "sequence")
-public class Sequence extends DSpaceObject{
+public class Sequence extends RTBObject{
     private static Logger log = Logger.getLogger(Sequence.class);
 
     public Sequence() {}
@@ -54,7 +54,7 @@ public class Sequence extends DSpaceObject{
         }
     	
         if(expandFields.contains("owningParentList") || expandFields.contains("all")) {
-            this.owningParentList = new ArrayList<DSpaceObject>();
+            this.owningParentList = new ArrayList<RTBObject>();
 
             org.dspace.content.Collection owningCollection = item.getOwningCollection();
             

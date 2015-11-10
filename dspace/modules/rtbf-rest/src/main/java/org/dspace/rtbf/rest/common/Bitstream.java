@@ -26,7 +26,7 @@ import org.dspace.core.Constants;
  * To change this template use File | Settings | File Templates.
  */
 @XmlRootElement(name = "bitstream")
-public class Bitstream extends DSpaceObject {
+public class Bitstream extends RTBObject {
     Logger log = Logger.getLogger(Bitstream.class);
 
     private String bundleName;
@@ -34,7 +34,7 @@ public class Bitstream extends DSpaceObject {
     private String format;
     private String mimeType;
     private Long sizeBytes;
-    private DSpaceObject parentObject;
+    private RTBObject parentObject;
     private String retrieveLink;
     private CheckSum checkSum;
     private Integer sequenceId;
@@ -75,7 +75,7 @@ public class Bitstream extends DSpaceObject {
         this.setCheckSum(checkSum);
 
         if(expandFields.contains("parent") || expandFields.contains("all")) {
-            parentObject = new DSpaceObject(bitstream.getParentObject());
+            parentObject = new RTBObject(bitstream.getParentObject());
         } else if(expandFields.contains("policies") || expandFields.contains("all")) {
         	List<ResourcePolicy> tempPolicies = new ArrayList<ResourcePolicy>();
         	Bundle[] bundles = bitstream.getBundles();
@@ -131,7 +131,7 @@ public class Bitstream extends DSpaceObject {
 		this.sizeBytes = sizeBytes;
 	}
 
-	public void setParentObject(DSpaceObject parentObject) {
+	public void setParentObject(RTBObject parentObject) {
 		this.parentObject = parentObject;
 	}
 
@@ -159,7 +159,7 @@ public class Bitstream extends DSpaceObject {
         return retrieveLink;
     }
 
-    public DSpaceObject getParentObject() {
+    public RTBObject getParentObject() {
         return parentObject;
     }
     

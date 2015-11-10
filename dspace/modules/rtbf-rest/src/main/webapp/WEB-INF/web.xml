@@ -47,6 +47,10 @@
          org.springframework.web.context.ContextLoaderListener
       </listener-class>
   </listener>
+  <!-- 09.11.2015 Lan: to support name mapping of metadata -->
+  <listener>
+      <listener-class>org.dspace.rtbf.rest.util.RsContextListener</listener-class>
+  </listener>
   <filter>
     <filter-name>cross-origin</filter-name>
     <filter-class>org.eclipse.jetty.servlets.CrossOriginFilter</filter-class>

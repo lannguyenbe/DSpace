@@ -19,7 +19,8 @@ public class RsJacksonContextResolver implements ContextResolver<ObjectMapper> {
     public RsJacksonContextResolver() {
         defaultObjectMapper = new ObjectMapper()
     		.setSerializationInclusion(Include.NON_NULL)
-        	.enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
+    		.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+			.enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
         	.enable(SerializationFeature.INDENT_OUTPUT)
         	.registerModule(new com.fasterxml.jackson.datatype.jsr353.JSR353Module())
         	.registerModule(new org.dspace.rtbf.rest.util.jackson.NameMappingModule())
