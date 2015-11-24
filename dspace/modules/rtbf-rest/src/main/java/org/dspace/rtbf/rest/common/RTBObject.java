@@ -61,6 +61,8 @@ public class RTBObject {
     // Specialized elements
     @JsonProperty("dc.date.issued")
     private MetadataEntry dateIssued;
+    @JsonProperty("rtbf.channel_issued")
+    private MetadataEntry channelIssued;
 	//
     // Calculated elements
     protected Integer countSubSeries;
@@ -83,6 +85,7 @@ public class RTBObject {
     protected List<MetadataEntry> metadataEntries; // neither by Jaxb, nor Jackson
     @JsonIgnore
     protected MetadataWrapper metadata; // use by Jaxb, not by Jackson
+    protected List<RTBObject> linkedDocuments;
     // TODO List<Diffusion> diffusions;
     // TODO List<Support> supports;
 
@@ -90,6 +93,11 @@ public class RTBObject {
     private ArrayList<String> expand = new ArrayList<String>();
 	
 	public RTBObject() {}
+
+    public RTBObject(String handle) {
+		disableExpand();
+        setHandle(handle);
+    }
 
     public RTBObject(org.dspace.content.DSpaceObject dso) {
         setHandle(dso.getHandle());
@@ -326,6 +334,15 @@ public class RTBObject {
 		this.dateIssued = dateIssued;
 	}
 
+	@XmlAnyElement
+	public MetadataEntry getChannelIssued() {
+		return channelIssued;
+	}
+
+	public void setChannelIssued(MetadataEntry channelIssued) {
+		this.channelIssued = channelIssued;
+	}
+
 	public Integer getCountSupports() {
 		return countSupports;
 	}
@@ -385,4 +402,13 @@ public class RTBObject {
 		return MetadataEntry.listAsMap(this.metadataEntries);
 	}
 
+	public void setLinkedDocuments(List<RTBObject> expandedDocuments) {
+		this.linkedDocuments = expandedDocuments;		
+	}
+
+	public List<RTBObject> getLinkedDocuments() {
+		return linkedDocuments;
+	}
+
+	
 }

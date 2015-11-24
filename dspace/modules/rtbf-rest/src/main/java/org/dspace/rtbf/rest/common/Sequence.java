@@ -3,6 +3,7 @@ package org.dspace.rtbf.rest.common;
 import org.apache.log4j.Logger;
 import org.dspace.content.Metadatum;
 import org.dspace.core.Context;
+import org.dspace.discovery.DiscoverResult.SearchDocument;
 
 import javax.ws.rs.WebApplicationException;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -35,6 +36,7 @@ public class Sequence extends RTBObject{
     	case Constants.SEARCH_RESULT_VIEW:
         	this.setCountSupports(getCountAllSupports(item));
     		this.setDateIssued(getMetadataEntry(Constants.DATE_ISSUED,item));
+    		this.setChannelIssued(getMetadataEntry(Constants.CHANNEL_ISSUED,item));
     		innerViewType = Constants.MIN_VIEW;
     		break;
     	default:

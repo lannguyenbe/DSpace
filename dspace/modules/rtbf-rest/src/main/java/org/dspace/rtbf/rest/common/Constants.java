@@ -31,6 +31,7 @@ public class Constants extends org.dspace.core.Constants {
     public static final String ROYALTY_REMARK = "rtbf.royalty_remark";
     public static final String ABSTRACT = "dc.description.abstract";
     public static final String DATE_ISSUED = "dc.date.issued";
+    public static final String CHANNEL_ISSUED = "rtbf.channel_issued";
     public static final String CODE_ORIGINE = "rtbf.code_origine.*";
     public static final String TITLE = "dc.title";
 

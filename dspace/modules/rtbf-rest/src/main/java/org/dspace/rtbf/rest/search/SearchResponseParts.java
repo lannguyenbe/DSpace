@@ -7,17 +7,20 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.log4j.Logger;
 import org.dspace.content.Item;
-import org.dspace.content.Metadatum;
 import org.dspace.core.ConfigurationManager;
 import org.dspace.core.Context;
 import org.dspace.discovery.DiscoverResult;
+import org.dspace.discovery.DiscoverResult.SearchDocument;
 import org.dspace.rtbf.rest.common.Constants;
+import org.dspace.rtbf.rest.common.Episode;
 import org.dspace.rtbf.rest.common.MetadataEntry;
 import org.dspace.rtbf.rest.common.MetadataWrapper;
+import org.dspace.rtbf.rest.common.RTBObject;
 import org.dspace.rtbf.rest.common.Sequence;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
@@ -50,7 +53,18 @@ public class SearchResponseParts {
 					try {
 						switch (resultType) {
 						case Constants.ITEM:
-							lst.add(new Sequence(Constants.SEARCH_RESULT_VIEW, (Item) result, Constants.SEARCH_SEQUENCE_EXPAND_OPTIONS, null));
+		                    Sequence sequence = new Sequence(Constants.SEARCH_RESULT_VIEW, (Item) result, Constants.SEARCH_SEQUENCE_EXPAND_OPTIONS, null);
+//		                    DiscoverResult.DSpaceObjectHighlightResult highlightedResults = queryResults.getHighlightedResults(result);
+
+		                    // Add linked Documents : collapse on identifier_origin
+		                    List<RTBObject> linkedDocuments = new ArrayList<RTBObject>();	                    
+		                    List<DiscoverResult.SearchDocument> entries = queryResults.getExpandDocuments(result);
+		            		for (SearchDocument entry : entries) {
+		            			linkedDocuments.add(new RTBObject(entry.getSearchFields().get("handle").get(0)));
+		            		}
+		                    sequence.setLinkedDocuments(linkedDocuments);
+
+							lst.add(sequence);
 						case Constants.COLLECTION:
 //							lst.add(new Episode(Constants.SEARCH_RESULT_VIEW, (Collection) result, null, null));
 						case Constants.COMMUNITY:
@@ -124,11 +138,11 @@ public class SearchResponseParts {
 		}
 	}
 
-	public static class FacetsCount {
+	public static class Expanded {
 		
 	}
 
-	public static class Expanded {
+	public static class FacetsCount {
 		
 	}
 
