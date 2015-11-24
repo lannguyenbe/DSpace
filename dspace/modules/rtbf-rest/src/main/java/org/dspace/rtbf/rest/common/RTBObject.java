@@ -126,7 +126,7 @@ public class RTBObject {
     	}
     }
     
-    protected MetadataEntry getMetadataEntry(String value, org.dspace.content.DSpaceObject dso){
+    protected static MetadataEntry getMetadataEntry(String value, org.dspace.content.DSpaceObject dso){
         Metadatum[] dcv = dso.getMetadataByMetadataString(value);
 
         if(dcv.length>0) {
@@ -279,7 +279,11 @@ public class RTBObject {
 		return metadataEntries;
 	}
 	
-    @JsonIgnore
+    public void setMetadataEntries(List<MetadataEntry> metadataEntries) {
+		this.metadataEntries = metadataEntries;
+	}
+
+	@JsonIgnore
 	public MetadataWrapper getMetadata() { // use by Jaxb, not by Jackson
 		if (metadataEntries != null ) {
 			metadata = new MetadataWrapper(metadataEntries);

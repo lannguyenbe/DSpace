@@ -34,9 +34,9 @@ public class Sequence extends RTBObject{
     	
     	switch(viewType) {
     	case Constants.SEARCH_RESULT_VIEW:
-        	this.setCountSupports(getCountAllSupports(item));
     		this.setDateIssued(getMetadataEntry(Constants.DATE_ISSUED,item));
     		this.setChannelIssued(getMetadataEntry(Constants.CHANNEL_ISSUED,item));
+        	// this.setCountSupports(getCountAllSupports(item));
     		innerViewType = Constants.MIN_VIEW;
     		break;
     	default:
@@ -88,11 +88,13 @@ public class Sequence extends RTBObject{
         }
                 
         if(expandFields.contains("metadata") || expandFields.contains("all")) {
-    		metadataEntries = new ArrayList<MetadataEntry>();
+        	List<MetadataEntry> entries = new ArrayList<MetadataEntry>();
             Metadatum[] dcvs = item.getMetadata(org.dspace.content.Item.ANY, org.dspace.content.Item.ANY, org.dspace.content.Item.ANY, org.dspace.content.Item.ANY);
             for (Metadatum dcv : dcvs) {
-              metadataEntries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
+            	if (dcv.schema.equals(Constants.OLD_SCHEMA)) { continue; } // skip old schema
+            	entries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
             }
+            this.setMetadataEntries(entries);
      	} else {
      		this.addExpand("metadata");
      	}
