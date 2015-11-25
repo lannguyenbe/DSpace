@@ -62,7 +62,9 @@ public class SearchResponseParts {
 		            		for (SearchDocument entry : entries) {
 		            			linkedDocuments.add(new RTBObject(entry.getSearchFields().get("handle").get(0)));
 		            		}
-		                    sequence.setLinkedDocuments(linkedDocuments);
+		            		if (linkedDocuments.size() > 0) {
+		            			sequence.setLinkedDocuments(linkedDocuments);
+		            		}
 
 							lst.add(sequence);
 						case Constants.COLLECTION:
