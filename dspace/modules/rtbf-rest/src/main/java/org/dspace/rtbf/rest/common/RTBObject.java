@@ -118,6 +118,7 @@ public class RTBObject {
             setRoyaltyRemark(getMetadataEntry(Constants.ROYALTY_REMARK,dso));
             setDescriptionAbstract(getMetadataEntry(Constants.ABSTRACT,dso));
             break;
+    	case Constants.STANDARD_VIEW:
     	case Constants.MIN_VIEW:
     		disableExpand();
     		break;
@@ -203,7 +204,6 @@ public class RTBObject {
 
     public void addExpand(String expandableAttribute) {
     	if (this.expand != null) {
-    		log.info("debug 600 :"+ this.expand.size());
     		this.expand.add(expandableAttribute);
     	}
     }

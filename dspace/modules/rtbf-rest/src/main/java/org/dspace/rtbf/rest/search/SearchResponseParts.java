@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.log4j.Logger;
@@ -17,7 +16,6 @@ import org.dspace.core.Context;
 import org.dspace.discovery.DiscoverResult;
 import org.dspace.discovery.DiscoverResult.SearchDocument;
 import org.dspace.rtbf.rest.common.Constants;
-import org.dspace.rtbf.rest.common.Episode;
 import org.dspace.rtbf.rest.common.MetadataEntry;
 import org.dspace.rtbf.rest.common.MetadataWrapper;
 import org.dspace.rtbf.rest.common.RTBObject;

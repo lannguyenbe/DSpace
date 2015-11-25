@@ -63,13 +63,14 @@ public class Episode extends RTBObject {
         }
 
         if(expandFields.contains("owningParentList") || expandFields.contains("all")) {
-            this.owningParentList = new ArrayList<RTBObject>();
+            List<RTBObject> entries = new ArrayList<RTBObject>();
             org.dspace.content.Community parentCommunity = (org.dspace.content.Community) collection.getParentObject();
-            this.owningParentList.add(new Serie(viewType, parentCommunity, null, context));
+            entries.add(new Serie(viewType, parentCommunity, null, context));
             org.dspace.content.Community topparentCommunity = parentCommunity.getParentCommunity();
             if (topparentCommunity != null) { // already at top for orphan episode
-            	this.owningParentList.add(new Serie(viewType, topparentCommunity, null, context));
+            	entries.add(new Serie(viewType, topparentCommunity, null, context));
             }
+            this.setOwningParentList(entries);
         } else {
             this.addExpand("owningParentList");
         }
@@ -85,21 +86,23 @@ public class Episode extends RTBObject {
             }
             
             childItems = collection.getItems(limit, offset);
-            sequences = new ArrayList<Sequence>();
+        	List<Sequence> entries = new ArrayList<Sequence>();
             while(childItems.hasNext()) {
                 org.dspace.content.Item item = childItems.next();
-                	sequences.add(new Sequence(viewType, item, null, context));
+                	entries.add(new Sequence(viewType, item, null, context));
             }
+            this.setSequences(entries);
         } else {
             this.addExpand("sequences");
         }
 
         if(expandFields.contains("metadata") || expandFields.contains("all")) {
-    		metadataEntries = new ArrayList<MetadataEntry>();
+        	List<MetadataEntry> entries = new ArrayList<MetadataEntry>();
             Metadatum[] dcvs = getAllMetadata(collection);
             for (Metadatum dcv : dcvs) {
-                metadataEntries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
+                entries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
             }
+            this.setMetadataEntries(entries);
      	} else {
      		this.addExpand("metadata");
      	}

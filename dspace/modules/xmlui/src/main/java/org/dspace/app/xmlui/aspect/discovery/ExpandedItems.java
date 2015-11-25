@@ -9,6 +9,7 @@ package org.dspace.app.xmlui.aspect.discovery;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -30,11 +31,9 @@ import org.xml.sax.SAXException;
 /**
  * Displays related items to the currently viewable item
  *
- * @author Kevin Van de Velde (kevin at atmire dot com)
- * @author Mark Diggory (markd at atmire dot com)
- * @author Ben Bosman (ben at atmire dot com)
+ * @author Lan
  */
-public class ExpandedItems /*extends AbstractDSpaceTransformer*/
+public class ExpandedItems
 {
     private static final Logger log = Logger.getLogger(ExpandedItems.class);
     
@@ -96,7 +95,7 @@ public class ExpandedItems /*extends AbstractDSpaceTransformer*/
             // normally exactly 1 result that represents the most representativ of the items having the same indentifier_origin
             // the return result may have a different handle from the one we are questionning 
             DSpaceObject resultDso = queryResults.getDspaceObjects().get(0);
-            String handle = dso.getHandle(); // initial handle
+            String handle = dso.getHandle(); // questionning handle
             org.dspace.app.xmlui.wing.element.List expandList = null;
 
             if (!handle.equals(resultDso.getHandle())) {
@@ -144,5 +143,45 @@ public class ExpandedItems /*extends AbstractDSpaceTransformer*/
         return new Message("default", key);
     }
 
+    /**
+     * List of items related to the given item
+     */
+    public List<DiscoverResult.SearchDocument> getDocuments() 
+    {
+
+        List<DiscoverResult.SearchDocument> expandList = new ArrayList<DiscoverResult.SearchDocument>();
+
+        try {
+            // Questionne solr for expanded results
+            performSearch(); 
+        }catch (Exception e){
+            log.error("Error while searching for expanded items", e);
+
+            return expandList;
+        }
+                
+        if (queryResults != null && 0 < queryResults.getDspaceObjects().size()) {
+            // normally exactly 1 result that represents the most representativ of the items having the same indentifier_origin
+            // the return result may have a different handle from the one we are questionning 
+            DSpaceObject resultDso = queryResults.getDspaceObjects().get(0);
+            String handle = dso.getHandle(); // questionning handle
+
+            if (!handle.equals(resultDso.getHandle())) { // result handle and questionning handle are different
+                // take the first doc, should be the only one
+                DiscoverResult.SearchDocument doc = queryResults.getSearchDocument(resultDso).get(0);
+                expandList.add(doc);
+            }
+            
+            List<DiscoverResult.SearchDocument> expandDocuments = queryResults.getExpandDocuments(resultDso);
+            for (SearchDocument docE : expandDocuments) {
+            	String handleE = docE.getSearchFieldValues("handle").get(0);
+            	if (!handle.equals(handleE)) {
+            		expandList.add(docE);
+            	}
+            }
+        }
+        
+        return expandList;
+    }
     
 }

@@ -14,6 +14,7 @@ public class Constants extends org.dspace.core.Constants {
     public static final int EXPANDELEM_VIEW = 1;
     public static final int MIN_VIEW = 2;
     public static final int SEARCH_RESULT_VIEW = 3;
+    public static final int STANDARD_VIEW = 4;
 
     // Expandable elements
     public static final String SERIE_EXPAND_OPTIONS = "owningSerie,metadata";

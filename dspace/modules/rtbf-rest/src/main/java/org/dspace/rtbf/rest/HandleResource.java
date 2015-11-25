@@ -75,7 +75,9 @@ public class HandleResource {
                     case Constants.COLLECTION:
                     	return new Episode(viewType, (org.dspace.content.Collection) dso, expand+","+Constants.EPISODE_EXPAND_OPTIONS, context);
                     case Constants.ITEM:
-                        return new Sequence(viewType, (org.dspace.content.Item) dso, expand+","+Constants.SEQUENCE_EXPAND_OPTIONS, context);
+                        // return new Sequence(viewType, (org.dspace.content.Item) dso, expand+","+Constants.SEQUENCE_EXPAND_OPTIONS, context);
+                    	// STANDARD_VIEW is MIN_VIEW + retrieve all linkedDocuments from solr
+                        return new Sequence(Constants.STANDARD_VIEW, (org.dspace.content.Item) dso, expand+","+Constants.SEQUENCE_EXPAND_OPTIONS, context);
                     default:
                         return new RTBObject(dso);
                 }

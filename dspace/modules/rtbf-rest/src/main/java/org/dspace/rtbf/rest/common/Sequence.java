@@ -3,6 +3,8 @@ package org.dspace.rtbf.rest.common;
 import org.apache.log4j.Logger;
 import org.dspace.content.Metadatum;
 import org.dspace.core.Context;
+import org.dspace.discovery.DiscoverExpandedItems;
+import org.dspace.discovery.DiscoverResult;
 import org.dspace.discovery.DiscoverResult.SearchDocument;
 
 import javax.ws.rs.WebApplicationException;
@@ -12,7 +14,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
 @XmlRootElement(name = "sequence")
 public class Sequence extends RTBObject{
@@ -39,6 +40,19 @@ public class Sequence extends RTBObject{
         	// this.setCountSupports(getCountAllSupports(item));
     		innerViewType = Constants.MIN_VIEW;
     		break;
+    	case Constants.STANDARD_VIEW:
+            // Add linked Documents : collapse on identifier_origin
+            List<RTBObject> linkedDocuments = new ArrayList<RTBObject>();	                    
+            DiscoverExpandedItems expandedItems = new DiscoverExpandedItems(context, item);
+            List<DiscoverResult.SearchDocument> entries = expandedItems.getItems();
+    		for (SearchDocument entry : entries) {
+    			linkedDocuments.add(new RTBObject(entry.getSearchFields().get("handle").get(0)));
+    		}
+    		if (linkedDocuments.size() > 0) {
+    			this.setLinkedDocuments(linkedDocuments);
+    		}
+    		innerViewType = Constants.MIN_VIEW;
+    		break;
     	default:
     		innerViewType = viewType;
     	}
@@ -56,33 +70,35 @@ public class Sequence extends RTBObject{
         }
     	
         if(expandFields.contains("owningParentList") || expandFields.contains("all")) {
-            this.owningParentList = new ArrayList<RTBObject>();
+            List<RTBObject> entries = new ArrayList<RTBObject>();
 
             org.dspace.content.Collection owningCollection = item.getOwningCollection();
             
-            this.owningParentList.add(new Episode(innerViewType, owningCollection, null, context));
+            entries.add(new Episode(innerViewType, owningCollection, null, context));
             org.dspace.content.Community parentCommunity = (org.dspace.content.Community) owningCollection.getParentObject();
-            this.owningParentList.add(new Serie(innerViewType, parentCommunity, null, context));
+            entries.add(new Serie(innerViewType, parentCommunity, null, context));
             org.dspace.content.Community topparentCommunity = parentCommunity.getParentCommunity();
             if (topparentCommunity != null) { // already at top for orphan item
-            	this.owningParentList.add(new Serie(innerViewType, topparentCommunity, null, context));
+            	entries.add(new Serie(innerViewType, topparentCommunity, null, context));
             }
+            this.setOwningParentList(entries);
         } else {
             this.addExpand("owningParentList");
         }
 
         if(expandFields.contains("owningEpisode") || expandFields.contains("all")) {
-            this.owningEpisode = new Episode(innerViewType, item.getOwningCollection(), null, context);
+        	this.setOwningEpisode(new Episode(innerViewType, item.getOwningCollection(), null, context));
         } else {
             this.addExpand("owningEpisode");
         }
     	
         if(expandFields.contains("parentEpisodeList") || expandFields.contains("all")) {
-            this.parentEpisodeList = new ArrayList<Episode>();
+        	List<Episode> entries = new ArrayList<Episode>();
             org.dspace.content.Collection[] collections = item.getCollections();
             for(org.dspace.content.Collection collection : collections) {
-                this.parentEpisodeList.add(new Episode(innerViewType, collection, null, context));
+                entries.add(new Episode(innerViewType, collection, null, context));
             }
+            this.setParentEpisodeList(entries);
         } else {
             this.addExpand("parentEpisodeList");
         }

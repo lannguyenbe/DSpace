@@ -54,7 +54,7 @@ public class Serie extends RTBObject{
         if(expandFields.contains("owningSerie") || expandFields.contains("all")) {
             org.dspace.content.Community parentCommunity = community.getParentCommunity();
             if(parentCommunity != null) {
-                setOwningSerie(new Serie(viewType, parentCommunity, null, context));
+                this.setOwningSerie(new Serie(viewType, parentCommunity, null, context));
             }
         } else {
             this.addExpand("owningSerie");
@@ -63,7 +63,7 @@ public class Serie extends RTBObject{
         if(expandFields.contains("owningParentList") || expandFields.contains("all")) {
             org.dspace.content.Community parentCommunity = community.getParentCommunity();
             if(parentCommunity != null) {
-                setOwningSerie(new Serie(viewType, parentCommunity, null, context));
+                this.setOwningSerie(new Serie(viewType, parentCommunity, null, context));
             }
         } else {
             this.addExpand("owningParentList");
@@ -71,7 +71,7 @@ public class Serie extends RTBObject{
 
         // Episodes pagination
         if(expandFields.contains("episodes") || expandFields.contains("all")) {
-            episodes = new ArrayList<Episode>();
+            List<Episode> entries = new ArrayList<Episode>();
             if (!((limit != null) && (limit >= 0) && (offset != null) && (offset >= 0))) {
                 log.warn("Pagging was badly set, using default values.");
                 limit = Constants.LIMITMAX;
@@ -80,15 +80,16 @@ public class Serie extends RTBObject{
             CollectionIterator childCollections = community.getCollections(limit, offset);
             while(childCollections.hasNext()) {
                 org.dspace.content.Collection collection = childCollections.next();
-                	episodes.add(new Episode(viewType, collection, null, context));
-            }                    	
+                	entries.add(new Episode(viewType, collection, null, context));
+            }
+            this.setEpisodes(entries);
         
         } else {
             this.addExpand("episodes");
         }
 
         if(expandFields.contains("subSeries") || expandFields.contains("all")) {
-            subSeries = new ArrayList<Serie>();
+            List<Serie> entries = new ArrayList<Serie>();
 
             if (!((limit != null) && (limit >= 0) && (offset != null) && (offset >= 0))) {
                 log.warn("Paging was badly set, using default values.");
@@ -99,19 +100,21 @@ public class Serie extends RTBObject{
     		CommunityIterator childCommunities = community.getSubCommunities(limit, offset);
             while(childCommunities.hasNext()) {
                 org.dspace.content.Community subCommunity = childCommunities.next();
-                	subSeries.add(new Serie(viewType, subCommunity, null, context));
+                	entries.add(new Serie(viewType, subCommunity, null, context));
             }
+            this.setSubSeries(entries);
             
         } else {
             this.addExpand("subSeries");
         }
 
         if(expandFields.contains("metadata") || expandFields.contains("all")) {
-    		metadataEntries = new ArrayList<MetadataEntry>();
+    		List<MetadataEntry> entries = new ArrayList<MetadataEntry>();
             Metadatum[] dcvs = getAllMetadata(community);
             for (Metadatum dcv : dcvs) {
-                metadataEntries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
+                entries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
            }
+            this.setMetadataEntries(entries);
      	} else {
      		this.addExpand("metadata");
      	}
