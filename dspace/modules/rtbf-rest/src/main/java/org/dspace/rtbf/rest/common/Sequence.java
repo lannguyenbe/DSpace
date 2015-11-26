@@ -41,12 +41,14 @@ public class Sequence extends RTBObject{
     		innerViewType = Constants.MIN_VIEW;
     		break;
     	case Constants.STANDARD_VIEW:
-            // Add linked Documents : collapse on identifier_origin
+            // Add linked Documents 
+            // a new search will be performed on solr to retrieve ALL linked documents to this item 
+            // their id,type,handle,title, attributor will be available
             List<RTBObject> linkedDocuments = new ArrayList<RTBObject>();	                    
             DiscoverExpandedItems expandedItems = new DiscoverExpandedItems(context, item);
-            List<DiscoverResult.SearchDocument> entries = expandedItems.getItems();
-    		for (SearchDocument entry : entries) {
-    			linkedDocuments.add(new RTBObject(entry.getSearchFields().get("handle").get(0)));
+            List<DiscoverExpandedItems.ExpandedItem> entries = expandedItems.getItems();
+    		for (DiscoverExpandedItems.ExpandedItem entry : entries) {
+    			linkedDocuments.add(new RTBObject(entry));
     		}
     		if (linkedDocuments.size() > 0) {
     			this.setLinkedDocuments(linkedDocuments);

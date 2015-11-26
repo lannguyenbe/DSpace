@@ -10,6 +10,7 @@ package org.dspace.rtbf.rest.common;
 import org.apache.log4j.Logger;
 import org.atteo.evo.inflector.English;
 import org.dspace.content.Metadatum;
+import org.dspace.discovery.DiscoverResult;
 import org.dspace.rtbf.rest.common.Constants;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
@@ -94,11 +95,6 @@ public class RTBObject {
 	
 	public RTBObject() {}
 
-    public RTBObject(String handle) {
-		disableExpand();
-        setHandle(handle);
-    }
-
     public RTBObject(org.dspace.content.DSpaceObject dso) {
         setHandle(dso.getHandle());
         setType(Constants.TYPETEXT[dso.getType()].toLowerCase());
@@ -127,6 +123,19 @@ public class RTBObject {
     	}
     }
     
+    // Constructor for expanded item
+    public RTBObject(org.dspace.discovery.DiscoverExpandedItems.ExpandedItem doc) {
+    	disableExpand();
+    	setHandle(doc.getHandle());
+    	if (doc.containsMetadataString(Constants.TITLE)) {
+        	setTitle(new MetadataEntry(Constants.TITLE, doc.getValueByMetadataString(Constants.TITLE), null));
+    	}
+    	if (doc.containsMetadataString(Constants.ATTRIBUTOR)) {
+        	setIdentifierAttributor(new MetadataEntry(Constants.ATTRIBUTOR, doc.getValueByMetadataString(Constants.ATTRIBUTOR), null));    		
+    	}
+    }
+
+
     protected static MetadataEntry getMetadataEntry(String value, org.dspace.content.DSpaceObject dso){
         Metadatum[] dcv = dso.getMetadataByMetadataString(value);
 

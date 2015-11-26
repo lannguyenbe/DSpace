@@ -34,7 +34,7 @@ public class DiscoverExpandedItems {
     }
     
     // TODO : externalize searchFields in config
-    private static String[] searchFields = {"dc.title", "identifier_attributor", "dcterms.isPartOf.title"};
+    private static String[] searchFields = {"search.resourceid", "search.resourcetype", "dc.title", "rtbf.identifier.attributor", "dcterms.isPartOf.title"};
     public void performSearch() throws SearchServiceException, SQLException {
 
         DiscoverQuery query = new DiscoverQuery();
@@ -52,10 +52,10 @@ public class DiscoverExpandedItems {
     /**
      * List of items related to the given item
      */
-    public List<DiscoverResult.SearchDocument> getItems() 
+    public List<ExpandedItem> getItems() 
     {
 
-        List<DiscoverResult.SearchDocument> expandList = new ArrayList<DiscoverResult.SearchDocument>();
+        List<ExpandedItem> expandList = new ArrayList<ExpandedItem>();
 
         try {
             // Questionne solr for expanded results
@@ -75,19 +75,47 @@ public class DiscoverExpandedItems {
             if (!handle.equals(resultDso.getHandle())) { // result handle and questionning handle are different
                 // take the first doc, should be the only one
                 DiscoverResult.SearchDocument doc = queryResults.getSearchDocument(resultDso).get(0);
-                expandList.add(doc);
+                expandList.add(new ExpandedItem(doc));
             }
             
             List<DiscoverResult.SearchDocument> expandDocuments = queryResults.getExpandDocuments(resultDso);
             for (SearchDocument docE : expandDocuments) {
             	String handleE = docE.getSearchFieldValues("handle").get(0);
             	if (!handle.equals(handleE)) {
-            		expandList.add(docE);
+            		expandList.add(new ExpandedItem(docE));
             	}
             }
         }
         
         return expandList;
     }
+    
+    public static class ExpandedItem { /* wrapper of DiscoverResult.SearchDocument */
+    	private DiscoverResult.SearchDocument itdoc;
+    	
+    	public ExpandedItem(DiscoverResult.SearchDocument doc) {
+    		itdoc = doc;
+    	}
+    	
+        public int getID() {
+        	return (Integer.valueOf(itdoc.getSearchFields().get("search.resourceid").get(0)));
+        }
 
+        public int getType() {
+        	return (Integer.valueOf(itdoc.getSearchFields().get("search.resourcetype").get(0)));
+        }
+
+        public String getHandle() {
+    		return (itdoc.getSearchFields().get("handle").get(0));
+        }
+
+        public boolean containsMetadataString(String label) {
+    		return (itdoc.getSearchFields().containsKey(label));
+        }
+
+        public String getValueByMetadataString(String label) {
+    		return (itdoc.getSearchFields().get(label).get(0));
+        }
+
+    }
 }

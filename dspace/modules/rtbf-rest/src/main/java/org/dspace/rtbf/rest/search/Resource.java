@@ -251,8 +251,16 @@ public abstract class Resource
         	query.setSortField(searchRequest.getSortField(), searchRequest.getSortOrder());
         }
         
+        // Search Fields : handle is included by default
+        String[] searchFields = {
+                // Those are needed in expanded items
+        		"search.resourceid", "search.resourcetype", "dc.title", "rtbf.identifier.attributor"
+        };
+        for (String sf : searchFields) {
+        	query.addSearchField(sf);			
+		}
+        
         // 2. Perform query
-
 		return (getSearchService().search(context, query));
 	}
 

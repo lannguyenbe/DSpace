@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import org.dspace.content.Item;
 import org.dspace.core.ConfigurationManager;
 import org.dspace.core.Context;
+import org.dspace.discovery.DiscoverExpandedItems;
 import org.dspace.discovery.DiscoverResult;
 import org.dspace.discovery.DiscoverResult.SearchDocument;
 import org.dspace.rtbf.rest.common.Constants;
@@ -54,11 +55,13 @@ public class SearchResponseParts {
 		                    Sequence sequence = new Sequence(Constants.SEARCH_RESULT_VIEW, (Item) result, Constants.SEARCH_SEQUENCE_EXPAND_OPTIONS, null);
 //		                    DiscoverResult.DSpaceObjectHighlightResult highlightedResults = queryResults.getHighlightedResults(result);
 
-		                    // Add linked Documents : collapse on identifier_origin
+		                    // Add linked Documents 
+		                    // the linked documents to this dso were already retrieved by the same search - in the expanded section ot solr response - 
+		                    // only their handle are available
 		                    List<RTBObject> linkedDocuments = new ArrayList<RTBObject>();	                    
 		                    List<DiscoverResult.SearchDocument> entries = queryResults.getExpandDocuments(result);
 		            		for (SearchDocument entry : entries) {
-		            			linkedDocuments.add(new RTBObject(entry.getSearchFields().get("handle").get(0)));
+		            			linkedDocuments.add(new RTBObject(new DiscoverExpandedItems.ExpandedItem(entry)));
 		            		}
 		            		if (linkedDocuments.size() > 0) {
 		            			sequence.setLinkedDocuments(linkedDocuments);
