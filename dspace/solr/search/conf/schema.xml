@@ -741,6 +741,17 @@
 
     <!-- 07.10.2015 Lan : support datediffusion_dt as multivalue field -->
     <field name="datediffusion_dt" type="tdate" indexed="true" stored="true" multiValued="true" omitNorms="true"  docValues="true"/>
+    <!-- 01.12.2015 Lan : dateIssued_dt as sort field with nulls last -->
+    <!-- field name="dateIssued_dt" type="tdate" indexed="true" stored="true" multiValued="false" sortMissingLast="true" omitNorms="true"  docValues="true"/-->
+    <field name="dc.date.issued_dt" type="tdate" indexed="true" stored="true" multiValued="false" sortMissingLast="true" omitNorms="true"  docValues="true"/>
+    <!-- 01.12.2015 Lan : rtbf.channel_issued as sort field with nulls last -->
+    <field name="rtbf.channel_issued" type="lowerCaseSort" indexed="true" stored="true" multiValued="false" omitNorms="true"/>
+    <field name="rtbf.royalty_code" type="lowerCaseSort" indexed="true" stored="true" multiValued="false" omitNorms="true"/>
+    <!-- 02.12.2015 Lan : add owning_collection from table item.owning_collection -->
+    <field name="owning_collection" type="string" indexed="true" stored="true" multiValued="false" omitNorms="true" />
+    <field name="owning_community" type="string" indexed="true" stored="true" multiValued="false" omitNorms="true" />
+    <field name="location.community" type="string" indexed="true" stored="true" multiValued="true" omitNorms="true" />
+    <field name="location.collection" type="string" indexed="true" stored="true" multiValued="true" omitNorms="true" />
     
     </fields>
 
