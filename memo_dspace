@@ -200,6 +200,38 @@ cp dspace-api-4.2.jar $DS/lib
 ## to recompile:end
 
 -----------------------------------------  S O L R  --------------------------------------------------
+
+# facet on role_keyword + pivot to retrieve document uniqueid
+http://localhost:8070/solr/search/select?q=*%3A*&fq=search.resourcetype%3A2&rows=0&wt=json&indent=true&facet=true&facet.pivot=role_keyword,search.uniqueid&f.role_keyword.facet.prefix=Journaliste&facet.mincount=1
+
+# facet on location.collection : get collection id + count of items + order by count
+http://localhost:8070/solr/search/selectOrigin?q=belgique&rows=0&fl=search.uniqueid%2Cdc.title%2Clocation.collection%2Cowning_community%2Cscore&wt=json&indent=true&facet=true&facet.field=location.collection&facet.mincount=1&facet.limit=10&facet.offset=0
+# join on location.collection sort by collection date issued, get 5 first collections
+http://localhost:8070/solr/search/selectOrigin?q=*%3A*&fq=%7B!tag%3Dmyjoin%7D%7B!join+from%3Dlocation.collection+to%3Dsearch.uniqueid%7Dbelgique&sort=dc.title_sort+asc&rows=5&fl=search.uniqueid%2C+dc.title%2C+dc.date.issued&wt=json&indent=true
+# get facet count of those 5 collections
+http://localhost:8070/solr/search/selectOrigin?q=*%3A*&fq=location.collection%3A(3-1692+3-11+3-14+3-31+3-38)&rows=0&wt=json&indent=true&facet=true&facet.query=location.collection%3A3-1692&facet.query=location.collection%3A3-13&facet.query=location.collection%3A3-14&facet.query=location.collection%3A3-38&facet.query=location.collection%3A3-31
+
+# join+order and facet on collection but join collection and facet collection are not following the same order
+http://localhost:8070/solr/search/selectOrigin?q=*%3A*&fq=%7B!tag%3Dmyjoin%7D%7B!join+from%3Dlocation.collection+to%3Dsearch.uniqueid%7Dbelgique&sort=dc.title_sort+asc&rows=5&fl=search.uniqueid%2C+dc.title%2C+dc.date.issued&wt=json&indent=true&facet=true&facet.field=%7B!ex%3Dmyjoin%7Dlocation.collection&facet.mincount=1&facet.limit=10&facet.offset=0
+
+# join+order and facet on community
+http://localhost:8070/solr/search/select?q=*%3A*&fq=%7B!tag%3Dmyjoin%7D%7B!join+from%3Dlocation.community+to%3Dsearch.uniqueid%7D*%3A*&sort=dc.date.issued_dt+asc&fl=search.uniqueid%2C+dc.title%2C+dc.date.issued&wt=json&indent=true&facet=true&facet.field=%7B!ex%3Dmyjoin%7Dlocation.community&facet.mincount=1
+
+# join is not preserving the score, use for sorting on title_sort ...
+#  /selectCommunity + join but there is no expanded, same score
+http://localhost:8070/solr/search/selectCommunity?q=%7B!join+from%3Downing_community+to%3Dsearch.uniqueid%7Dsearch_text%3Abelgique+AND+search.resourcetype%3A2&fl=search.uniqueid%2Cowning_collection%2Cowning_community%2Cscore&wt=json&indent=true
+http://localhost:8070/solr/search/selectCommunity?q=%7B!join+from%3Downing_community+to%3Dsearch.uniqueid%7Dsearch_text%3Abelgique+AND+search.resourcetype%3A2&sort=dc.title_sort+asc&fl=search.uniqueid%2Cdc.title%2Cowning_collection%2Cowning_community%2Cscore&wt=json&indent=true
+
+# collapse on owning_community via /selectCommunity  + rubrique expanded
+http://localhost:8070/solr/search/selectCollection?q=%7B!join+from%3Downing_collection+to%3Dsearch.uniqueid%7Dsearch_text%3Abelgique+AND+search.resourcetype%3A2%0A&sort=dc.title_sort+desc&rows=10&fl=dc.title&wt=json&indent=true
+http://localhost:8070/solr/search/selectCommunity?q=belgique+AND+search.resourcetype%3A2&fl=search.uniqueid%2Cowning_collection%2Cowning_community%2Cscore&wt=json&indent=true# collapse on owning_collection via /selectCollection  + rubrique expanded 
+http://localhost:8070/solr/search/selectCollection?q=search.resourcetype%3A2+AND+search_text%3Abelgique&fl=search.uniqueid%2Cowning_collection%2Cscore&wt=json&indent=true
+
+# collapse sur owning_collection (expand=true ne montre pas la rubrique expanded !)
+http://localhost:8070/solr/search/selectNoCollapse?q=search.resourcetype%3A2+AND+search_text%3Abelgique&fq=%7B!collapse+field%3Downing_collection%7D&rows=20&fl=search.uniqueid%2Cowning_collection%2Cscore&wt=json&indent=true
+# join on owning_collection (scoring is not preserve ! tous = 1)
+http://localhost:8070/solr/search/select?q=%7B!join+from%3Downing_collection+to%3Dsearch.uniqueid%7Dsearch.resourcetype%3A2+AND+search_text%3Abelgique&rows=20&fl=handle%2Csearch.resourcetype%2Cowning_collection&wt=json&indent=true
+
 # collapse sur location.coll
 http://vm-dev4.inf.rtbf.be:8080/solr/search/selectNoCollapse?q=location%3Am1+AND+search.resourcetype%3A2+AND+search_text%3Atoto&fq=%7B!collapse+field%3Dlocation.coll%7D&rows=10&fl=dc.title%2Clocation.*%2Clocation%2Chandle%2Csearch.resourceid&wt=json&indent=true&facet=true&facet.field=dc.title_sort
 
@@ -214,6 +246,8 @@ http://localhost:8070/solr/search/select?q=contributor%3A(%22boever+intervenant%
 http://localhost:8070/solr/search/select?q=-dateIssued.year%3A2015&rows=0&wt=json&indent=true
 # Number of doc that not exists dateIssued.year # q=-dateIssued.year:[* TO *]
 http://localhost:8070/solr/search/select?q=-dateIssued.year%3A%5B*+TO+*%5D&rows=0&wt=json&indent=true
+# Use facet.query to retrieve #doc not exist date : facet.query=-dateIssued.year:[* TO *]
+http://vm-dev4.inf.rtbf.be:8080/solr/search/select?q=search.resourcetype%3A2&rows=0&wt=json&indent=true&facet=true&facet.query=-dateIssued.year%3A%5B*+TO+*%5D&facet.query=dateIssued.year%3A2015&facet.field=dateIssued.year&facet.mincount=1
 
 ### hierarchical faceting on typesupport
 # query on "BETA Digit" faceting on typesupport_tax_0_filter with facet_prefix "beta digit"

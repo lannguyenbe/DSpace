@@ -1192,6 +1192,12 @@ public class SolrServiceImpl implements SearchService, IndexingService {
 
         // build list of collection ids
         Collection[] collections = myitem.getCollections();
+        
+        // Lan 02.12.2015 : add owning_collection and owning_community
+        Collection owningCollection = myitem.getOwningCollection();
+        Community owningCommunity = (Community) owningCollection.getParentObject();
+        locations.add("om" + owningCommunity.getID());
+        locations.add("ol" + owningCollection.getID());
 
         // now put those into strings
         int i = 0;
@@ -1280,7 +1286,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
      * @throws SQLException
      * @throws IOException
      */
-    protected void buildDocument(Context context, Community community)
+    protected void buildDocument_old(Context context, Community community)
     throws SQLException, IOException {
         // Create Document
         SolrInputDocument doc = buildDocument(Constants.COMMUNITY, community.getID(),
@@ -1321,6 +1327,72 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         writeDocument(doc, null);
     }
 
+    protected void buildDocument(Context context, Community community)
+    throws SQLException, IOException {
+        // Create Document
+        SolrInputDocument doc = buildDocument(Constants.COMMUNITY, community.getID(),
+                community.getHandle(), null);
+
+        DiscoveryConfiguration discoveryConfiguration = SearchUtils.getDiscoveryConfiguration(community);
+        DiscoveryHitHighlightingConfiguration highlightingConfiguration = discoveryConfiguration.getHitHighlightingConfiguration();
+        List<String> highlightedMetadataFields = new ArrayList<String>();
+        if(highlightingConfiguration != null)
+        {
+            for (DiscoveryHitHighlightFieldConfiguration configuration : highlightingConfiguration.getMetadataFields())
+            {
+                highlightedMetadataFields.add(configuration.getField());
+            }
+        }
+
+        List<String> toIgnoreMetadataFields = SearchUtils.getIgnoredMetadataFields(community.getType());
+        Metadatum[] mydc = community.getMetadata(Item.ANY, Item.ANY, Item.ANY, Item.ANY);
+        for (Metadatum meta : mydc)
+        {
+            String field = meta.schema + "." + meta.element;
+            String unqualifiedField = field;
+
+            String value = meta.value;
+            Date value_dt = null;
+
+            if (value == null) { continue; }
+
+            if (meta.qualifier != null && !meta.qualifier.trim().equals("")) { field += "." + meta.qualifier; }
+            
+            if (toIgnoreMetadataFields != null	&& (toIgnoreMetadataFields.contains(field) || toIgnoreMetadataFields.contains(unqualifiedField + "." + Item.ANY)))
+            {
+                continue;
+            }
+                       
+            switch (field) {
+            case "dc.description":
+            case "dc.description.abstract":
+            case "dc.description.tableofcontents":
+            case "dc.rights":
+                doc.addField(field, value);
+                break;
+            case "dc.title":
+                doc.addField(field, value);
+                doc.addField(field + "_sort", value);
+                break;
+            case "rtbf.identifier.attributor":
+            case "rtbf.royalty_code":
+                doc.addField(field, value);
+                break;
+            default: 
+            	break;
+            }
+        }
+
+        //Do any additional indexing, depends on the plugins
+        List<SolrServiceIndexPlugin> solrServiceIndexPlugins = new DSpace().getServiceManager().getServicesByType(SolrServiceIndexPlugin.class);
+        for (SolrServiceIndexPlugin solrServiceIndexPlugin : solrServiceIndexPlugins)
+        {
+            solrServiceIndexPlugin.additionalIndex(context, community, doc);
+        }
+
+        writeDocument(doc, null);
+    }
+
     /**
      * Build a solr document for a DSpace Collection.
      *
@@ -1328,7 +1400,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
      * @throws SQLException sql exception
      * @throws IOException IO exception
      */
-    protected void buildDocument(Context context, Collection collection)
+    protected void buildDocument_old(Context context, Collection collection)
     throws SQLException, IOException {
         List<String> locations = getCollectionLocations(collection);
 
@@ -1377,6 +1449,84 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         writeDocument(doc, null);
     }
 
+    protected void buildDocument(Context context, Collection collection)
+    throws SQLException, IOException {
+        List<String> locations = getCollectionLocations(collection);
+
+        // Create Lucene Document
+        SolrInputDocument doc = buildDocument(Constants.COLLECTION, collection.getID(),
+                collection.getHandle(), locations);
+
+        DiscoveryConfiguration discoveryConfiguration = SearchUtils.getDiscoveryConfiguration(collection);
+        DiscoveryHitHighlightingConfiguration highlightingConfiguration = discoveryConfiguration.getHitHighlightingConfiguration();
+        List<String> highlightedMetadataFields = new ArrayList<String>();
+        if(highlightingConfiguration != null)
+        {
+            for (DiscoveryHitHighlightFieldConfiguration configuration : highlightingConfiguration.getMetadataFields())
+            {
+                highlightedMetadataFields.add(configuration.getField());
+            }
+        }
+
+
+        List<String> toIgnoreMetadataFields = SearchUtils.getIgnoredMetadataFields(collection.getType());
+        Metadatum[] mydc = collection.getMetadata(Item.ANY, Item.ANY, Item.ANY, Item.ANY);
+        for (Metadatum meta : mydc)
+        {
+            String field = meta.schema + "." + meta.element;
+            String unqualifiedField = field;
+
+            String value = meta.value;
+            Date value_dt = null;
+
+            if (value == null) { continue; }
+
+            if (meta.qualifier != null && !meta.qualifier.trim().equals("")) { field += "." + meta.qualifier; }
+            
+            if (toIgnoreMetadataFields != null	&& (toIgnoreMetadataFields.contains(field) || toIgnoreMetadataFields.contains(unqualifiedField + "." + Item.ANY)))
+            {
+                continue;
+            }
+                       
+            switch (field) {
+            case "dc.description":
+            case "dc.description.abstract":
+            case "dc.description.tableofcontents":
+            case "dc.provenance":
+            case "dc.rights":
+            case "dc.rights.license":
+                doc.addField(field, value);
+                break;
+            case "dc.title":
+                doc.addField(field, value);
+                doc.addField(field + "_sort", value);
+                break;
+            case "dc.date.issued":
+                value_dt = MultiFormatDateParser.parse(value);
+                doc.addField(field + "_dt", value_dt);
+                value = DateFormatUtils.formatUTC(value_dt, "yyyy-MM-dd");
+                doc.addField(field, value);
+            	break;
+            case "rtbf.channel_issued":
+            case "rtbf.identifier.attributor":
+            case "rtbf.royalty_code":
+                doc.addField(field, value);
+                break;
+            default: 
+            	break;
+            }
+        }
+
+        //Do any additional indexing, depends on the plugins
+        List<SolrServiceIndexPlugin> solrServiceIndexPlugins = new DSpace().getServiceManager().getServicesByType(SolrServiceIndexPlugin.class);
+        for (SolrServiceIndexPlugin solrServiceIndexPlugin : solrServiceIndexPlugins)
+        {
+            solrServiceIndexPlugin.additionalIndex(context, collection, doc);
+        }
+
+        writeDocument(doc, null);
+    }
+
     /**
      * Add the metadata value of the community/collection to the solr document
      * IF needed highlighting is added !
@@ -1408,9 +1558,10 @@ public class SolrServiceImpl implements SearchService, IndexingService {
      * @throws SQLException
      * @throws IOException
      * 
+     * 03.12.2015 Lan : changer dc.date_issued_dt pour contenir aussi la partie heure, supprimer dateIssued_dt introduit précédemment
      * 10.10.2015 Lan : si un field DB de type date fait l'objet d'un searchFilter, ajouter field index de nom getIndexFieldName() + "_dt"
      * 		exemple: pour dc.date.issued, on crée dateIssued_dt qui comporte date et HEURE
-     * 			alors que dc.date.iddued_dt ne contient plus la partie heure
+     * 			alors que dc.date.issued_dt ne contient plus la partie heure
      */
     protected void buildDocument(Context context, Item item)
             throws SQLException, IOException {
@@ -1431,7 +1582,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
 
         doc.addField("withdrawn", item.isWithdrawn());
         doc.addField("discoverable", item.isDiscoverable());
-
+        
         //Keep a list of our sort values which we added, sort values can only be added once
         List<String> sortFieldsAdded = new ArrayList<String>();
         Set<String> hitHighlightingFields = new HashSet<String>();
@@ -1520,6 +1671,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 String unqualifiedField = field;
 
                 String value = meta.value;
+                Date value_dt = null;
 
                 if (value == null)
                 {
@@ -1619,7 +1771,6 @@ public class SolrServiceImpl implements SearchService, IndexingService {
 
                     for (DiscoverySearchFilter searchFilter : searchFilterConfigs)
                     {
-                        Date date = null;
                         String separator = new DSpace().getConfigurationService().getProperty("discovery.solr.facets.split.char");
                         if(separator == null)
                         {
@@ -1628,13 +1779,11 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                         if(searchFilter.getType().equals(DiscoveryConfigurationParameters.TYPE_DATE))
                         {
                             //For our search filters that are dates we format them properly
-                            date = MultiFormatDateParser.parse(value);
-                            if(date != null)
+                            value_dt = MultiFormatDateParser.parse(value);
+                            if(value_dt != null)
                             {
                                 //TODO: make this date format configurable !
-                                value = DateFormatUtils.formatUTC(date, "yyyy-MM-dd");
-                                // Lan
-                                doc.addField(searchFilter.getIndexFieldName() + "_dt", date);
+                                value = DateFormatUtils.formatUTC(value_dt, "yyyy-MM-dd");
                             }
                         }
                         doc.addField(searchFilter.getIndexFieldName(), value);
@@ -1729,10 +1878,10 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                             }else
                                 if(searchFilter.getType().equals(DiscoveryConfigurationParameters.TYPE_DATE))
                                 {
-                                    if(date != null)
+                                    if(value_dt != null)
                                     {
                                         String indexField = searchFilter.getIndexFieldName() + ".year";
-                                        String yearUTC = DateFormatUtils.formatUTC(date, "yyyy");
+                                        String yearUTC = DateFormatUtils.formatUTC(value_dt, "yyyy");
 										doc.addField(searchFilter.getIndexFieldName() + "_keyword", yearUTC);
 										// add the year to the autocomplete index
 										doc.addField(searchFilter.getIndexFieldName() + "_ac", yearUTC);
@@ -1813,14 +1962,17 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                         type = recentSubmissionsConfigurationMap.get(field).getType();
                     }
 
+                    // 03.12.2015 Lan : <field>_dt contains date AND time, not only date
                     if(type.equals(DiscoveryConfigurationParameters.TYPE_DATE))
                     {
-                        Date date = MultiFormatDateParser.parse(value);
-                        if(date != null)
+                    	if (value_dt == null) {
+                    		value_dt = MultiFormatDateParser.parse(value);
+                    	}
+                        if(value_dt != null)
                         {
-                            doc.addField(field + "_dt", date);
+                            doc.addField(field + "_dt", value_dt);
                         }else{
-                            log.warn("Error while indexing sort date field, item: " + item.getHandle() + " metadata field: " + field + " date value: " + date);
+                            log.warn("Error while indexing sort date field, item: " + item.getHandle() + " metadata field: " + field + " date value: " + value_dt);
                         }
                     }else{
                         doc.addField(field + "_sort", value);
@@ -2004,13 +2156,23 @@ public class SolrServiceImpl implements SearchService, IndexingService {
             for (String location : locations)
             {
                 doc.addField("location", location);
-                if (location.startsWith("m"))
+                if (location.startsWith("om"))
+                {
+                    doc.addField("owning_community", Constants.COMMUNITY+"-"+location.substring(2));
+                }
+                else if (location.startsWith("ol"))
+                {
+                    doc.addField("owning_collection", Constants.COLLECTION+"-"+location.substring(2));
+                }
+                else if (location.startsWith("m"))
                 {
                     doc.addField("location.comm", location.substring(1));
+                    doc.addField("location.community", Constants.COMMUNITY+"-"+location.substring(1));
                 }
                 else
                 {
                     doc.addField("location.coll", location.substring(1));
+                    doc.addField("location.collection", Constants.COLLECTION+"-"+location.substring(1));
                 }
             }
         }
