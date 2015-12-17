@@ -10,6 +10,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.log4j.Logger;
+import org.dspace.content.Collection;
 import org.dspace.content.Item;
 import org.dspace.core.ConfigurationManager;
 import org.dspace.core.Context;
@@ -17,6 +18,7 @@ import org.dspace.discovery.DiscoverExpandedItems;
 import org.dspace.discovery.DiscoverResult;
 import org.dspace.discovery.DiscoverResult.SearchDocument;
 import org.dspace.rtbf.rest.common.Constants;
+import org.dspace.rtbf.rest.common.Episode;
 import org.dspace.rtbf.rest.common.MetadataEntry;
 import org.dspace.rtbf.rest.common.MetadataWrapper;
 import org.dspace.rtbf.rest.common.RTBObject;
@@ -68,10 +70,13 @@ public class SearchResponseParts {
 		            		}
 
 							lst.add(sequence);
+							break;
 						case Constants.COLLECTION:
-//							lst.add(new Episode(Constants.SEARCH_RESULT_VIEW, (Collection) result, null, null));
+							lst.add(new Episode(Constants.SEARCH_RESULT_VIEW, (Collection) result, null, null));
+							break;
 						case Constants.COMMUNITY:
 //							lst.add(new Serie(Constants.SEARCH_RESULT_VIEW, (Community) result, null, null));
+//							break;
 						}
 					} catch (WebApplicationException e) {
 						log.error("Unable to add to result list: "+ e);

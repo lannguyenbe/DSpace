@@ -40,6 +40,7 @@ public class Episode extends RTBObject {
 	}
 
     private void setup(int viewType, org.dspace.content.Collection collection, String expand, Context context, Integer limit, Integer offset) throws SQLException{
+    	int innerViewType = 0;
     	
     	switch (viewType) {
     	case Constants.SEARCH_RESULT_VIEW:
@@ -47,7 +48,11 @@ public class Episode extends RTBObject {
     		this.setChannelIssued(getMetadataEntry(Constants.CHANNEL_ISSUED,collection));
             // this.setCountSupports(getCountAllSupports(collection));
             this.setCountSequences(collection.countItems());
+    		innerViewType = Constants.MIN_VIEW;
             break;
+        default:
+    		innerViewType = viewType;
+        	break;
     	}
 
         List<String> expandFields = new ArrayList<String>();
@@ -57,18 +62,20 @@ public class Episode extends RTBObject {
         
         if(expandFields.contains("owningSerie") | expandFields.contains("all")) {
             org.dspace.content.Community parentCommunity = (org.dspace.content.Community) collection.getParentObject();
-            this.setOwningSerie(new Serie(viewType, parentCommunity, null, context));
+            this.setOwningSerie(new Serie(innerViewType, parentCommunity, null, context));
         } else {
             this.addExpand("owningSerie");
         }
 
         if(expandFields.contains("owningParentList") || expandFields.contains("all")) {
             List<RTBObject> entries = new ArrayList<RTBObject>();
+            // serie level
             org.dspace.content.Community parentCommunity = (org.dspace.content.Community) collection.getParentObject();
-            entries.add(new Serie(viewType, parentCommunity, null, context));
+            entries.add(new Serie(innerViewType, parentCommunity, null, context));
+            // repository level
             org.dspace.content.Community topparentCommunity = parentCommunity.getParentCommunity();
             if (topparentCommunity != null) { // already at top for orphan episode
-            	entries.add(new Serie(viewType, topparentCommunity, null, context));
+            	entries.add(new Serie(innerViewType, topparentCommunity, null, context));
             }
             this.setOwningParentList(entries);
         } else {
@@ -89,7 +96,7 @@ public class Episode extends RTBObject {
         	List<Sequence> entries = new ArrayList<Sequence>();
             while(childItems.hasNext()) {
                 org.dspace.content.Item item = childItems.next();
-                	entries.add(new Sequence(viewType, item, null, context));
+                	entries.add(new Sequence(innerViewType, item, null, context));
             }
             this.setSequences(entries);
         } else {
@@ -98,8 +105,9 @@ public class Episode extends RTBObject {
 
         if(expandFields.contains("metadata") || expandFields.contains("all")) {
         	List<MetadataEntry> entries = new ArrayList<MetadataEntry>();
-            Metadatum[] dcvs = getAllMetadata(collection);
+        	Metadatum[] dcvs = collection.getMetadataByMetadataString("*.*.*");
             for (Metadatum dcv : dcvs) {
+            	if (dcv.schema.equals(Constants.OLD_SCHEMA)) { continue; } // skip old schema
                 entries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
             }
             this.setMetadataEntries(entries);

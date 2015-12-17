@@ -6,6 +6,8 @@ import java.util.Map;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
+import org.dspace.rtbf.rest.util.jackson.CustomCharacterEscapes;
+
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +27,9 @@ public class RsJacksonContextResolver implements ContextResolver<ObjectMapper> {
         	.registerModule(new org.dspace.rtbf.rest.util.jackson.NameMappingModule())
         ;
 //    	.registerModule(new com.fasterxml.jackson.datatype.jsr353.JSR353Module())
+        
+// Escape control characters
+//      defaultObjectMapper.getFactory().setCharacterEscapes(new CustomCharacterEscapes());
     }
 		
 	@Override

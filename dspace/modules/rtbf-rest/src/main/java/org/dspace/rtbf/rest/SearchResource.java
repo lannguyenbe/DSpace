@@ -23,7 +23,7 @@ public class SearchResource extends Resource {
     @GET
     @Path("sequences")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    public SearchResponse getSearchResponse(
+    public SearchResponse getItemsSearchResponse(
     		@QueryParam("scope") String scope
     		, @QueryParam("q") String qterms
     		, @QueryParam("limit") @DefaultValue(Constants.DEFAULT_LIMIT) Integer limit, @QueryParam("offset") @DefaultValue("0") Integer offset
@@ -53,6 +53,53 @@ public class SearchResource extends Resource {
 
         } catch (Exception e) {
            processException("Could not process search sequences. Message:"+e.getMessage(), context);
+         } finally {
+           processFinally(context);            
+         }
+
+        return response;
+
+    }
+		
+    @GET
+    @Path("episodes")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public SearchResponse getCollectionsSearchResponse(
+    		@QueryParam("scope") String scope
+    		, @QueryParam("q") String qterms
+    		, @QueryParam("limit") @DefaultValue(Constants.DEFAULT_LIMIT) Integer limit, @QueryParam("offset") @DefaultValue("0") Integer offset
+    		, @QueryParam("sort-by") String orderBy, @QueryParam("order") String order
+    		, @QueryParam("expand") String expand
+    		, @Context UriInfo info
+    		, @QueryParam("userIP") String user_ip, @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor
+            , @Context HttpHeaders headers, @Context HttpServletRequest request) throws WebApplicationException
+    {
+        org.dspace.core.Context context = null;
+        log.info("Searching episodes(q=" + qterms + ").");
+        SearchResponse response = null;
+        DiscoverResult queryResults = null;
+
+        try {
+            context = new org.dspace.core.Context();
+            context.getDBConnection();
+            
+            Request searchRequest = new Request(info.getQueryParameters(), context);
+            
+            // expand the results if there is a query
+            if (qterms != null && qterms.length() > 0) { expand += ",results"; }
+            
+            if (orderBy != null && orderBy.length() > 0) {
+	            queryResults = getCollectionResultAsJoin(org.dspace.core.Constants.COLLECTION, context, searchRequest);
+	            response = new SequencesSearchResponse(queryResults, expand, context, limit, offset);
+            } else {
+	            queryResults = getCollectionResultFromFacet(org.dspace.core.Constants.ITEM, context, searchRequest);
+	            response = new SequencesSearchResponse(queryResults, expand, context, limit, offset);
+            }
+
+            context.complete();
+
+        } catch (Exception e) {
+           processException("Could not process search episodes. Message:"+e.getMessage(), context);
          } finally {
            processFinally(context);            
          }

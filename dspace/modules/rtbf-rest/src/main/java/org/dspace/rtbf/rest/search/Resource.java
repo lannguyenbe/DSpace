@@ -20,6 +20,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
+import org.dspace.content.DSpaceObject;
 import org.dspace.core.Constants;
 import org.dspace.core.Context;
 import org.dspace.discovery.DiscoverFacetField;
@@ -263,7 +264,206 @@ public abstract class Resource
         // 2. Perform query
 		return (getSearchService().search(context, query));
 	}
+	
+
+	/*
+	 * The results of the query are about sequences, use facet to access the collections of those results
+	 */
+	protected DiscoverResult getCollectionResultFromFacet(int resourceType, Context context, Request searchRequest) throws SearchServiceException {
+
+        // 1. Prepare the query
+        DiscoverQuery query = new DiscoverQuery();
+
+        // Use request handler /selectNoCollapse instead of the default /select
+        // to be compatible with the method getCollectionResultAsJoin() that uses the request handle /selectCollection which is also NO collapsing
+        query.addProperty("qt", "/selectNoCollapse");
+        
+        // Prepare facetting and facet pagination : use facet to get the parent collections of the results
+        DiscoverFacetField dff = new DiscoverFacetField("location.coll"
+                , DiscoveryConfigurationParameters.TYPE_STANDARD
+                , searchRequest.getLimit() /* facet limit */
+                , DiscoveryConfigurationParameters.SORT.COUNT
+                , searchRequest.getOffset() * searchRequest.getLimit() /* facet offset */);
+        query.addFacetField(dff);
+        query.setFacetMinCount(1);
+        query.setMaxResults(0); // count of results only
+                
+        // q terms
+        query.setQuery(searchRequest.getQuery());
+
+        // return which resourcetype document (community/collection/item) - should be item
+        query.setDSpaceObjectFilter(resourceType);
+    	
+        // limit the search within community/collection
+        String scope = searchRequest.getScope();
+    	if (scope != null) { // scope contains logical expression of handles
+    		// a. Replace handle by m{community_id} or l{collection_id}
+    		StringBuffer sb = new StringBuffer();    		
+    		Pattern pattern = Pattern.compile("\\d+/\\d+");
+    		Matcher matcher = pattern.matcher(scope);
+
+    		while (matcher.find()) {
+    			String handle = matcher.group();
+    			String replacement;
+
+    			org.dspace.content.DSpaceObject dso = null;
+    			try {
+    				dso = HandleManager.resolveToObject(context, handle);
+    			} catch (Exception e) {
+    				processException("Could not process getCollectionResultFromFacet. Message:"+e.getMessage(), context);
+    			};
+
+    			if(dso == null) {
+    				replacement = handle;
+    			} else {
+    				switch (dso.getType()) {
+    				case Constants.COMMUNITY:
+    					replacement = "m" + dso.getID();
+    					break;
+    				case Constants.COLLECTION:
+    					replacement = "l" + dso.getID();
+    					break;
+    				default :
+    					replacement = handle;
+    				}
+    			}
+    			matcher.appendReplacement(sb, replacement);
+    		}
+
+    		// b. Add filter query
+    		query.addFilterQueries("{!q.op=OR}" + "location:(" + sb.toString() + ")");
+    	}
+
+        
+        // 2. Perform query
+        DiscoverResult queryResults = getSearchService().search(context, query);
+        
+        // 3. Make facet results as main results 
+        if (queryResults != null) {
+            List<FacetResult> facets = queryResults.getFacetResult("location.coll");
+            int facetIndex = 0;
+            
+            for (FacetResult facet : facets) {
+                DSpaceObject o = null;
+				try {
+					o = DSpaceObject.find(context, (Integer) org.dspace.core.Constants.COLLECTION, (Integer) Integer.parseInt(facet.getAsFilterQuery()));
+				} catch (NumberFormatException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				queryResults.addDSpaceObject(o);
+				facetIndex++;
+            }
+            
+            // setTotalSearchResults to count of collections
+            if (searchRequest.getOffset() == 0 && facetIndex < searchRequest.getLimit()) {
+            	// set count of collections to facet count
+                queryResults.setTotalSearchResults(facetIndex);
+            } else { 
+            	// do another search to get count of collections
+            	DiscoverResult collections = getCollectionResultAsJoin(org.dspace.core.Constants.COLLECTION, context, searchRequest);
+            	searchRequest.setLimit(0); // Do not get results detail only their count
+            	queryResults.setTotalSearchResults(collections.getTotalSearchResults());
+            }
+        }
+
+        return queryResults;
+
+	}
+
+	
+	protected DiscoverResult getCollectionResultAsJoin(int resourceType, Context context, Request searchRequest) throws SearchServiceException {
+		// 1. Prepare the query
+        DiscoverQuery query = new DiscoverQuery();
+        
+        // use request handler /selectCollection instead of the default /select
+        query.addProperty("qt", "/selectCollection");
+        
+        // seqQuery terms instead of q terms
+        // query.setQuery(searchRequest.getQuery());
+        query.addProperty("seqQ", searchRequest.getQuery());
+
+        // return which resourcetype document (community/collection/item) - should be collection
+        query.setDSpaceObjectFilter(resourceType);
+    	
+        /*
+         *  TODO test ALL the following features
+         */
+
+        // limit the search within community/collection
+        String scope = searchRequest.getScope();
+    	if (scope != null) { // scope contains logical expression of handles
+    		// a. Replace handle by m{community_id} or l{collection_id}
+    		StringBuffer sb = new StringBuffer();    		
+    		Pattern pattern = Pattern.compile("\\d+/\\d+");
+    		Matcher matcher = pattern.matcher(scope);
+
+    		while (matcher.find()) {
+    			String handle = matcher.group();
+    			String replacement;
+
+    			org.dspace.content.DSpaceObject dso = null;
+    			try {
+    				dso = HandleManager.resolveToObject(context, handle);
+    			} catch (Exception e) {
+    				processException("Could not process getCollectionResultAsJoin. Message:"+e.getMessage(), context);
+    			};
+
+    			if(dso == null) {
+    				replacement = handle;
+    			} else {
+    				switch (dso.getType()) {
+    				case Constants.COMMUNITY:
+    					replacement = "m" + dso.getID();
+    					break;
+    				case Constants.COLLECTION:
+    					replacement = "l" + dso.getID();
+    					break;
+    				default :
+    					replacement = handle;
+    				}
+    			}
+    			matcher.appendReplacement(sb, replacement);
+    		}
+
+    		// b. Add filter query at SEQUENCE level (not collection level)
+    		// query.addFilterQueries("{!q.op=OR}" + "location:(" + sb.toString() + ")");  // this is collection level  		
+    		query.addFilterQueries("{!join from=location.collection to=search.uniqueid}(_query_:\"{!q.op=OR v=$locQ}\")" );
+            query.addProperty("locQ", "location:(" + sb.toString() + ")");
+    	}
+
+
+    	// Pagination
+    	query.setMaxResults(searchRequest.getLimit());
+        if (searchRequest.getOffset() > 0) {
+            query.setStart(searchRequest.getOffset());
+        }
+        
+        // Order
+        if (searchRequest.getSortField() != null) {
+        	query.setSortField(searchRequest.getSortField(), searchRequest.getSortOrder());
+        }
+        
+        // Search Fields : handle is included by default
+        String[] searchFields = {
+                // Those are needed in expanded items
+        		"search.resourceid", "search.resourcetype", "dc.title", "rtbf.identifier.attributor"
+        };
+        for (String sf : searchFields) {
+        	query.addSearchField(sf);			
+		}
+        
+        // 2. Perform query
+		return (getSearchService().search(context, query));
+	}
+	
+	
 
 }
+
+
 
 

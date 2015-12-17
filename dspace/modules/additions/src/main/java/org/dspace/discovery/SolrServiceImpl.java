@@ -2375,7 +2375,14 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         for(String property : discoveryQuery.getProperties().keySet())
         {
             List<String> values = discoveryQuery.getProperties().get(property);
-            solrQuery.add(property, values.toArray(new String[values.size()]));
+            
+            // Lan 15.12.2015 : process "qt" property especially 
+            // use "qt" to choose another RequestHandler than the default /request
+            if (property.equals("qt")) {
+            	solrQuery.setRequestHandler(values.get(0));
+            } else {
+                solrQuery.add(property, values.toArray(new String[values.size()]));
+            }
         }
 
         List<DiscoverFacetField> facetFields = discoveryQuery.getFacetFields();

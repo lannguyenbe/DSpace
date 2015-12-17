@@ -73,12 +73,13 @@ public class Sequence extends RTBObject{
     	
         if(expandFields.contains("owningParentList") || expandFields.contains("all")) {
             List<RTBObject> entries = new ArrayList<RTBObject>();
-
-            org.dspace.content.Collection owningCollection = item.getOwningCollection();
-            
+            // collection level
+            org.dspace.content.Collection owningCollection = item.getOwningCollection();            
             entries.add(new Episode(innerViewType, owningCollection, null, context));
+            // serie level
             org.dspace.content.Community parentCommunity = (org.dspace.content.Community) owningCollection.getParentObject();
             entries.add(new Serie(innerViewType, parentCommunity, null, context));
+            // repository level
             org.dspace.content.Community topparentCommunity = parentCommunity.getParentCommunity();
             if (topparentCommunity != null) { // already at top for orphan item
             	entries.add(new Serie(innerViewType, topparentCommunity, null, context));

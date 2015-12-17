@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     Update history :
-    13.10.2015 Lan : recentSubmissionConfiguration utilise dateIssued
+    13.10.2015 Lan : recentSubmissionConfiguration utilise dc.date.issued
 -->
 <!--
 
@@ -162,8 +162,7 @@
         <property name="recentSubmissionConfiguration">
             <bean class="org.dspace.discovery.configuration.DiscoveryRecentSubmissionsConfiguration">
                 <!-- property name="metadataSortField" value="dc.date.accessioned" /-->
-                <!-- 13.10.2015 Lan : dateIssued parce que dateIssued_dt existe et comporte la partie HEURE -->
-                <property name="metadataSortField" value="dateIssued" />
+                <property name="metadataSortField" value="dc.date.issued" />
                 <property name="type" value="date"/>
                 <property name="max" value="20"/>
                 <!-- If enabled the collection home page will not display metadata but show a pageable list of recent submissions -->
@@ -282,8 +281,7 @@
         <property name="recentSubmissionConfiguration">
             <bean class="org.dspace.discovery.configuration.DiscoveryRecentSubmissionsConfiguration">
                 <!-- property name="metadataSortField" value="dc.date.accessioned" /-->
-                <!-- 13.10.2015 Lan : dateIssued parce que dateIssued_dt existe et comporte la partie HEURE -->
-                <property name="metadataSortField" value="dateIssued" />
+                <property name="metadataSortField" value="dc.date.issued" />
                 <property name="type" value="date"/>
                 <property name="max" value="5"/>
                 <property name="useAsHomePage" value="false"/>
