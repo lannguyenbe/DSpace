@@ -2393,6 +2393,10 @@ public class SolrServiceImpl implements SearchService, IndexingService {
             {
                 String field = transformFacetField(facetFieldConfig, facetFieldConfig.getField(), false);
                 solrQuery.addFacetField(field);
+                
+                // Lan 22.12.2015 : get rid of local parameter in field
+                String[] lpField = field.split("\\{.+\\}");
+                if (lpField.length > 1) { field = lpField[1]; }
 
                 // Setting the facet limit in this fashion ensures that each facet can have its own max
                 solrQuery.add("f." + field + "." + FacetParams.FACET_LIMIT, String.valueOf(facetFieldConfig.getLimit()));
@@ -2529,11 +2533,14 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 for (String field : searchFields)
                 {
                     List<String> valuesAsString = new ArrayList<String>();
-                    for (Object o : doc.getFieldValues(field))
-                    {
-                        valuesAsString.add(String.valueOf(o));
-                    }
-                    resultDoc.addSearchField(field, valuesAsString.toArray(new String[valuesAsString.size()]));
+                	java.util.Collection<Object> fieldValues = doc.getFieldValues(field);
+                	if (fieldValues != null) {
+	                    for (Object o : fieldValues)
+	                    {
+	                        valuesAsString.add(String.valueOf(o));
+	                    }
+	                    resultDoc.addSearchField(field, valuesAsString.toArray(new String[valuesAsString.size()]));
+                	}
                 }
                 result.addSearchDocument(dso, resultDoc);
 

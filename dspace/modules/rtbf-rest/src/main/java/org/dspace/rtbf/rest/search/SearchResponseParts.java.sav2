@@ -8,8 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
+import javax.xml.bind.annotation.XmlAnyElement;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlValue;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -31,8 +32,10 @@ import org.dspace.rtbf.rest.common.RTBObject;
 import org.dspace.rtbf.rest.common.Sequence;
 import org.dspace.rtbf.rest.common.Serie;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 public class SearchResponseParts {
     private static Logger log = Logger.getLogger(SearchResponseParts.class);
@@ -207,7 +210,7 @@ public class SearchResponseParts {
 	public static class FacetCountsAdapter extends XmlAdapter<FacetCountsAdapter.AdapteFacetCounts,  Map<String, List<FacetCounts.Entry>>> {
 		
 		public static class AdapteFacetCounts {
-			public List<ListEntry> fieldEntry = new ArrayList<ListEntry>();
+			public List<ListEntry> facetEntries = new ArrayList<ListEntry>();
 		}
 		
 		public static class ListEntry {
@@ -230,7 +233,7 @@ public class SearchResponseParts {
 				ListEntry e = new ListEntry();
 				e.field = mEntry.getKey();
 				e.entry = mEntry.getValue();
-				adapte.fieldEntry.add(e);
+				adapte.facetEntries.add(e);
 			}					
 			return adapte;
 		}

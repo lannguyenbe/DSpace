@@ -25,7 +25,7 @@ public class SearchResponse {
     private SearchResponseParts.Meta meta;
     private List<RTBObject> results;
 //    private SearchResponseParts.Result results;
-    private SearchResponseParts.FacetsCount facets;
+    private SearchResponseParts.FacetCounts facets;
 	private SearchResponseParts.Expanded expanded;
 	private SearchResponseParts.Highlighting highlighting;
 	
@@ -61,7 +61,7 @@ public class SearchResponse {
         }
 
         if(expandFields.contains("facets") || expandFields.contains("all")) {
-        	setFacets(new SearchResponseParts.FacetsCount());
+        	setFacets(new SearchResponseParts.FacetCounts(queryResults));
         } else {
             this.addExpand("facets");
         }
@@ -117,11 +117,11 @@ public class SearchResponse {
 		this.responseHeader = responseHeader;
 	}
 
-	public SearchResponseParts.FacetsCount getFacets() {
+	public SearchResponseParts.FacetCounts getFacets() {
 		return facets;
 	}
 
-	public void setFacets(SearchResponseParts.FacetsCount facets) {
+	public void setFacets(SearchResponseParts.FacetCounts facets) {
 		this.facets = facets;
 	}
 

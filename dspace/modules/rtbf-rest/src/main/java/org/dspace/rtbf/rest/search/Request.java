@@ -9,6 +9,7 @@ import org.dspace.rtbf.rest.common.Constants;
 import org.dspace.rtbf.rest.common.MetadataEntry;
 import org.dspace.rtbf.rest.util.RsConfigurationManager;
 import org.dspace.core.Context;
+import org.mortbay.log.Log;
 
 public class Request {
 	private String scope;
@@ -17,6 +18,10 @@ public class Request {
 	private int offset;
 	private String sortField;
 	private SORT_ORDER sortOrder;
+	private boolean facet = false;
+	private int facetLimit = Constants.DEFAULT_FACET_RPP;
+	private int facetOffset = Constants.DEFAULT_FACET_OFFSET;
+	
 
 
 	public Request(MultivaluedMap<String, String> params, Context context) {
@@ -43,12 +48,24 @@ public class Request {
 		        if (str != null && str.length() > 0) {
 		        	sortOrder = SORT_ORDER.valueOf(str);
 		        } else {
-		        	sortOrder = Constants.ORDER_DEFAULT;
+		        	sortOrder = Constants.DEFAULT_ORDER;
 		        }
 	        } catch (IllegalArgumentException e) {
-		        	sortOrder = Constants.ORDER_DEFAULT;
+		        	sortOrder = Constants.DEFAULT_ORDER;
 	        }
 		}
+		
+		str = params.getFirst("facet");
+		if (str != null && str.length() > 0) {
+			facet = Boolean.parseBoolean(str);
+			if (facet) {
+				String si = params.getFirst("facet.limit");
+				if (si != null && si.length() > 0) { facetLimit = Integer.parseInt(si); }
+				si = params.getFirst("facet.offset");
+				if (si != null && si.length() > 0) { facetOffset = Integer.parseInt(params.getFirst("facet.offset")); }
+			}
+		}
+
 		
 	}
 
@@ -110,6 +127,36 @@ public class Request {
 
 	public void setSortOrder(SORT_ORDER sortOrder) {
 		this.sortOrder = sortOrder;
+	}
+
+
+	public boolean isFacet() {
+		return facet;
+	}
+
+
+	public void setFacet(boolean facet) {
+		this.facet = facet;
+	}
+
+
+	public int getFacetLimit() {
+		return facetLimit;
+	}
+
+
+	public void setFacetLimit(int facetLimit) {
+		this.facetLimit = facetLimit;
+	}
+
+
+	public int getFacetOffset() {
+		return facetOffset;
+	}
+
+
+	public void setFacetOffset(int facetOffset) {
+		this.facetOffset = facetOffset;
 	}
 
 }

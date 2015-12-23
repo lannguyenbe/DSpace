@@ -11,14 +11,20 @@ import org.dspace.core.Context;
 import org.dspace.discovery.DiscoverResult;
 import org.dspace.rtbf.rest.search.SearchResponseParts;
 
-@XmlRootElement(name = "sequencesSearchResponse")
-public class SequencesSearchResponse extends SearchResponse {
+/*
+ * 18.12.2015 Lan : actuellement SeriesSearchResponse = EpisodesSearchResponse = SequencesSearchResponse 
+ * mais pourrait different dans le futur
+ * 
+ */
 
-    private static Logger log = Logger.getLogger(SequencesSearchResponse.class);
+@XmlRootElement(name = "seriesSearchResponse")
+public class SeriesSearchResponse extends SearchResponse {
+
+    private static Logger log = Logger.getLogger(SeriesSearchResponse.class);
 	
-	public SequencesSearchResponse() {}
+	public SeriesSearchResponse() {}
 
-	public SequencesSearchResponse(DiscoverResult queryResults, String expand, Context context, Integer limit, Integer offset) {
+	public SeriesSearchResponse(DiscoverResult queryResults, String expand, Context context, Integer limit, Integer offset) {
 		super(queryResults, expand);
 		setup(queryResults, expand, context, limit, offset);
 		
@@ -38,15 +44,7 @@ public class SequencesSearchResponse extends SearchResponse {
         } else {
             this.addExpand("results");
         }
-
-/*
-        if(expandFields.contains("facets") || expandFields.contains("all")) {
-        	SearchResponseParts.FacetCounts resultsWrapper = new SearchResponseParts.FacetCounts(queryResults);
-        	setFacets(resultsWrapper);
-        } else {
-            this.addExpand("facets");
-        }
-*/        
+		
 	}
 
 }

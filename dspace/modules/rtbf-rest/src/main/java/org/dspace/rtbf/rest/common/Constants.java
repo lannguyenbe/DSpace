@@ -21,13 +21,17 @@ public class Constants extends org.dspace.core.Constants {
     public static final String EPISODE_EXPAND_OPTIONS = "owningSerie,metadata";
     public static final String SEQUENCE_EXPAND_OPTIONS = "owningSerie,owningEpisode,parentEpisodeList,metadata";
     public static final String SEARCH_SEQUENCE_EXPAND_OPTIONS = "owningParentList";
+    public static final String SEARCH_EPISODE_EXPAND_OPTIONS = "owningParentList";
 
     // Default values
     public static final String[] TYPETEXT = { "none", "none", "SEQUENCE", "EPISODE", "SERIE", "none", "none", "none" };
-    public static final int LIMITMAX = 5000;
-    public static final String DEFAULT_LIMIT = "100";
-    public static final int DEFAULT_RPP = Integer.valueOf(DEFAULT_LIMIT);
-    public static final SORT_ORDER ORDER_DEFAULT = SORT_ORDER.asc;
+    public static final int        LIMITMAX = 5000;
+    public static final String     DEFAULT_LIMIT = "100";
+    public static final int        DEFAULT_RPP = Integer.valueOf(DEFAULT_LIMIT);
+    public static final SORT_ORDER DEFAULT_ORDER = SORT_ORDER.asc;
+    public static final int        DEFAULT_FACET_RPP = 10;
+    public static final int        DEFAULT_FACET_OFFSET = 0;
+
     
     // Keys for accessing metadata
     public static final String ATTRIBUTOR = "rtbf.identifier.attributor";
