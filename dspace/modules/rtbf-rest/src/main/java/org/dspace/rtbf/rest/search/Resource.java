@@ -268,9 +268,9 @@ public abstract class Resource
     		int facetLimit = searchRequest.getFacetLimit();
     		int facetOffset = searchRequest.getFacetOffset() * facetLimit;
     		
-            String[] facetFields = { "subject_keyword", "place_keyword" };
-    		for (String keyword : facetFields) {
-    	        DiscoverFacetField dff = new DiscoverFacetField(keyword
+            String[][] facetFields = { {"matter","subject_keyword"}, {"place","place_keyword"} };
+    		for (String[] keyword : facetFields) {
+    	        DiscoverFacetField dff = new DiscoverFacetField("{!key="+keyword[0]+"}"+keyword[1]
     	                , DiscoveryConfigurationParameters.TYPE_STANDARD
     	                , /* facet limit  */ facetLimit
     	                , /* facet sort   */ DiscoveryConfigurationParameters.SORT.COUNT
@@ -279,7 +279,7 @@ public abstract class Resource
     	        query.setFacetMinCount(1);
     		}
 
-    		String[] rolePrefix = { "Journaliste", "Pr\u00e9sentateur", "Intervenant" };
+	        String[] rolePrefix = { "Journaliste", "Pr\u00e9sentateur", "Intervenant" };
     		for (String role : rolePrefix) {
 		        DiscoverFacetField dff = new DiscoverFacetField("{!key="+role+" facet.prefix="+role+"/}role_keyword"
 		                , DiscoveryConfigurationParameters.TYPE_STANDARD
@@ -364,11 +364,11 @@ public abstract class Resource
                 		, /* facet limit */ -1
                 		, /* facet sort  */ DiscoveryConfigurationParameters.SORT.VALUE));
         	} else {
-        		query.addFacetQuery("{!key=\"dateFacet:[ -1DAY ]\"}"+ dateFacet + ":[ NOW/DAY-1DAY TO NOW/DAY+1DAY ]");
-        		query.addFacetQuery("{!key=\"dateFacet:[ -7DAYS ]\"}"+ dateFacet + ":[ NOW/DAY-7DAYS TO NOW/DAY-1DAY }");
-        		query.addFacetQuery("{!key=\"dateFacet:[ -1MONTH ]\"}"+ dateFacet + ":[ NOW/DAY-1MONTH TO NOW/DAY-7DAYS }");
-        		query.addFacetQuery("{!key=\"dateFacet:[ -1YEAR ]\"}"+ dateFacet + ":[ NOW/DAY-1YEAR TO NOW/DAY-1MONTH }");
-        		query.addFacetQuery("{!key=\"dateFacet:[ +1YEAR ]\"}"+ dateFacet + ":[ * TO NOW/DAY-1YEAR }");
+        		query.addFacetQuery("{!key=\"date_issued:[ -1DAY ]\"}"   + dateFacet + ":[ NOW/DAY-1DAY TO NOW/DAY+1DAY ]");
+        		query.addFacetQuery("{!key=\"date_issued:[ -7DAYS ]\"}"  + dateFacet + ":[ NOW/DAY-7DAYS TO NOW/DAY-1DAY }");
+        		query.addFacetQuery("{!key=\"date_issued:[ -1MONTH ]\"}" + dateFacet + ":[ NOW/DAY-1MONTH TO NOW/DAY-7DAYS }");
+        		query.addFacetQuery("{!key=\"date_issued:[ -1YEAR ]\"}"  + dateFacet + ":[ NOW/DAY-1YEAR TO NOW/DAY-1MONTH }");
+        		query.addFacetQuery("{!key=\"date_issued:[ +1YEAR ]\"}"  + dateFacet + ":[ * TO NOW/DAY-1YEAR }");
         	}
             // facetQueries.add
         } else {
