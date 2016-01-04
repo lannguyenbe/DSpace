@@ -364,9 +364,11 @@ public abstract class Resource
                 		, /* facet limit */ -1
                 		, /* facet sort  */ DiscoveryConfigurationParameters.SORT.VALUE));
         	} else {
-        		query.addFacetQuery("{!key=\"dateFacet:[ -7DAYS ]\"}"+ dateFacet + ":[ NOW/DAY-7DAYS TO NOW/DAY+1DAY ]");
-        		query.addFacetQuery("{!key=\"dateFacet:[ -1MONTH ]\"}"+ dateFacet + ":[ NOW/DAY-1MONTH TO NOW/DAY+1DAY ]");
-        		query.addFacetQuery("{!key=\"dateFacet:[ +1MONTH ]\"}"+ dateFacet + ":[ * TO NOW/DAY-1MONTH ]");
+        		query.addFacetQuery("{!key=\"dateFacet:[ -1DAY ]\"}"+ dateFacet + ":[ NOW/DAY-1DAY TO NOW/DAY+1DAY ]");
+        		query.addFacetQuery("{!key=\"dateFacet:[ -7DAYS ]\"}"+ dateFacet + ":[ NOW/DAY-7DAYS TO NOW/DAY-1DAY }");
+        		query.addFacetQuery("{!key=\"dateFacet:[ -1MONTH ]\"}"+ dateFacet + ":[ NOW/DAY-1MONTH TO NOW/DAY-7DAYS }");
+        		query.addFacetQuery("{!key=\"dateFacet:[ -1YEAR ]\"}"+ dateFacet + ":[ NOW/DAY-1YEAR TO NOW/DAY-1MONTH }");
+        		query.addFacetQuery("{!key=\"dateFacet:[ +1YEAR ]\"}"+ dateFacet + ":[ * TO NOW/DAY-1YEAR }");
         	}
             // facetQueries.add
         } else {
