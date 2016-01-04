@@ -808,39 +808,6 @@
        queries across multiple shards
     -->
 
-    <!-- Trop Lent -->
-    <requestHandler name="/selectCollectionOld" class="solr.SearchHandler">
-    <!-- default values for query parameters can be specified, these
-         will be overridden by parameters in the request
-      -->
-     <lst name="defaults">
-       <str name="echoParams">explicit</str>
-       <int name="rows">10</int>
-       <str name="df">search_text</str>
-       <!-- Lan 09.02.2015 : boosting by dc.date.issued -->
-       <str name="defType">edismax</str>
-       <str name="boost">recip(ms(NOW/HOUR, dc.date.issued_dt),3.16e-11,1,1)</str>
-       <str name="q">_query_:"{!join from=location.collection to=search.uniqueid}(search.resourcetype:2 AND _query_:\"{!dismax mm=3&lt;-25% v=$seqQuery}\")"</str>
-     </lst>
-    </requestHandler>
-    
-    <requestHandler name="/selectCollection" class="solr.SearchHandler">
-     <lst name="defaults">
-       <str name="echoParams">explicit</str>
-       <int name="rows">10</int>
-       <str name="df">search_text</str>
-       <!-- Lan 09.02.2015 : boosting by dc.date.issued -->
-       <str name="defType">edismax</str>
-       <str name="boost">recip(ms(NOW/HOUR, dc.date.issued_dt),3.16e-11,1,1)</str>
-     </lst>
-       <str name="mm">3&lt;-25% 9&lt;-3</str>
-       <lst name="appends">
-         <str name="fq">{!join from=location.collection to=search.uniqueid}(search.resourcetype:2 AND discoverable:true AND _query_:"{!dismax mm=\"3&lt;-25% 9&lt;-3\" v=$seqQ}")</str>
-         <!-- join + collapse does not work. Error msg:"Query  does not implement createWeight"-->
-       </lst>
-    </requestHandler>
-    
-
     <requestHandler name="/selectNoCollapse" class="solr.SearchHandler">
     <!-- default values for query parameters can be specified, these
          will be overridden by parameters in the request
@@ -950,8 +917,34 @@
 
     </requestHandler>
     
+    <!-- 02.12.2015 Lan : same as /select but collapse on owning_collection -->
+    <requestHandler name="/selectCollection" class="solr.SearchHandler">
+     <lst name="defaults">
+       <str name="echoParams">explicit</str>
+       <int name="rows">10</int>
+       <str name="df">search_text</str>
+       <!-- Lan 09.02.2015 : boosting by dc.date.issued -->
+       <str name="defType">edismax</str>
+       <str name="boost">recip(ms(NOW/HOUR, dc.date.issued_dt),3.16e-11,1,1)</str>
+       <!-- Lan 20.04.2015 : 'minimum should match' when multiple terms in the query -->
+       <!-- 3<-25% 9<-3 : if there are 1 or 2 or 3 clauses all are required, 
+        if there are 4-9 clauses all but 25% are required, 
+        and if there are more than 9 clauses, all but three are required -->
+       <str name="mm">3&lt;-25% 9&lt;-3</str>
+     </lst>
+      <arr name="last-components">
+          <str>spellcheck</str>
+      </arr>
+       <lst name="appends">
+         <!-- Lan 02.12.2015 : Impose this default filter query to collapse multiple
+              sequences of the same collection to one  -->
+         <str name="fq">{!collapse field=owning_collection nullPolicy=expand}</str>
+         <str name="expand">true</str>
+       </lst>
+    </requestHandler>
+
     <!-- 02.12.2015 Lan : same as /select but collapse on owning_community -->
-    <requestHandler name="/selectCommunityOld" class="solr.SearchHandler">
+    <requestHandler name="/selectCommunity" class="solr.SearchHandler">
      <lst name="defaults">
        <str name="echoParams">explicit</str>
        <int name="rows">10</int>
@@ -976,24 +969,6 @@
        </lst>
     </requestHandler>
 
-    <requestHandler name="/selectCommunity" class="solr.SearchHandler">
-     <lst name="defaults">
-       <str name="echoParams">explicit</str>
-       <int name="rows">10</int>
-       <str name="df">search_text</str>
-       <!-- Lan 09.02.2015 : boosting by dc.date.issued -->
-       <str name="defType">edismax</str>
-       <str name="boost">recip(ms(NOW/HOUR, dc.date.issued_dt),3.16e-11,1,1)</str>
-     </lst>
-       <str name="mm">3&lt;-25% 9&lt;-3</str>
-       <lst name="appends">
-         <str name="fq">-search.resourceid:[1 TO 10]</str>
-         <!--str name="fq">-search.resourceid:999</str-->
-         <str name="fq">{!join from=location.community to=search.uniqueid}(search.resourcetype:2 AND discoverable:true AND _query_:"{!dismax mm=\"3&lt;-25% 9&lt;-3\" v=$seqQ}")</str>
-         <!-- join + collapse does not work. Error msg:"Query  does not implement createWeight"-->
-       </lst>
-    </requestHandler>
-    
     <!-- copy of /select but making use of the external spellcheck_index -->
     <requestHandler name="/select2spell" class="solr.SearchHandler">
     <!-- default values for query parameters can be specified, these
