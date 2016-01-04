@@ -39,11 +39,14 @@ public class Serie extends RTBObject{
     	
     	switch (viewType) {
     	case Constants.SEARCH_RESULT_VIEW:
+/*    		TODO : This way of counting is NOT optimal : to optimize
 	        int[] counts = {0,0,0};
 	    	community.getCounts(counts);
 	        this.setCountSequences(counts[0]);
 	        this.setCountEpisodes(counts[1]);
 	        this.setCountSubSeries(counts[2]);
+*/	        
+    		break;
     	}
 	        
         List<String> expandFields = new ArrayList<String>();
