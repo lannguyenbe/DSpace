@@ -1,5 +1,6 @@
 package org.dspace.rtbf.rest.search;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,8 +32,14 @@ import org.dspace.rtbf.rest.common.RTBObject;
 import org.dspace.rtbf.rest.common.Sequence;
 import org.dspace.rtbf.rest.common.Serie;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public class SearchResponseParts {
     private static Logger log = Logger.getLogger(SearchResponseParts.class);
@@ -157,6 +164,7 @@ public class SearchResponseParts {
 		
 	}
 
+	@JsonSerialize(using = SearchResponseParts.FacetCountsSerializer.class)
 	public static class FacetCounts {
 		
 		public static class Entry {
@@ -235,6 +243,33 @@ public class SearchResponseParts {
 			return adapte;
 		}
 	}
+	
+	/*
+	 * Jackson custom serializers
+	 */
+	// FacetCountSerializer
+	public static class FacetCountsSerializer extends JsonSerializer<FacetCounts> {
+
+		@Override
+		public void serialize(FacetCounts fc, JsonGenerator jgen,
+				SerializerProvider provider) throws IOException,
+				JsonProcessingException {
+			
+			Map<String, List<FacetCounts.Entry>> v = fc.getFacetEntries();
+			
+			jgen.writeStartObject();
+			for (Map.Entry<String, List<FacetCounts.Entry>> me : v.entrySet()) {
+				jgen.writeArrayFieldStart(me.getKey());
+				for (FacetCounts.Entry e : me.getValue()) {
+					jgen.writeString(e.key);					
+					jgen.writeNumber(e.count);					
+				}
+				jgen.writeEndArray();			
+			}					
+			jgen.writeEndObject();
+		}
 		
+	}
+
 		
 }
