@@ -32,7 +32,6 @@ import org.dspace.rtbf.rest.common.RTBObject;
 import org.dspace.rtbf.rest.common.Sequence;
 import org.dspace.rtbf.rest.common.Serie;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -164,7 +163,7 @@ public class SearchResponseParts {
 		
 	}
 
-	@JsonSerialize(using = SearchResponseParts.FacetCountsSerializer.class)
+//	@JsonSerialize(using = SearchResponseParts.FacetCountsSerializer.class)
 	public static class FacetCounts {
 		
 		public static class Entry {
