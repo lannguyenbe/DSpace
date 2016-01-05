@@ -395,7 +395,7 @@ public abstract class Resource
                     currentTop--;
                 }
 //                facetQueries.add(yearFacet + ":[" + bottomYear + " TO " + currentTop + "]");
-                facetQueries.add("{!key=\"date_issued:[ "+ bottomYear + " TO " + currentTop + "]\"}"  + yearFacet + ":[" + bottomYear + " TO " + currentTop + "]");
+                facetQueries.add("{!key=\"date_issued:["+ bottomYear + " TO " + currentTop + "]\"}"  + yearFacet + ":[" + bottomYear + " TO " + currentTop + "]");
             }
             for (String facetQuery : facetQueries) {
                 query.addFacetQuery(facetQuery);
