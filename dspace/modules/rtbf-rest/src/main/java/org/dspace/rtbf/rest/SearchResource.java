@@ -32,6 +32,8 @@ public class SearchResource extends Resource {
     		, @QueryParam("sort-by") String orderBy, @QueryParam("order") String order
     		, @QueryParam("facet") @DefaultValue("false") Boolean isFacet 
     		, @QueryParam("facet.limit") Integer facetLimit, @QueryParam("facet.offset") Integer facetOffset
+    		, @QueryParam("highlight") @DefaultValue("true") Boolean isHighlight 
+    		, @QueryParam("snippet") @DefaultValue("false") Boolean isSnippet
     		, @QueryParam("expand") String expand
     		, @Context UriInfo info
     		, @QueryParam("userIP") String user_ip, @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor

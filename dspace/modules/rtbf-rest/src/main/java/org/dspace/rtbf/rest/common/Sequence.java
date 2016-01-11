@@ -4,13 +4,9 @@ import org.apache.log4j.Logger;
 import org.dspace.content.Metadatum;
 import org.dspace.core.Context;
 import org.dspace.discovery.DiscoverExpandedItems;
-import org.dspace.discovery.DiscoverHitHighlightingField;
 import org.dspace.discovery.DiscoverResult;
-import org.dspace.discovery.SearchUtils;
-import org.dspace.discovery.DiscoverResult.SearchDocument;
-import org.dspace.discovery.configuration.DiscoveryConfiguration;
 import org.dspace.discovery.configuration.DiscoveryHitHighlightFieldConfiguration;
-import org.dspace.rtbf.rest.search.SearchResponseParts.FacetCounts.Entry;
+import org.dspace.rtbf.rest.util.RsDiscoveryConfiguration;
 
 import javax.ws.rs.WebApplicationException;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -132,38 +128,32 @@ public class Sequence extends RTBObject{
     }
     
     public void render(DiscoverResult.DSpaceObjectHighlightResult highlightedResults) {
-        DiscoveryConfiguration discoveryConfiguration = SearchUtils.getDiscoveryConfiguration(); // TODO : get ONCE
-        if(discoveryConfiguration.getHitHighlightingConfiguration() != null) 
-        {
-        	// Cons highlight part for each sequence 
-        	Map<String, List<String>> hlEntries = new LinkedHashMap<String, List<String>>();
-        	List<DiscoveryHitHighlightFieldConfiguration> metadataFields = discoveryConfiguration.getHitHighlightingConfiguration().getMetadataFields();
-            for (DiscoveryHitHighlightFieldConfiguration fieldConfiguration : metadataFields)
-            {
-            	String metadataKey = fieldConfiguration.getField();
-            	List<String> hlList = highlightedResults.getHighlightResults(metadataKey);
-            	if (hlList == null || hlList.size() == 0) { continue; }
-            	hlEntries.put(MetadataEntry.getPreferredLabel(metadataKey), hlList);
-            }
-            this.setHlEntries(hlEntries);
-            
-            // render title
-        	List<String> hlList = highlightedResults.getHighlightResults("dc.title");
-        	if (hlList != null) {
-        		String title = this.getTitle().getValue();
-        		this.getTitle().setValue(title.replace(hlList.get(0).replaceAll("</?em>", ""), hlList.get(0)));
-        	}
-            
-        	// render description_abstract
-        	hlList = highlightedResults.getHighlightResults("dc.description.abstract");
-        	if (hlList != null) {
-        		for (String hl : hlList) {
-                    String str = this.getDescriptionAbstract().getValue();
-            		this.getDescriptionAbstract().setValue(str.replace(hl.replaceAll("</?em>", ""), hl));        			
-        		}
-        	}
-        }
-    	
+    	// Cons highlight part for each sequence 
+    	Map<String, List<String>> hlEntries = new LinkedHashMap<String, List<String>>();
+    	for (DiscoveryHitHighlightFieldConfiguration fieldConfiguration : RsDiscoveryConfiguration.getHighlightFieldConfigurations())
+    	{
+    		String metadataKey = fieldConfiguration.getField();
+    		List<String> hlList = highlightedResults.getHighlightResults(metadataKey);
+    		if (hlList == null || hlList.size() == 0) { continue; }
+    		hlEntries.put(MetadataEntry.getPreferredLabel(metadataKey), hlList);
+    	}
+    	this.setHlEntries(hlEntries);
+
+    	// render title
+    	List<String> hlList = highlightedResults.getHighlightResults("dc.title");
+    	if (hlList != null) {
+    		String title = this.getTitle().getValue();
+    		this.getTitle().setValue(title.replace(hlList.get(0).replaceAll("</?em>", ""), hlList.get(0)));
+    	}
+
+    	// render description_abstract
+    	hlList = highlightedResults.getHighlightResults("dc.description.abstract");
+    	if (hlList != null) {
+    		for (String hl : hlList) {
+    			String str = this.getDescriptionAbstract().getValue();
+    			this.getDescriptionAbstract().setValue(str.replace(hl.replaceAll("</?em>", ""), hl));        			
+    		}
+    	}
     }
     		                    
 }

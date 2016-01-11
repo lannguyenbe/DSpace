@@ -21,6 +21,8 @@ public class Request {
 	private boolean facet = false;
 	private int facetLimit = Constants.DEFAULT_FACET_RPP;
 	private int facetOffset = Constants.DEFAULT_FACET_OFFSET;
+	private boolean highlight = true;
+	private boolean snippet = false;
 	
 
 
@@ -64,6 +66,16 @@ public class Request {
 				si = params.getFirst("facet.offset");
 				if (si != null && si.length() > 0) { facetOffset = Integer.parseInt(params.getFirst("facet.offset")); }
 			}
+		}
+		
+		str = params.getFirst("highlight");
+		if (str != null && str.length() > 0) {
+			highlight = Boolean.parseBoolean(str);
+		}
+
+		str = params.getFirst("snippet");
+		if (str != null && str.length() > 0) {
+			snippet = Boolean.parseBoolean(str);
 		}
 
 		
@@ -157,6 +169,26 @@ public class Request {
 
 	public void setFacetOffset(int facetOffset) {
 		this.facetOffset = facetOffset;
+	}
+
+
+	public boolean isSnippet() {
+		return snippet;
+	}
+
+
+	public void setSnippet(boolean snippet) {
+		this.snippet = snippet;
+	}
+
+
+	public boolean isHighlight() {
+		return highlight;
+	}
+
+
+	public void setHighlight(boolean highlight) {
+		this.highlight = highlight;
 	}
 
 }

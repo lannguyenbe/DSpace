@@ -39,6 +39,7 @@ import org.dspace.discovery.configuration.DiscoveryConfigurationParameters;
 import org.dspace.discovery.configuration.DiscoveryHitHighlightFieldConfiguration;
 import org.dspace.handle.HandleManager;
 import org.dspace.rtbf.rest.common.SimpleNode;
+import org.dspace.rtbf.rest.util.RsDiscoveryConfiguration;
 import org.dspace.sort.OrderFormat;
 import org.dspace.utils.DSpace;
 
@@ -300,15 +301,15 @@ public abstract class Resource
     	}
     	
     	// Highlighting
-        DiscoveryConfiguration discoveryConfiguration = SearchUtils.getDiscoveryConfiguration(); // TODO : get ONCE
-        if(discoveryConfiguration.getHitHighlightingConfiguration() != null)
-        {
-            List<DiscoveryHitHighlightFieldConfiguration> metadataFields = discoveryConfiguration.getHitHighlightingConfiguration().getMetadataFields();
-            for (DiscoveryHitHighlightFieldConfiguration fieldConfiguration : metadataFields)
-            {
-                query.addHitHighlightingField(new DiscoverHitHighlightingField(fieldConfiguration.getField(), fieldConfiguration.getMaxSize(), fieldConfiguration.getSnippets()));
-            }
-        }
+    	if (searchRequest.isHighlight()) {
+	    	for (DiscoveryHitHighlightFieldConfiguration fieldConfiguration : RsDiscoveryConfiguration.getHighlightFieldConfigurations())
+	    	{
+	    		// query.addHitHighlightingField(new DiscoverHitHighlightingField(fieldConfiguration.getField(), fieldConfiguration.getMaxSize(), fieldConfiguration.getSnippets()));
+	    		query.addHitHighlightingField(new DiscoverHitHighlightingField(fieldConfiguration.getField()
+	    				, (searchRequest.isSnippet()) ? fieldConfiguration.getMaxSize() : 0
+	    				, fieldConfiguration.getSnippets()));
+	    	}
+    	}
 
 
         // 2. Perform query

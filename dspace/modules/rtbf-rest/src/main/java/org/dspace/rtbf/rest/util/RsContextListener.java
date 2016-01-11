@@ -10,6 +10,8 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.dspace.core.ConfigurationManager;
+import org.dspace.discovery.SearchUtils;
+import org.dspace.discovery.configuration.DiscoveryHitHighlightFieldConfiguration;
 import org.dspace.rtbf.rest.common.Constants;
 
 public class RsContextListener implements ServletContextListener {
@@ -52,6 +54,10 @@ public class RsContextListener implements ServletContextListener {
 
         ServletContext sc = event.getServletContext();
         sc.setAttribute(Constants.WEBAPP_NAME, configManager); // keep ref to avoid garbage collector
+        
+        // Get List of highlight fields from discovery.xml
+        RsDiscoveryConfiguration discoveryConfig = RsDiscoveryConfiguration.getInstance();
+        discoveryConfig.setConfiguration(SearchUtils.getDiscoveryConfiguration());
 		
 	}
 
