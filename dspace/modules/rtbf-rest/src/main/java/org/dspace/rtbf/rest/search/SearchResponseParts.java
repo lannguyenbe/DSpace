@@ -22,8 +22,11 @@ import org.dspace.core.ConfigurationManager;
 import org.dspace.core.Context;
 import org.dspace.discovery.DiscoverExpandedItems;
 import org.dspace.discovery.DiscoverResult;
+import org.dspace.discovery.SearchUtils;
 import org.dspace.discovery.DiscoverResult.FacetResult;
 import org.dspace.discovery.DiscoverResult.SearchDocument;
+import org.dspace.discovery.configuration.DiscoveryConfiguration;
+import org.dspace.discovery.configuration.DiscoveryHitHighlightFieldConfiguration;
 import org.dspace.rtbf.rest.common.Constants;
 import org.dspace.rtbf.rest.common.Episode;
 import org.dspace.rtbf.rest.common.MetadataEntry;
@@ -68,7 +71,6 @@ public class SearchResponseParts {
 						switch (resultType) {
 						case Constants.ITEM:
 		                    Sequence sequence = new Sequence(Constants.SEARCH_RESULT_VIEW, (Item) result, Constants.SEARCH_SEQUENCE_EXPAND_OPTIONS, null);
-//		                    DiscoverResult.DSpaceObjectHighlightResult highlightedResults = queryResults.getHighlightedResults(result);
 
 		                    // Add linked Documents 
 		                    // the linked documents to this dso were already retrieved by the same search - in the expanded section ot solr response - 
@@ -81,7 +83,13 @@ public class SearchResponseParts {
 		            		if (linkedDocuments.size() > 0) {
 		            			sequence.setLinkedDocuments(linkedDocuments);
 		            		}
-
+		            		
+		            		// Set highlighted snippets
+		                    DiscoverResult.DSpaceObjectHighlightResult highlightedResults = queryResults.getHighlightedResults(result);
+		                    if (highlightedResults != null) {
+		                    	sequence.render(highlightedResults);
+		                    }
+		            		
 							lst.add(sequence);
 							break;
 						case Constants.COLLECTION:
@@ -159,11 +167,9 @@ public class SearchResponseParts {
 		}
 	}
 
-	public static class Expanded {
-		
-	}
 
-//	@JsonSerialize(using = SearchResponseParts.FacetCountsSerializer.class)
+	// Lan 05.01.2015 : The following json serializer is not use, the conventional Map serialization is preferred for ng-repeat
+	// @JsonSerialize(using = SearchResponseParts.FacetCountsSerializer.class)
 	public static class FacetCounts {
 		
 		public static class Entry {
@@ -202,10 +208,7 @@ public class SearchResponseParts {
 	}
 
 
-	public static class Highlighting {
-		
-	}
-	
+	public static class Highlighting {}
 
 	/*
 	 * Jaxb Adapters
@@ -243,10 +246,11 @@ public class SearchResponseParts {
 		}
 	}
 	
+
 	/*
 	 * Jackson custom serializers
 	 */
-	// FacetCountSerializer
+	// FacetCountSerializer (actually not use)
 	public static class FacetCountsSerializer extends JsonSerializer<FacetCounts> {
 
 		@Override

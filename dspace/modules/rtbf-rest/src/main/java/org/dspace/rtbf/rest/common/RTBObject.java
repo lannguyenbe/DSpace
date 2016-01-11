@@ -10,9 +10,7 @@ package org.dspace.rtbf.rest.common;
 import org.apache.log4j.Logger;
 import org.atteo.evo.inflector.English;
 import org.dspace.content.Metadatum;
-import org.dspace.discovery.DiscoverResult;
 import org.dspace.rtbf.rest.common.Constants;
-
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,9 +21,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -89,6 +85,12 @@ public class RTBObject {
     protected List<RTBObject> linkedDocuments;
     // TODO List<Diffusion> diffusions;
     // TODO List<Support> supports;
+    
+    // highlight
+    @JsonProperty("highlight")
+    protected Map<String, List<String>> hlEntries;
+    @JsonIgnore
+    protected HighlightWrapper highlight; // use by Jaxb, not by Jackson
 
     @XmlElement(required = true)
     private ArrayList<String> expand = new ArrayList<String>();
@@ -421,6 +423,27 @@ public class RTBObject {
 
 	public List<RTBObject> getLinkedDocuments() {
 		return linkedDocuments;
+	}
+
+	@XmlTransient
+	public Map<String, List<String>> getHlEntries() {
+		return hlEntries;
+	}
+
+	public void setHlEntries(Map<String, List<String>> hlEntries) {
+		this.hlEntries = hlEntries;
+	}
+
+	@JsonIgnore
+	public HighlightWrapper getHighlight() { // use by Jaxb, not by Jackson
+		if (hlEntries != null) {
+			highlight = new HighlightWrapper(hlEntries);
+		}
+		return highlight;
+	}
+
+	public void setHighlight(HighlightWrapper highlight) {
+		this.highlight = highlight;
 	}
 
 	

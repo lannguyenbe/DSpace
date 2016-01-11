@@ -27,12 +27,16 @@ import org.dspace.content.DSpaceObject;
 import org.dspace.core.Constants;
 import org.dspace.core.Context;
 import org.dspace.discovery.DiscoverFacetField;
+import org.dspace.discovery.DiscoverHitHighlightingField;
 import org.dspace.discovery.DiscoverQuery;
 import org.dspace.discovery.DiscoverResult;
 import org.dspace.discovery.SearchService;
+import org.dspace.discovery.SearchUtils;
 import org.dspace.discovery.DiscoverResult.FacetResult;
 import org.dspace.discovery.SearchServiceException;
+import org.dspace.discovery.configuration.DiscoveryConfiguration;
 import org.dspace.discovery.configuration.DiscoveryConfigurationParameters;
+import org.dspace.discovery.configuration.DiscoveryHitHighlightFieldConfiguration;
 import org.dspace.handle.HandleManager;
 import org.dspace.rtbf.rest.common.SimpleNode;
 import org.dspace.sort.OrderFormat;
@@ -193,7 +197,8 @@ public abstract class Resource
     }
     
 
-	protected DiscoverResult getQueryResult(int resourceType, Context context, Request searchRequest) throws SearchServiceException {
+    // actually get sequences results
+    protected DiscoverResult getQueryResult(int resourceType, Context context, Request searchRequest) throws SearchServiceException {
 		// 1. Prepare the query
         DiscoverQuery query = new DiscoverQuery();
 
@@ -293,6 +298,18 @@ public abstract class Resource
     		addDateFacet("dc.date.issued_dt", "dateIssued.year", query, context);
     		
     	}
+    	
+    	// Highlighting
+        DiscoveryConfiguration discoveryConfiguration = SearchUtils.getDiscoveryConfiguration(); // TODO : get ONCE
+        if(discoveryConfiguration.getHitHighlightingConfiguration() != null)
+        {
+            List<DiscoveryHitHighlightFieldConfiguration> metadataFields = discoveryConfiguration.getHitHighlightingConfiguration().getMetadataFields();
+            for (DiscoveryHitHighlightFieldConfiguration fieldConfiguration : metadataFields)
+            {
+                query.addHitHighlightingField(new DiscoverHitHighlightingField(fieldConfiguration.getField(), fieldConfiguration.getMaxSize(), fieldConfiguration.getSnippets()));
+            }
+        }
+
 
         // 2. Perform query
 		return (getSearchService().search(context, query));

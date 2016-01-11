@@ -1333,17 +1333,6 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         SolrInputDocument doc = buildDocument(Constants.COMMUNITY, community.getID(),
                 community.getHandle(), null);
 
-        DiscoveryConfiguration discoveryConfiguration = SearchUtils.getDiscoveryConfiguration(community);
-        DiscoveryHitHighlightingConfiguration highlightingConfiguration = discoveryConfiguration.getHitHighlightingConfiguration();
-        List<String> highlightedMetadataFields = new ArrayList<String>();
-        if(highlightingConfiguration != null)
-        {
-            for (DiscoveryHitHighlightFieldConfiguration configuration : highlightingConfiguration.getMetadataFields())
-            {
-                highlightedMetadataFields.add(configuration.getField());
-            }
-        }
-
         List<String> toIgnoreMetadataFields = SearchUtils.getIgnoredMetadataFields(community.getType());
         Metadatum[] mydc = community.getMetadata(Item.ANY, Item.ANY, Item.ANY, Item.ANY);
         for (Metadatum meta : mydc)
@@ -1456,18 +1445,6 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         // Create Lucene Document
         SolrInputDocument doc = buildDocument(Constants.COLLECTION, collection.getID(),
                 collection.getHandle(), locations);
-
-        DiscoveryConfiguration discoveryConfiguration = SearchUtils.getDiscoveryConfiguration(collection);
-        DiscoveryHitHighlightingConfiguration highlightingConfiguration = discoveryConfiguration.getHitHighlightingConfiguration();
-        List<String> highlightedMetadataFields = new ArrayList<String>();
-        if(highlightingConfiguration != null)
-        {
-            for (DiscoveryHitHighlightFieldConfiguration configuration : highlightingConfiguration.getMetadataFields())
-            {
-                highlightedMetadataFields.add(configuration.getField());
-            }
-        }
-
 
         List<String> toIgnoreMetadataFields = SearchUtils.getIgnoredMetadataFields(collection.getType());
         Metadatum[] mydc = collection.getMetadata(Item.ANY, Item.ANY, Item.ANY, Item.ANY);
@@ -1980,10 +1957,12 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                     sortFieldsAdded.add(field);
                 }
 
+                /* Lan 08.01.2016 - dont need distinct field *_hl anymore
                 if(hitHighlightingFields.contains(field) || hitHighlightingFields.contains("*") || hitHighlightingFields.contains(unqualifiedField + "." + Item.ANY))
                 {
                     doc.addField(field + "_hl", value);
                 }
+                */
 
                 if(moreLikeThisFields.contains(field) || moreLikeThisFields.contains(unqualifiedField + "." + Item.ANY))
                 {
@@ -2434,6 +2413,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
             solrQuery.setParam(FacetParams.FACET_OFFSET, String.valueOf(discoveryQuery.getFacetOffset()));
         }
 
+/*
         if(0 < discoveryQuery.getHitHighlightingFields().size())
         {
             solrQuery.setHighlight(true);
@@ -2446,7 +2426,20 @@ public class SolrServiceImpl implements SearchService, IndexingService {
             }
 
         }
-
+*/
+        // Highlight text fields , donot have distinct field *_hl for highlight anymore
+        if ( discoveryQuery.getHitHighlightingFields().size() > 0) {
+            solrQuery.setHighlight(true);
+            solrQuery.add(HighlightParams.USE_PHRASE_HIGHLIGHTER, Boolean.TRUE.toString());
+            for (DiscoverHitHighlightingField highlightingField : discoveryQuery.getHitHighlightingFields())
+            {
+                solrQuery.addHighlightField(highlightingField.getField());
+                solrQuery.add("f." + highlightingField.getField() + "." + HighlightParams.FRAGSIZE, String.valueOf(highlightingField.getMaxChars()));
+                solrQuery.add("f." + highlightingField.getField() + "." + HighlightParams.SNIPPETS, String.valueOf(highlightingField.getMaxSnippets()));
+            }        	
+        }
+        
+                
         //Add any configured search plugins !
         List<SolrServiceSearchPlugin> solrServiceSearchPlugins = new DSpace().getServiceManager().getServicesByType(SolrServiceSearchPlugin.class);
         for (SolrServiceSearchPlugin searchPlugin : solrServiceSearchPlugins)
@@ -2553,7 +2546,13 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                         Map<String, List<String>> resultMap = new HashMap<String, List<String>>();
                         for(String key : highlightedFields.keySet())
                         {
-                            resultMap.put(key.substring(0, key.lastIndexOf("_hl")), highlightedFields.get(key));
+                        	/* Lan 08.01.2015 - suffix _hl may or may not exists */
+                        	int ihl = key.lastIndexOf("_hl");
+                        	if (ihl < 0) { /* no _hl suffix */
+                        		resultMap.put(key, highlightedFields.get(key));
+                        	} else { /* remove _hl suffix */
+                        		resultMap.put(key.substring(0, ihl), highlightedFields.get(key));
+                        	}
                         }
 
                         result.addHighlightedResult(dso, new DiscoverResult.DSpaceObjectHighlightResult(dso, resultMap));
@@ -2757,7 +2756,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
 		}
     }
 
-    public DiscoverFilterQuery toFilterQuery_OLD(Context context, String field, String operator, String value) throws SQLException{
+    public DiscoverFilterQuery toFilterQuery_old(Context context, String field, String operator, String value) throws SQLException{
         DiscoverFilterQuery result = new DiscoverFilterQuery();
 
         StringBuilder filterQuery = new StringBuilder();
