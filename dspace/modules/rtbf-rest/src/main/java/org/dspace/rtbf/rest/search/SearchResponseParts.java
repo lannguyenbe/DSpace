@@ -208,8 +208,6 @@ public class SearchResponseParts {
 	}
 
 
-	public static class Highlighting {}
-
 	/*
 	 * Jaxb Adapters
 	 */

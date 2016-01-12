@@ -26,7 +26,6 @@ public class SearchResponse {
     private List<RTBObject> results;
 //    private SearchResponseParts.Result results;
     private SearchResponseParts.FacetCounts facets;
-	private SearchResponseParts.Highlighting highlighting;
 	
     private List<String> expand = new ArrayList<String>();
 	
@@ -65,12 +64,6 @@ public class SearchResponse {
             this.addExpand("facets");
         }
         
-        if(expandFields.contains("highlighting") || expandFields.contains("all")) {
-        	setHighlighting(new SearchResponseParts.Highlighting());
-        } else {
-            this.addExpand("highlighting");
-        }
-
 	}
 		
 	public void addExpand(String expandableAttribute) {
@@ -116,14 +109,6 @@ public class SearchResponse {
 
 	public void setFacets(SearchResponseParts.FacetCounts facets) {
 		this.facets = facets;
-	}
-
-	public SearchResponseParts.Highlighting getHighlighting() {
-		return highlighting;
-	}
-
-	public void setHighlighting(SearchResponseParts.Highlighting highlighting) {
-		this.highlighting = highlighting;
 	}
 
 	@XmlElementWrapper( name = "results" )
