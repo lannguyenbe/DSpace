@@ -43,8 +43,8 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-public class SearchResponseParts {
-    private static Logger log = Logger.getLogger(SearchResponseParts.class);
+public class CopyOfSearchResponseParts {
+    private static Logger log = Logger.getLogger(CopyOfSearchResponseParts.class);
 	
 	public static class ResponseHeader {
 
@@ -172,26 +172,10 @@ public class SearchResponseParts {
 	// @JsonSerialize(using = SearchResponseParts.FacetCountsSerializer.class)
 	public static class FacetCounts {
 		
-		public static class Filter {
-			public String filterType;
-			public String filter_relational_operator;
-			public String filter;
-			
-
-			public Filter() {}
-			public Filter(String ft, String fo, String fv) {
-				this.filterType = ft;
-				this.filter_relational_operator = fo;
-				this.filter = fv;				
-			}
-		}
-		
 		public static class Entry {
 
 			public String key;
 			public long count;
-			
-			public Filter fq;
 		}
 		
 		private Map<String, List<Entry>> facetEntries;
@@ -206,21 +190,13 @@ public class SearchResponseParts {
 					Entry e = new Entry();
 					e.key = f.getDisplayedValue();
 					e.count = f.getCount();
-					e.fq = new Filter(mEntry.getKey(), f.getFilterType(), f.getAsFilterQuery());
-					if (mEntry.getKey().endsWith(Resource._DT)) { /* is a date math filter, then filter value is a preformatted range */
-						String[] dtMath = Resource._DTMATH.get(f.getAsFilterQuery()); 
-						if (dtMath != null) { /* dtMath[1] is the preformatted range */
-							e.fq = new Filter(mEntry.getKey(), f.getFilterType(), dtMath[1]);
-						}
-					}
-										
 					entries.add(e);
 				}
 				this.facetEntries.put(mEntry.getKey(), entries);
 			}					
  		}
 
- 		@XmlJavaTypeAdapter(SearchResponseParts.FacetCountsAdapter.class)
+ 		@XmlJavaTypeAdapter(CopyOfSearchResponseParts.FacetCountsAdapter.class)
  		public Map<String, List<Entry>> getFacetEntries() {
 			return facetEntries;
 		}

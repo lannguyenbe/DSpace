@@ -2822,6 +2822,18 @@ public class SolrServiceImpl implements SearchService, IndexingService {
     
     // Lan
     public DiscoverFilterQuery toFilterQuery(Context context, String field, String operator, String value) throws SQLException{
+    	if (field.matches("'(.+)'")) {
+    		return toFilterQuery(false /* append no suffix to field */, context, field.substring(1, field.length()-1), operator, value);
+    	}
+    	return toFilterQuery(true /* append suffix  _keyword or _partial to field */, context, field, operator, value);
+    	
+    }
+    
+
+    // Lan 15.01.2016
+    // isIndexed is true when the field is configured as a searchFilterin discovery.xml e.g. exists solr fields <field>_keyword, <field>_partial
+    // then append field with _keyword or _partial in the filter query
+    private DiscoverFilterQuery toFilterQuery(boolean isIndexed, Context context, String field, String operator, String value) throws SQLException{
         DiscoverFilterQuery result = new DiscoverFilterQuery();
 
         StringBuilder filterQuery = new StringBuilder();
@@ -2831,18 +2843,18 @@ public class SolrServiceImpl implements SearchService, IndexingService {
             if("equals".equals(operator))
             {
                 //Query the keyword indexed field !
-                filterQuery.append("_keyword");
+                if (isIndexed) { filterQuery.append("_keyword"); }
             }
             // Lan
             else if ("contains".equals(operator))
             {
                 //Query the partial n-gram field !
-                filterQuery.append("_partial");
+                if (isIndexed) { filterQuery.append("_partial"); }
             }
             else if ("authority".equals(operator))
             {
                 //Query the authority indexed field !
-                filterQuery.append("_authority");
+                if (isIndexed) { filterQuery.append("_authority"); }
             }
             else if ("notequals".equals(operator)
                     || "notcontains".equals(operator)
@@ -2894,6 +2906,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         result.setFilterQuery(filterQuery.toString());
         return result;
     }
+
 
     @Override
     public List<Item> getRelatedItems(Context context, Item item, DiscoveryMoreLikeThisConfiguration mltConfig)

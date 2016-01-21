@@ -200,23 +200,43 @@ cp dspace-api-4.2.jar $DS/lib
 ## to recompile:end
 
 -----------------------------------------  S O L R  --------------------------------------------------
+# advandced search
+dc.date.issued_dt:"2013-07-21T06:52:14.72Z"
+dc.date.issued_dt:[2013-07-21T06:52:14.72Z TO *]
+
+# diffuse sur la Une en decembre de 20??
+channel_keyword:La\ Une/20??/12
+{!q.op=AND}channel_partial:(une "2014")
+{!q.op=AND}channel_partial:(une "2015/01")
+{!q.op=AND}channel_partial:(une "199*/01")
+{!q.op=AND}channel_partial:(une "199?/01")
+
+{!q.op=AND}contributor_partial:(Esmeralda Labye Editeur) # NOOK
+{!q.op=AND}contributor_partial:(Esmeralda Labye/Editeur)
+
+
+http://localhost:8070/rs/search/sequences?q=championnat&facet=true&facet.limit=5
+
+# role facet
+http://localhost:8070/solr/search/select?q=championnat&rows=0&fl=handle%2C+search.uniqueid&wt=json&indent=true&facet=true&facet.field=%7B!key%3DPr%C3%A9sentateur+facet.prefix%3DPr%C3%A9sentateur%2F%7Drole_keyword&facet.field=%7B!key%3DJournaliste+facet.prefix%3DJournaliste%2F%7Drole_keyword&facet.mincount=1&f.role_keyword.facet.limit=2
+
 # selectCollection + full text search + advanced search on dc.title + sort on dc.title_sort
-http://vm-dev4.inf.rtbf.be:8080/solr/search/selectCollection?q=*%3A*&fq=%7B!join+from%3Dlocation.collection+to%3Dsearch.uniqueid%7Ddc.title%3Aall%2Bblacks&sort=dc.title_sort+asc&fl=handle%2Cdc.title%2Csearch.uniqueid%2Cdc.date.issued%2Cscore&wt=json&indent=true&debugQuery=true&seqQuery=championnat+gymnastique
+http://vm-dev4.inf.rtbf.be:8080/solr/search/selectCollection?q=*%3A*&fq=%7B!join+from%3Dlocation.collection+to%3Dsearch.uniqueid%7Ddc.title%3Aall%2Bblacks&sort=dc.title_sort+asc&fl=handle%2Cdc.title%2Csearch.uniqueid%2Cdc.date.issued%2Cscore&wt=json&indent=true&debugQuery=true&seqQ=championnat+gymnastique
 sort=dc.title_sort asc
 
 # selectCollection + full text search + advanced search on dc.title
-http://vm-dev4.inf.rtbf.be:8080/solr/search/selectCollection?q=*&seqQuery=championnat+gymnastique&fq=%7B!join+from%3Dlocation.collection+to%3Dsearch.uniqueid%7Ddc.title%3Aall+blacks&fl=handle,search.uniqueid,dc.title,dc.date.issued&wt=json&indent=true&debugQuery=true
+http://vm-dev4.inf.rtbf.be:8080/solr/search/selectCollection?q=*&seqQ=championnat+gymnastique&fq=%7B!join+from%3Dlocation.collection+to%3Dsearch.uniqueid%7Ddc.title%3Aall+blacks&fl=handle,search.uniqueid,dc.title,dc.date.issued&wt=json&indent=true&debugQuery=true
 selectCollection
 q=*
-seqQuery=full+text+criteria
+seqQ=full+text+criteria
 fq={!join from=location.collection to=search.uniqueid}dc.title:critere+value  # remarquer le {!join ...} qui précède le critère
 
 
 
 # selectCollection
-http://vm-dev4.inf.rtbf.be:8080/solr/search/selectCollection?q=*&seqQuery=championnat+gymnastique&fq=%7B!join+from%3Dlocation.collection+to%3Dsearch.uniqueid%7Dlocation.collection%3A3-2569388&fl=handle,search.uniqueid,dc.date.issued&wt=json&indent=true&debugQuery=true
-http://vm-dev4.inf.rtbf.be:8080/solr/search/selectCollection?q=*&seqQuery=belgique+royal+terroriste+vacances+soleil+maroc&fl=handle,search.uniqueid,dc.date.issued&wt=json&indent=true&debugQuery=true
-http://vm-dev4.inf.rtbf.be:8080/solr/search/selectCollection?q=*%3A*&fq=%7B!join+from%3Dlocation.collection+to%3Dsearch.uniqueid%7Dlocation.collection%3A3-1378169&fl=search.uniqueid%2Cdc.date.issued%2Cscore&wt=json&indent=true&seqQuery=belgique+royal+terroriste+vacances+soleil+maroc
+http://vm-dev4.inf.rtbf.be:8080/solr/search/selectCollection?q=*&seqQ=championnat+gymnastique&fq=%7B!join+from%3Dlocation.collection+to%3Dsearch.uniqueid%7Dlocation.collection%3A3-2569388&fl=handle,search.uniqueid,dc.date.issued&wt=json&indent=true&debugQuery=true
+http://vm-dev4.inf.rtbf.be:8080/solr/search/selectCollection?q=*&seqQ=belgique+royal+terroriste+vacances+soleil+maroc&fl=handle,search.uniqueid,dc.date.issued&wt=json&indent=true&debugQuery=true
+http://vm-dev4.inf.rtbf.be:8080/solr/search/selectCollection?q=*%3A*&fq=%7B!join+from%3Dlocation.collection+to%3Dsearch.uniqueid%7Dlocation.collection%3A3-1378169&fl=search.uniqueid%2Cdc.date.issued%2Cscore&wt=json&indent=true&seqQ=belgique+royal+terroriste+vacances+soleil+maroc
 
 # join and inner query with edismax (to be able to use mm)
 http://vm-dev4.inf.rtbf.be:8080/solr/search/selectNoCollapse?q=_query_%3A%22%7B!join+from%3Dlocation.community+to%3Dsearch.uniqueid%7D(search.resourcetype%3A2+AND+_query_%3A%5C%22%7B!dismax+mm%3D3%3C-25%25%7Dbelgique+royal+terroriste+vacances+soleil+maroc%5C%22%0A)%22&fl=handle%2Csearch.uniqueid%2C+dc.title%2C+location.collection&wt=json&indent=true&debugQuery=true&mainQuery=belgique%20royal%20terroriste%20%20vacances%20soleil%20%C3%A9tranger%20maroc

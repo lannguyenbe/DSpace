@@ -12,8 +12,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,6 +25,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.dspace.content.DSpaceObject;
 import org.dspace.core.Constants;
@@ -31,14 +35,13 @@ import org.dspace.discovery.DiscoverHitHighlightingField;
 import org.dspace.discovery.DiscoverQuery;
 import org.dspace.discovery.DiscoverResult;
 import org.dspace.discovery.SearchService;
-import org.dspace.discovery.SearchUtils;
 import org.dspace.discovery.DiscoverResult.FacetResult;
 import org.dspace.discovery.SearchServiceException;
-import org.dspace.discovery.configuration.DiscoveryConfiguration;
 import org.dspace.discovery.configuration.DiscoveryConfigurationParameters;
 import org.dspace.discovery.configuration.DiscoveryHitHighlightFieldConfiguration;
 import org.dspace.handle.HandleManager;
 import org.dspace.rtbf.rest.common.SimpleNode;
+import org.dspace.rtbf.rest.util.RsConfigurationManager;
 import org.dspace.rtbf.rest.util.RsDiscoveryConfiguration;
 import org.dspace.sort.OrderFormat;
 import org.dspace.utils.DSpace;
@@ -269,6 +272,12 @@ public abstract class Resource
         	query.addSearchField(sf);			
 		}
         
+    	// Filter queries
+    	String[] fqs = getFilterQueries(context, searchRequest);
+    	for (String fq : fqs) {
+    		query.addFilterQueries(fq);
+    	}
+
         // Facetting and facet pagination
     	if (searchRequest.isFacet()) {
     		int facetLimit = searchRequest.getFacetLimit();
@@ -296,7 +305,7 @@ public abstract class Resource
 		        query.setFacetMinCount(1);
     		}
     		
-    		addDateFacet("dc.date.issued_dt", "dateIssued.year", query, context);
+    		addDateIssuedFacet("date_issued", "dc.date.issued_dt", "dateIssued.year", query, context);
     		
     	}
     	
@@ -310,17 +319,92 @@ public abstract class Resource
 	    				, fieldConfiguration.getSnippets()));
 	    	}
     	}
-
-
+    	
         // 2. Perform query
 		return (getSearchService().search(context, query));
 	}
 	
 	
-	private void addDateFacet(String dateFacet, String yearFacet, DiscoverQuery query, Context context) throws SearchServiceException {
+	public String[] getFilterQueries(Context context, Request searchRequest) {
+		
+		List<String> allFilterQueries = new ArrayList<String>();
+		
+		for (Map<String, String> fq : searchRequest.getParameterFilterQueries()) {
+            String filterType = fq.get("filtertype");
+            String filterOperator = fq.get("filter_relational_operator");
+            String filterValue = fq.get("filter");
+
+            if(StringUtils.isNotBlank(filterValue)){
+            	if (filterType.equals("*")) { return new String[0]; } // any filterType = not filter at all
+                filterType = getSearchFilterName(filterType); // get searchFilter name from filterType front end name from rtbf-rest.cfg
+                boolean isIndexed = RsDiscoveryConfiguration.getSearchFilters().containsKey(filterType); // verify if searchFilter is configured in discovery.xml
+                try {
+                	allFilterQueries.add(getSearchService().toFilterQuery(context
+                			, (isIndexed || filterType.matches("'(.+)'")) ? filterType 
+                					: "'"+filterType+"'" // within quote the filterType stayed unchanged, not suffix by _keyword or _partial
+                			, filterOperator, filterValue).getFilterQuery());
+                } catch (SQLException e) {
+                	return new String[0];
+                }
+           }
+		}
+
+		return allFilterQueries.toArray(new String[allFilterQueries.size()]);
+	}
+	
+	protected String getSearchFilterName(String key) {
+		Properties mapper = (Properties) RsConfigurationManager.getInstance().getAttribute(org.dspace.rtbf.rest.common.Constants.FILTERMETA);
+		if (mapper != null) {
+	    	String label = mapper.getProperty(key);
+	    	if (label != null) {
+	    		return label;
+	    	}
+		}
+    	return key;
+	}
+
+
+    // Date Math
+    public static final String _DT = "_dt";
+    public static final Map<String, String[]> _DTMATH = new HashMap<>();
+    static {
+    	_DTMATH.put("[ -1DAY ]"  , new String[] {"{!key=\"${keyName}_dt:[ -1DAY ]\"}",   "[ NOW/DAY-1DAY TO NOW/DAY+1DAY ]"});
+    	// Lan 19.01.2015 : use inclusive range with -1MILLI because exclusive range with {} gives error "Invalid date String" (solrj bug ?)
+    	//_DTMATH.put("[ -7DAYS ]" , new String[] {"{!key=\"date_issued_dt:[ -7DAYS ]\"}",  "[ NOW/DAY-7DAYS TO NOW/DAY-1DAY }"});
+    	_DTMATH.put("[ -7DAYS ]" , new String[] {"{!key=\"${keyName}_dt:[ -7DAYS ]\"}",  "[ NOW/DAY-7DAYS TO NOW/DAY-1DAY-1MILLI ]"});
+    	_DTMATH.put("[ -1MONTH ]", new String[] {"{!key=\"${keyName}_dt:[ -1MONTH ]\"}", "[ NOW/DAY-1MONTH TO NOW/DAY-7DAYS-1MILLI ]"});
+    	_DTMATH.put("[ -1YEAR ]" , new String[] {"{!key=\"${keyName}_dt:[ -1YEAR ]\"}",  "[ NOW/DAY-1YEAR TO NOW/DAY-1MONTH-1MILLI ]"});
+    	_DTMATH.put("[ +1YEAR ]" , new String[] {"{!key=\"${keyName}_dt:[ +1YEAR ]\"}",  "[ * TO NOW/DAY-1YEAR-1MILLI ]"});
+    }
+
+	private void addDateIssuedFacet(String keyName, String dateFacet, String yearFacet, DiscoverQuery query, Context context) throws SearchServiceException {
+
+		// Get results count from 12 last months
+        DiscoverQuery yearRangeQuery = new DiscoverQuery();
+        yearRangeQuery.setQuery(query.getQuery());
+        yearRangeQuery.setDSpaceObjectFilter(query.getDSpaceObjectFilter());
+        for (String f : query.getFilterQueries()) {
+        	yearRangeQuery.addFilterQueries(f);
+        }
+        yearRangeQuery.setMaxResults(0);
+
+		yearRangeQuery.addFilterQueries(dateFacet + ":[ NOW/DAY-1YEAR TO NOW ]");
+        DiscoverResult last12MonthsResult = getSearchService().search(context, yearRangeQuery);
+        if (last12MonthsResult.getTotalSearchResults() > 0) { // result found within 12 months
+			for (Map.Entry<String, String[]> todayMath : _DTMATH.entrySet()) {
+        		query.addFacetQuery(todayMath.getValue()[0].replaceFirst("\\$\\{keyName\\}", keyName)  + dateFacet + ":" + todayMath.getValue()[1]);					
+			}        	
+        } else { // no result found within 12 months
+        	addDateFacet(keyName, dateFacet, yearFacet, query, context);       	
+        }
+	}
+
+		
+	private void addDateFacet(String keyName, String dateFacet, String yearFacet, DiscoverQuery query, Context context) throws SearchServiceException {
         int oldestYear = -1;
         int newestYear = -1;
 
+           
         // Get the oldest year
         DiscoverQuery yearRangeQuery = new DiscoverQuery();
         yearRangeQuery.setQuery(query.getQuery());
@@ -329,6 +413,7 @@ public abstract class Resource
         	yearRangeQuery.addFilterQueries(f);
         }
         yearRangeQuery.setMaxResults(1);
+
         //Set our query to anything that has this value
         yearRangeQuery.addFieldPresentQueries(yearFacet);
         //Set sorting so our last value will appear on top
@@ -372,23 +457,11 @@ public abstract class Resource
             //We need a list of our years
             //We have a date range add faceting for our field
             //The faceting will automatically be limited to the 10 years in our span due to our filterquery
-        	
-        	Date today = Calendar.getInstance().getTime();
-        	SimpleDateFormat formatter = new SimpleDateFormat("yyyy");
-        	int todayYear = Integer.parseInt(formatter.format(today));
-        	
-        	if ((todayYear - topYear) > 1) {
-                query.addFacetField(new DiscoverFacetField(yearFacet, DiscoveryConfigurationParameters.TYPE_STANDARD
-                		, /* facet limit */ -1
-                		, /* facet sort  */ DiscoveryConfigurationParameters.SORT.VALUE));
-        	} else {
-        		query.addFacetQuery("{!key=\"date_issued:[ -1DAY ]\"}"   + dateFacet + ":[ NOW/DAY-1DAY TO NOW/DAY+1DAY ]");
-        		query.addFacetQuery("{!key=\"date_issued:[ -7DAYS ]\"}"  + dateFacet + ":[ NOW/DAY-7DAYS TO NOW/DAY-1DAY }");
-        		query.addFacetQuery("{!key=\"date_issued:[ -1MONTH ]\"}" + dateFacet + ":[ NOW/DAY-1MONTH TO NOW/DAY-7DAYS }");
-        		query.addFacetQuery("{!key=\"date_issued:[ -1YEAR ]\"}"  + dateFacet + ":[ NOW/DAY-1YEAR TO NOW/DAY-1MONTH }");
-        		query.addFacetQuery("{!key=\"date_issued:[ +1YEAR ]\"}"  + dateFacet + ":[ * TO NOW/DAY-1YEAR }");
-        	}
-            // facetQueries.add
+        	query.addFacetField(new DiscoverFacetField(
+        			"{!key="+ keyName +"}"+ yearFacet
+        			, DiscoveryConfigurationParameters.TYPE_STANDARD
+            		, -1 // facet limit 
+            		,  DiscoveryConfigurationParameters.SORT.VALUE)); // facet sort 
         } else {
             java.util.List<String> facetQueries = new ArrayList<String>();
             //Create facet queries but limit them to 11 (11 == when we need to show a "show more" url)
@@ -412,8 +485,7 @@ public abstract class Resource
                     //We need to do -1 on this one to get a better result
                     currentTop--;
                 }
-//                facetQueries.add(yearFacet + ":[" + bottomYear + " TO " + currentTop + "]");
-                facetQueries.add("{!key=\"date_issued:["+ bottomYear + " TO " + currentTop + "]\"}"  + yearFacet + ":[" + bottomYear + " TO " + currentTop + "]");
+                facetQueries.add("{!key=\""+ keyName +":["+ bottomYear + " TO "+ currentTop +"]\"}"+ yearFacet +":["+ bottomYear +" TO "+ currentTop +"]");
             }
             for (String facetQuery : facetQueries) {
                 query.addFacetQuery(facetQuery);
@@ -492,7 +564,13 @@ public abstract class Resource
     	}
 
         
-        // 2. Perform query
+    	// Filter queries
+    	String[] fqs = getFilterQueries(context, searchRequest);
+    	for (String fq : fqs) {
+    		query.addFilterQueries(fq);
+    	}
+
+    	// 2. Perform query
         DiscoverResult queryResults = getSearchService().search(context, query);
         
         // 3. Make facet results as main results 
@@ -592,6 +670,16 @@ public abstract class Resource
             query.addProperty("locQ", "location:(" + sb.toString() + ")");
     	}
 
+    	// Filter queries
+    	String[] fqs = getFilterQueries(context, searchRequest);
+    	StringBuilder filterQ = new StringBuilder();
+    	for (int i = 0, len = fqs.length; i < len; i++ ) {
+    		filterQ.append(" AND ");
+    		filterQ.append(fqs[i]);
+    	}
+    	if (filterQ.length() > 0) {
+            query.addProperty("filterQ", filterQ.substring(5));    		
+    	}
 
     	// Pagination
     	query.setMaxResults(searchRequest.getLimit());
@@ -677,6 +765,16 @@ public abstract class Resource
             query.addProperty("locQ", "location:(" + sb.toString() + ")");
     	}
 
+    	// Filter queries
+    	String[] fqs = getFilterQueries(context, searchRequest);
+    	StringBuilder filterQ = new StringBuilder();
+    	for (int i = 0, len = fqs.length; i < len; i++ ) {
+    		filterQ.append(" AND ");
+    		filterQ.append(fqs[i]);
+    	}
+    	if (filterQ.length() > 0) {
+            query.addProperty("filterQ", filterQ.substring(5));    		
+    	}
 
     	// Pagination
     	query.setMaxResults(searchRequest.getLimit());

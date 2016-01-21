@@ -1,5 +1,8 @@
 package org.dspace.rtbf.rest.common;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.dspace.discovery.DiscoverQuery.SORT_ORDER;
 
 public class Constants extends org.dspace.core.Constants {
@@ -8,6 +11,7 @@ public class Constants extends org.dspace.core.Constants {
     // Config sections in the config file rtbf-rest.cfg
     public static final String SORTMETA = "sortMeta";
     public static final String NAMINGMETA = "namingMeta";
+    public static final String FILTERMETA = "filterMeta";
 
     // Use in class RTBObject
     // Type of view determines the choice of metadata to show 
@@ -45,5 +49,5 @@ public class Constants extends org.dspace.core.Constants {
     
     // Schema to skip
     public static final String OLD_SCHEMA = "old";
-
+    
 }

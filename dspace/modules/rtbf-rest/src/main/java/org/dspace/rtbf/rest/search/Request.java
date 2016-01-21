@@ -2,8 +2,14 @@ package org.dspace.rtbf.rest.search;
 
 import javax.ws.rs.core.MultivaluedMap;
 
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 
+import org.apache.commons.lang.StringUtils;
 import org.dspace.discovery.DiscoverQuery.SORT_ORDER;
 import org.dspace.rtbf.rest.common.Constants;
 import org.dspace.rtbf.rest.common.MetadataEntry;
@@ -23,6 +29,7 @@ public class Request {
 	private int facetOffset = Constants.DEFAULT_FACET_OFFSET;
 	private boolean highlight = true;
 	private boolean snippet = false;
+	private List<Map<String, String>> parameterFilterQueries;
 	
 
 
@@ -78,7 +85,48 @@ public class Request {
 			snippet = Boolean.parseBoolean(str);
 		}
 
+		setParameterFilterQueries(params);
 		
+	}
+	
+
+	public List<Map<String,String>> getParameterFilterQueries() {
+		return parameterFilterQueries;
+	}
+
+	public void setParameterFilterQueries(MultivaluedMap<String, String> params) {
+		List<Map<String, String>> fqs = new ArrayList<Map<String, String>> ();
+		
+        List<String> filterTypes = getRepeatableParameters(params, "filtertype");
+        List<String> filterOperators = getRepeatableParameters(params, "filter_relational_operator");
+        List<String> filterValues = getRepeatableParameters(params, "filter");
+        
+        for (int i = 0, len = filterTypes.size(); i < len; i++) {
+        	String filterType = filterTypes.get(i);
+            String filterValue = filterValues.get(i);
+            String filterOperator = filterOperators.get(i);
+
+            Map<String, String> fq = new Hashtable<String, String>();
+            fq.put("filtertype", new String(filterType));
+            fq.put("filter_relational_operator", new String(filterOperator));
+            fq.put("filter", new String(filterValue));
+            
+            fqs.add(i, fq);
+            
+        }	
+		
+        parameterFilterQueries = fqs;		
+	}
+	
+	public List<String> getRepeatableParameters(MultivaluedMap<String, String> params, String prefix) {
+        TreeMap<String, String> result = new TreeMap<String, String>();
+         
+        for (String key : params.keySet()) {
+        	if (key.startsWith(prefix)) {
+        		result.put(key, params.getFirst(key));
+        	}
+        }
+        return new ArrayList<String>(result.values());		
 	}
 
 

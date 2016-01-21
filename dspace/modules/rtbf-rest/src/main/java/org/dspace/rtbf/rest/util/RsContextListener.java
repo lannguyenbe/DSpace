@@ -52,10 +52,23 @@ public class RsContextListener implements ServletContextListener {
 	    }
         configManager.setAttribute(Constants.NAMINGMETA, namingEntries);
 
+    	// For frontend names, build map between frontend name and searchFilter
+        idx = 1;
+	    Properties filterEntries = new Properties();
+	    while ((definition = ConfigurationManager.getProperty(Constants.WEBAPP_NAME, Constants.FILTERMETA+".field." + idx)) != null) {
+	        List<String> fields = new ArrayList<String>();
+	        fields = Arrays.asList(definition.split(":"));
+            filterEntries.put(fields.get(0), fields.get(1));
+	    	
+	    	idx++;
+	    }
+        configManager.setAttribute(Constants.FILTERMETA, filterEntries);
+
         ServletContext sc = event.getServletContext();
         sc.setAttribute(Constants.WEBAPP_NAME, configManager); // keep ref to avoid garbage collector
-        
+
         // Get List of highlight fields from discovery.xml
+        // Get List of searchFilter fields from discovery.xml
         RsDiscoveryConfiguration discoveryConfig = RsDiscoveryConfiguration.getInstance();
         discoveryConfig.setConfiguration(SearchUtils.getDiscoveryConfiguration());
 		
