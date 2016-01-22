@@ -2886,8 +2886,25 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 //DO NOT ESCAPE RANGE QUERIES !
                 if(!value.matches("\\[.*TO.*\\]"))
                 {
-                    value = ClientUtils.escapeQueryChars(value);
+                	/* Lan 22.01.2016 : put in comment
+                	value = ClientUtils.escapeQueryChars(value);
                     filterQuery.append("(").append(value).append(")");
+                    */
+
+                	value = ClientUtils.escapeQueryChars(value);
+
+                	if ("contains".equals(operator) || "notcontains".equals(operator)) { /* Lan 22.01.2016 : add for contains operator */
+	                	StringBuilder mandatoryValues = new StringBuilder(value);
+	                	for (int i=mandatoryValues.indexOf("\\ ", 0); i > 0; i = mandatoryValues.indexOf("\\ ", i+1) ) {
+	                		mandatoryValues.replace(i, i+2, " +");
+	                	}
+	                	if (mandatoryValues.indexOf(" ", 0) > 0) {
+	                		mandatoryValues.insert(0,'+');
+	                	}
+	                    filterQuery.append("(").append(mandatoryValues).append(")");
+                	} else {
+                        filterQuery.append("(").append(value).append(")");               		
+                	}
                 }
                 else
                 {
@@ -2895,11 +2912,11 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 }
             }
             
-            // Lan
+            /* Lan : replace by above which use "+" syntax
             if ("contains".equals(operator) || "notcontains".equals(operator)) {
             	filterQuery.insert(0,"{!q.op=AND}");
             }
-
+            */
         }
 
         result.setDisplayedValue(transformDisplayedValue(context, field, value));
