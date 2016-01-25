@@ -820,10 +820,10 @@
        <!-- Lan 09.02.2015 : boosting by dc.date.issued -->
        <str name="defType">edismax</str>
        <str name="boost">recip(ms(NOW/HOUR, dc.date.issued_dt),3.16e-11,1,1)</str>
-       <str name="q">_query_:"{!join from=location.collection to=search.uniqueid}(search.resourcetype:2 AND _query_:\"{!dismax mm=3&lt;-25% v=$seqQuery}\")"</str>
+       <str name="q">_query_:"{!join from=location.collection to=search.uniqueid}(search.resourcetype:2 AND _query_:\"{!edismax mm=3&lt;-25% v=$seqQuery}\")"</str>
      </lst>
     </requestHandler>
-    
+        
     <requestHandler name="/selectCollection" class="solr.SearchHandler">
      <lst name="defaults">
        <str name="echoParams">explicit</str>
@@ -835,7 +835,9 @@
      </lst>
        <str name="mm">3&lt;-25% 9&lt;-3</str>
        <lst name="appends">
-         <str name="fq">{!join from=location.collection to=search.uniqueid}(search.resourcetype:2 AND discoverable:true AND _query_:"{!dismax mm=\"3&lt;-25% 9&lt;-3\" v=$seqQ}")</str>
+         <!-- Lan 21.01.2016 : add filterQ, use edismax to allow wildchar syntax in seqQ-->
+         <str name="fq">{!join from=location.collection to=search.uniqueid}(search.resourcetype:2 AND discoverable:true AND _query_:"{!edismax mm=\"3&lt;-25% 9&lt;-3\" v=$seqQ}" AND _query_:"{!edismax v=$filterQ}" )</str>
+         <!-- str name="fq">{!join from=location.collection to=search.uniqueid}(search.resourcetype:2 AND discoverable:true AND _query_:"{!edismax mm=\"3&lt;-25% 9&lt;-3\" v=$seqQ}")</str -->
          <!-- join + collapse does not work. Error msg:"Query  does not implement createWeight"-->
        </lst>
     </requestHandler>
@@ -987,9 +989,14 @@
      </lst>
        <str name="mm">3&lt;-25% 9&lt;-3</str>
        <lst name="appends">
-         <str name="fq">-search.resourceid:[1 TO 10]</str>
+         <!-- remove resourceid from 1 to 10 which are TOP serie (TV, Sonuma TV, Radio) -->
+         <!-- When testing on Lan PTG : resourceid from 1 to 10 cover regular serie too, so might be filtered out incorrectly from the returned results -->
+            <!-- str name="fq">-search.resourceid:[1 TO 10]</str-->
+            <str name="fq">-search.resourceid:[1 TO 3]</str>
          <!--str name="fq">-search.resourceid:999</str-->
-         <str name="fq">{!join from=location.community to=search.uniqueid}(search.resourcetype:2 AND discoverable:true AND _query_:"{!dismax mm=\"3&lt;-25% 9&lt;-3\" v=$seqQ}")</str>
+         <!-- Lan 21.01.2016 : add filterQ -->
+            <str name="fq">{!join from=location.community to=search.uniqueid}(search.resourcetype:2 AND discoverable:true AND _query_:"{!edismax mm=\"3&lt;-25% 9&lt;-3\" v=$seqQ}" AND _query_:"{!edismax v=$filterQ}" )</str>
+            <!-- str name="fq">{!join from=location.community to=search.uniqueid}(search.resourcetype:2 AND discoverable:true AND _query_:"{!edismax mm=\"3&lt;-25% 9&lt;-3\" v=$seqQ}")</str -->
          <!-- join + collapse does not work. Error msg:"Query  does not implement createWeight"-->
        </lst>
     </requestHandler>
