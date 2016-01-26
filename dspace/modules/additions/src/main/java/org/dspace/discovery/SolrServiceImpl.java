@@ -2886,25 +2886,8 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 //DO NOT ESCAPE RANGE QUERIES !
                 if(!value.matches("\\[.*TO.*\\]"))
                 {
-                	/* Lan 22.01.2016 : put in comment
                 	value = ClientUtils.escapeQueryChars(value);
                     filterQuery.append("(").append(value).append(")");
-                    */
-
-                	value = ClientUtils.escapeQueryChars(value);
-
-                	if ("contains".equals(operator) || "notcontains".equals(operator)) { /* Lan 22.01.2016 : add for contains operator */
-	                	StringBuilder mandatoryValues = new StringBuilder(value);
-	                	for (int i=mandatoryValues.indexOf("\\ ", 0); i > 0; i = mandatoryValues.indexOf("\\ ", i+1) ) {
-	                		mandatoryValues.replace(i, i+2, " +");
-	                	}
-	                	if (mandatoryValues.indexOf(" ", 0) > 0) {
-	                		mandatoryValues.insert(0,'+');
-	                	}
-	                    filterQuery.append("(").append(mandatoryValues).append(")");
-                	} else {
-                        filterQuery.append("(").append(value).append(")");               		
-                	}
                 }
                 else
                 {
@@ -2912,11 +2895,16 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 }
             }
             
-            /* Lan : replace by above which use "+" syntax
+            /* Lan 26.01.2016 : this is for contains orerator,
+             * q.op=AND is mandatory because text_edge creates others sub-tokens using Word Delimiter Filter :
+             * 		compare {!q.op=AND}codeorigine_partial:DAL6140382 versus codeorigine_partial:DAL6140382
+             * subquery _query_ is mandatory for join request in requestHandler /selectCollection and /selectCommunity
+             */
             if ("contains".equals(operator) || "notcontains".equals(operator)) {
-            	filterQuery.insert(0,"{!q.op=AND}");
+            	// filterQuery.insert(0,"{!q.op=AND}");
+            	filterQuery.insert(0,"_query_:\"{!q.op=AND}");
+            	filterQuery.append("\"");
             }
-            */
         }
 
         result.setDisplayedValue(transformDisplayedValue(context, field, value));
