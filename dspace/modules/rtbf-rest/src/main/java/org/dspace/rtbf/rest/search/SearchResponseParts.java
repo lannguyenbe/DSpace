@@ -173,14 +173,14 @@ public class SearchResponseParts {
 	public static class FacetCounts {
 		
 		public static class Filter {
-			public String filterType;
+			public String filtertype;
 			public String filter_relational_operator;
 			public String filter;
 			
 
 			public Filter() {}
 			public Filter(String ft, String fo, String fv) {
-				this.filterType = ft;
+				this.filtertype = ft;
 				this.filter_relational_operator = fo;
 				this.filter = fv;				
 			}
