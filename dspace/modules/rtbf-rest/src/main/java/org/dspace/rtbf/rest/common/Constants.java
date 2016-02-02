@@ -32,7 +32,7 @@ public class Constants extends org.dspace.core.Constants {
     public static final int        LIMITMAX = 5000;
     public static final String     DEFAULT_LIMIT = "100";
     public static final int        DEFAULT_RPP = Integer.valueOf(DEFAULT_LIMIT);
-    public static final SORT_ORDER DEFAULT_ORDER = SORT_ORDER.asc;
+    public static final String     DEFAULT_ORDER = "asc";
     public static final int        DEFAULT_FACET_RPP = 10;
     public static final int        DEFAULT_FACET_OFFSET = 0;
 

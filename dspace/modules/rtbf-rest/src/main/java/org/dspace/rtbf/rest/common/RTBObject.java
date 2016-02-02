@@ -32,7 +32,7 @@ import java.util.Map;
  * Time: 12:11 PM
  * To change this template use File | Settings | File Templates.
  */
-@XmlRootElement(name = "dspaceobject")
+@XmlRootElement(name = "rtbobject")
 public class RTBObject {
     private static Logger log = Logger.getLogger(RTBObject.class);
     

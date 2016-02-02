@@ -252,7 +252,6 @@ public abstract class Resource
     		query.addFilterQueries("{!q.op=OR}" + "location:(" + sb.toString() + ")");
     	}
 
-
     	// Pagination
     	query.setMaxResults(searchRequest.getLimit());
         if (searchRequest.getOffset() > 0) {
@@ -277,6 +276,7 @@ public abstract class Resource
     	for (String fq : fqs) {
     		query.addFilterQueries(fq);
     	}
+
 
         // Facetting and facet pagination
     	if (searchRequest.isFacet()) {

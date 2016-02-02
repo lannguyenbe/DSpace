@@ -74,7 +74,7 @@
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-jackson</artifactId>
         </dependency>
-<!--  10.11.2015 Lan: not currently using javax?json      
+<!--  10.11.2015 Lan: not currently using javax.json      
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.json</artifactId>
