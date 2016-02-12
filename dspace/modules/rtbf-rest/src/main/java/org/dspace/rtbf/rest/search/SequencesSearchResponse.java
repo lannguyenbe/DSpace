@@ -39,14 +39,6 @@ public class SequencesSearchResponse extends SearchResponse {
             this.addExpand("results");
         }
 
-/*
-        if(expandFields.contains("facets") || expandFields.contains("all")) {
-        	SearchResponseParts.FacetCounts resultsWrapper = new SearchResponseParts.FacetCounts(queryResults);
-        	setFacets(resultsWrapper);
-        } else {
-            this.addExpand("facets");
-        }
-*/        
 	}
 
 }

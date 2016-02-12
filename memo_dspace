@@ -371,6 +371,17 @@ http://localhost:8070/solr/zookeeper
 
 cd C:\local\solr-4.9.0\node1\scripts\cloud-scripts
 zkcli.bat -z localhost:9070 -cmd list
+-----------------------------------------  CURL SOLR ----------------------------------------------
+# to retrieve the sequence search.uniqueid=2-36300
+curl http://vm-dev4.inf.rtbf.be:8080/solr/search/get?id=2-36300
+
+# to make atomic update of a single field : add "B 724438-42" to the multivalued field
+curl -X POST -H 'Content-Type: application/json' http://vm-dev4.inf.rtbf.be:8080/solr/search/update --data-binary '
+[
+{"search.uniqueid":"2-36300",
+"rtbf.code_origine.supportseq":{"add":"B 724438-42"}
+}
+]'
 
 -----------------------------------------  DSPACE  C L I ----------------------------------------------
 cd C:\local\dspace\bin>

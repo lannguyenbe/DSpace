@@ -38,11 +38,11 @@
 	<message key="xmlui.custom.rtbf.identifier.source.RA">Radio</message>
 
 	<!-- Custom messages -->    
-	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.titlecom">Serie Title</message>
-	<message key="xmlui.ArtifactBrowser.ConfigurableBrowse.titlecom.column_heading">Serie Title</message>
-	<message key="xmlui.ArtifactBrowser.ConfigurableBrowse.title.metadata.titlecom">Browsing {0} by Serie Title {1}</message>
-	<message key="xmlui.ArtifactBrowser.ConfigurableBrowse.trail.metadata.titlecom">Browsing {0} by Serie Title</message>
-	<message key="xmlui.ArtifactBrowser.Navigation.browse_titlecom">Serie Titles</message>
+	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.ispartof_title">Serie Title</message>
+	<message key="xmlui.ArtifactBrowser.ConfigurableBrowse.ispartof_title.column_heading">Serie Title</message>
+	<message key="xmlui.ArtifactBrowser.ConfigurableBrowse.title.metadata.ispartof_title">Browsing {0} by Serie Title {1}</message>
+	<message key="xmlui.ArtifactBrowser.ConfigurableBrowse.trail.metadata.ispartof_title">Browsing {0} by Serie Title</message>
+	<message key="xmlui.ArtifactBrowser.Navigation.browse_ispartof_title">Serie Titles</message>
 	<message key="xmlui.ArtifactBrowser.ConfigurableBrowse.general.match_with">Or enter few letters:</message>
 	<message key="xmlui.ArtifactBrowser.ConfigurableBrowse.general.match_with_help">Browse for strings that match these letters</message>
     
@@ -58,8 +58,8 @@
 	<message key="xmlui.general.delete">Delete</message>
 	<message key="xmlui.general.next">Next</message>
 	<message key="xmlui.general.untitled">Untitled</message>
-        <message key="xmlui.general.perform">Perform</message>
-        <message key="xmlui.general.queue">Queue</message>
+    <message key="xmlui.general.perform">Perform</message>
+    <message key="xmlui.general.queue">Queue</message>
 
 	<!--
 		Page not found keys

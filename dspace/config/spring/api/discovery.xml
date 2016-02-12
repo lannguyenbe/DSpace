@@ -121,7 +121,7 @@
         <property name="searchFilters">
             <list>
                 <ref bean="searchFilterIdAttributor" />
-                <!-- Lan 16.02.2015 Remove title, add titlecom to advanced search -->
+                <!-- Lan 16.02.2015 Remove title, add TitleCommunity to advanced search -->
                 <!-- ref bean="searchFilterTitle" /-->
                 <ref bean="searchFilterTitleCommunity" />
                 <ref bean="searchFilterAuthor" />
@@ -494,7 +494,7 @@
 
     <!-- Lan 16.02.2015 - add this filter to advanced search -->
     <bean id="searchFilterTitleCommunity" class="org.dspace.discovery.configuration.DiscoverySearchFilter">
-        <property name="indexFieldName" value="titlecom"/>
+        <property name="indexFieldName" value="ispartof_title"/>
         <property name="metadataFields">
             <list>
                 <value>dcterms.isPartOf.title</value>
@@ -515,18 +515,16 @@
         <property name="skipFirstNodeLevel" value="false"/>
     </bean>
 
-    <!-- Lan 20.08.2015 - add this filter to advanced search -->
-    <bean id="searchFilterCodeOrigine" class="org.dspace.discovery.configuration.HierarchicalSidebarFacetConfiguration">
-        <property name="indexFieldName" value="codeorigine"/>
+    <!-- Lan 12.02.2016 - add this filter to advanced search -->
+    <bean id="searchFilterCodeOrigine" class="org.dspace.discovery.configuration.DiscoverySearchFilter">
+        <property name="indexFieldName" value="code_origine"/>
         <property name="metadataFields">
             <list>
-                <value>rtbf.code_origine.*</value>
+                <!-- This filter is not indexed directly from a DB metadata field, its exists already in solr index -->
+                <!-- code_origine, code_origine_keyword, code_origine_partial exists already as solr fields -->
+                <value>none</value>
            </list>
         </property>
-        <property name="facetLimit" value="10"/>
-        <property name="sortOrder" value="COUNT"/>
-        <property name="splitter" value="::"/>
-        <property name="skipFirstNodeLevel" value="false"/>
     </bean>
 
     <bean id="searchFilterAuthor" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
