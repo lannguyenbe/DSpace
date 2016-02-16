@@ -39,7 +39,11 @@ public class IndexClient {
     public static void main(String[] args) throws SQLException, IOException, SearchServiceException {
 
         Context context = new Context();
-        context.setIgnoreAuthorization(true);
+        //context.setIgnoreAuthorization(true); // depreciate
+        context.turnOffAuthorisationSystem();
+        
+        Context contextRO = new Context(org.dspace.core.Context.READ_ONLY); // readonly implies not caching
+        contextRO.turnOffAuthorisationSystem();
 
         String usage = "org.dspace.discovery.IndexClient [-cbhf[r <item handle>]] or nothing to update/clean an existing index.";
         Options options = new Options();
@@ -183,7 +187,7 @@ public class IndexClient {
             indexer.createIndex(context);
             checkRebuildSpellCheck(line, indexer);
         } else if (line.hasOption("B")) { /* Lan 20.11.2014 */
-            log.info("(Re)building index from scratch for large databse.");
+            log.info("(Re)building index from scratch for large database.");
             indexer2.updateIndexBig(context, true);
             checkRebuildSpellCheck(line, indexer2);
         } else if (line.hasOption("CC")) { /* Lan 21.11.2014 */
@@ -208,18 +212,18 @@ public class IndexClient {
         	if (communityId > 0) {
         		if (itemIto > 0) {
                     log.info("Adding ordered items for community id " + communityId + " from item id " + itemId + " to " + itemIto);
-                	indexer2.updateIndexCIto(context, communityId, itemId, itemIto, true);
+                	indexer2.updateIndexCIto(contextRO, communityId, itemId, itemIto, true);
         		} else {
                     log.info("Adding ordered items for community id " + communityId + " from item id " + itemId);
-                	indexer2.updateIndexCI(context, communityId, itemId, true);        			
+                	indexer2.updateIndexCI(contextRO, communityId, itemId, true);        			
         		}
         	} else {
         		if (itemIto > 0) {
                     log.info("Adding ordered items from item id " + itemId + " to " + itemIto);
-                	indexer2.updateIndexIto(context, itemId, itemIto, true);        			
+                	indexer2.updateIndexIto(contextRO, itemId, itemIto, true);        			
         		} else {
                     log.info("Adding ordered items from item id " + itemId);
-                	indexer2.updateIndexI(context, itemId, true);        			
+                	indexer2.updateIndexI(contextRO, itemId, true);        			
         			
         		}
         	}

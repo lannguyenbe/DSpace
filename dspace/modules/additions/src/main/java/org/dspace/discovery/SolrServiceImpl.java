@@ -580,16 +580,15 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
     }
 
-    public void updateIndexI(Context context, int id, boolean force)
+    public void updateIndexI(Context contextRO, int id, boolean force)
     {
         try {
             ItemIterator items = null;
             try {
-                for (items = ItemAdd.findGeId(context, id); items.hasNext();)
+                for (items = ItemAdd.findGeId(contextRO, id); items.hasNext();)
                 {
                     Item item = items.next();
-                    indexContent(context, item, force);
-                    item.decache();
+                    indexContent(contextRO, item, force);
                 }
             } finally {
                 if (items != null)
@@ -609,16 +608,15 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
     }
     
-    public void updateIndexCI(Context context, int commId, int itemId, boolean force)
+    public void updateIndexCI(Context contextRO, int commId, int itemId, boolean force)
     {
         try {
             ItemIterator items = null;
             try {
-                for (items = ItemAdd.findGeIdByCommunity(context, commId, itemId); items.hasNext();)
+                for (items = ItemAdd.findGeIdByCommunity(contextRO, commId, itemId); items.hasNext();)
                 {
                     Item item = items.next();
-                    indexContent(context, item, force);
-                    item.decache();
+                    indexContent(contextRO, item, force);
                 }
             } finally {
                 if (items != null)
@@ -639,16 +637,15 @@ public class SolrServiceImpl implements SearchService, IndexingService {
     }
     
 
-    public void updateIndexIto(Context context, int id, int idto, boolean force)
+    public void updateIndexIto(Context contextRO, int id, int idto, boolean force)
     {
         try {
             ItemIterator items = null;
             try {
-                for (items = ItemAdd.findBetweenId(context, id, idto); items.hasNext();)
+                for (items = ItemAdd.findBetweenId(contextRO, id, idto); items.hasNext();)
                 {
                     Item item = items.next();
-                    indexContent(context, item, force);
-                    item.decache();
+                    indexContent(contextRO, item, force);
                 }
             } finally {
                 if (items != null)
@@ -668,16 +665,15 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
     }
     
-    public void updateIndexCIto(Context context, int commId, int itemId, int itemIdto, boolean force)
+    public void updateIndexCIto(Context contextRO, int commId, int itemId, int itemIdto, boolean force)
     {
         try {
             ItemIterator items = null;
             try {
-                for (items = ItemAdd.findBetweenIdByCommunity(context, commId, itemId, itemIdto); items.hasNext();)
+                for (items = ItemAdd.findBetweenIdByCommunity(contextRO, commId, itemId, itemIdto); items.hasNext();)
                 {
                     Item item = items.next();
-                    indexContent(context, item, force);
-                    item.decache();
+                    indexContent(contextRO, item, force);
                 }
             } finally {
                 if (items != null)
