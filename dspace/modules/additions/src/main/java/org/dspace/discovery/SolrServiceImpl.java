@@ -1759,11 +1759,34 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                                 value = DateFormatUtils.formatUTC(value_dt, "yyyy-MM-dd");
                             }
                         }
+                        
+
+                        /* Lan code_origine test ******************************************/
+                        if (field.equals("rtbf.code_origine.supportseq") || field.equals("rtbf.code_origine.supportprog")) {
+                        	/* isolate code_origine part */
+                        	String value_p1 = meta.value.replaceAll("^(((?!::).)+)::(((?!::).)+)(::)?(.*)?$", "$3").replaceAll("^(((?!\\\\\\\\).)+)(.*)$", "$1");
+                            doc.addField(searchFilter.getIndexFieldName(), value_p1);
+                            doc.addField(searchFilter.getIndexFieldName() + "_keyword", value_p1);
+                            doc.addField(searchFilter.getIndexFieldName() + "_partial", value_p1);
+                        	
+                        	/* isolate place part */
+                        	String value_p2 = meta.value.replaceAll("^Fichier Sonuma.*$", "").replaceAll("^(((?!::).)+)::(((?!::).)+)(::)?(.*)?$", "$6");
+                        	if (!value_p2.isEmpty()) {
+                        		doc.addField(searchFilter.getIndexFieldName(), value_p2);
+                        		doc.addField(searchFilter.getIndexFieldName() + "_keyword", value_p2);
+                        		doc.addField(searchFilter.getIndexFieldName() + "_partial", value_p2);
+                        	}
+                        	
+                        	continue;
+                        }
+                        
+                        /* Lan code_origine test ******************************************/
+
                         doc.addField(searchFilter.getIndexFieldName(), value);
                         doc.addField(searchFilter.getIndexFieldName() + "_keyword", value);
                         // Lan
                         doc.addField(searchFilter.getIndexFieldName() + "_partial", value);
-
+                        
 
                         if (authority != null && preferedLabel == null)
                         {
