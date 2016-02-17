@@ -1558,7 +1558,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         
         //Keep a list of our sort values which we added, sort values can only be added once
         List<String> sortFieldsAdded = new ArrayList<String>();
-        Set<String> hitHighlightingFields = new HashSet<String>();
+        // Set<String> hitHighlightingFields = new HashSet<String>(); // Lan 16.02.2016 : not use anymore
         try {
             List<DiscoveryConfiguration> discoveryConfigurations = SearchUtils.getAllDiscoveryConfigurations(item);
 
@@ -1604,6 +1604,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                     recentSubmissionsConfigurationMap.put(recentSubmissionConfiguration.getMetadataSortField(), recentSubmissionConfiguration);
                 }
 
+                /* Lan 16.02.2016 : not use anymore
                 DiscoveryHitHighlightingConfiguration hitHighlightingConfiguration = discoveryConfiguration.getHitHighlightingConfiguration();
                 if(hitHighlightingConfiguration != null)
                 {
@@ -1613,6 +1614,8 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                         hitHighlightingFields.add(fieldConfiguration.getField());
                     }
             	}
+            	*/
+
                 DiscoveryMoreLikeThisConfiguration moreLikeThisConfiguration = discoveryConfiguration.getMoreLikeThisConfiguration();
                 if(moreLikeThisConfiguration != null)
                 {
