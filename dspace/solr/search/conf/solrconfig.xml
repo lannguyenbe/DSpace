@@ -1990,8 +1990,7 @@
         <!--str name="fieldName">identifier_origin_count</str-->
         <str name="value">1000</str>
     </processor>
-    <!-- -->
-    <!-- Add field role_plus_contributor -->
+    <!-- Add field role only -->
     <processor class="solr.CloneFieldUpdateProcessorFactory">
         <str name="source">rtbf.contributor_plus_role</str>
         <str name="dest">role_keyword</str>
@@ -1999,69 +1998,21 @@
     <processor class="solr.RegexReplaceProcessorFactory">
         <str name="fieldName">role_keyword</str>
         <str name="pattern">(.+)/(.+)</str>
-        <str name="replacement">$2/$1</str>
+        <str name="replacement">$2</str>
         <bool name="literalReplacement">false</bool>
     </processor>
     <!-- -->
-    <!-- 02.02.2016 Lan : add code_origine -->
-       <!-- Lan 11.02.2016 : code_origine format in BNF :
-            <code_origine> ::= <support_type>::<code_origine_uniq> | <support_type>::<code_origine_uniq>::<support_place> 
-            <code_origine_uniq> ::= <code_origine_tram> | <code_origine_tram>\\<support_notice>
-            where 
-            <code_origine_tram> is original code_origine from Tramontane
-            <support_notice> is "abusive" field where keyframeoffset is stored for type of support "Fichier Sonuma"
-       -->
-       <processor class="solr.CloneFieldUpdateProcessorFactory">
-            <arr name="source">
-                <str>rtbf.code_origine.supportseq</str>
-                <str>rtbf.code_origine.supportprog</str>
-            </arr>
-            <str name="dest">code_origine_p1</str>
-       </processor>
-       <!-- isolate <code_origine_uniq> -->
-       <processor class="solr.RegexReplaceProcessorFactory">
-            <str name="fieldName">code_origine_p1</str>
-            <str name="pattern">^(((?!::).)+)::(((?!::).)+)(::)?(.*)?$</str>
-            <str name="replacement">$3</str>
-            <bool name="literalReplacement">false</bool>
-       </processor>
-       <!-- isolate <code_origine_uniq> -->
-       <processor class="solr.RegexReplaceProcessorFactory">
-            <str name="fieldName">code_origine_p1</str>
-            <str name="pattern">^(((?!\\\\).)+)(.*)$</str>
-            <str name="replacement">$1</str>
-            <bool name="literalReplacement">false</bool>
-       </processor>
-       <processor class="solr.CloneFieldUpdateProcessorFactory">
-            <arr name="source">
-                <str>rtbf.code_origine.supportseq</str>
-                <str>rtbf.code_origine.supportprog</str>
-            </arr>
-            <str name="dest">code_origine_p2</str>
-       </processor>
-       <!-- isolate <support_place> -->
-       <processor class="solr.RegexReplaceProcessorFactory">
-            <str name="fieldName">code_origine_p2</str>
-            <str name="pattern">^Fichier Sonuma::(((?!::).)+)(::)?(.*)?$</str>
-            <str name="replacement"></str>
-            <bool name="literalReplacement">false</bool>
-       </processor>
-       <processor class="solr.RegexReplaceProcessorFactory">
-            <str name="fieldName">code_origine_p2</str>
-            <str name="pattern">^(((?!::).)+)::(((?!::).)+)(::)?(.*)?$</str>
-            <str name="replacement">$6</str>
-            <bool name="literalReplacement">false</bool>
-       </processor>
-       <processor class="solr.RemoveBlankFieldUpdateProcessorFactory">
-            <str name="fieldName">code_origine_p2</str>
-       </processor>
-       <processor class="solr.CloneFieldUpdateProcessorFactory">
-            <arr name="source">
-                <str>code_origine_p1</str>
-                <str>code_origine_p2</str>
-            </arr>
-            <str name="dest">code_origine</str>
-       </processor>
+    <!-- Add field role only -->
+    <processor class="solr.CloneFieldUpdateProcessorFactory">
+        <str name="source">rtbf.type_plus_set</str>
+        <str name="dest">set_keyword</str>
+    </processor>
+    <processor class="solr.RegexReplaceProcessorFactory">
+        <str name="fieldName">set_keyword</str>
+        <str name="pattern">(.+)::(.*)</str>
+        <str name="replacement">$2</str>
+        <bool name="literalReplacement">false</bool>
+    </processor>
     <!-- -->
     <processor class="solr.LogUpdateProcessorFactory" />
     <processor class="solr.RunUpdateProcessorFactory" />

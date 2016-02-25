@@ -109,10 +109,8 @@
                 <ref bean="searchFilterIssued" />
                 <ref bean="searchFilterSubject" />
                 <ref bean="searchFilterPlace" />
-                <ref bean="searchFilterImage" />
-                <ref bean="searchFilterSound" />
-                <ref bean="searchFilterTypeSupport" />
-                <!-- ref bean="searchFilterCodeOrigine" /-->
+                <ref bean="searchFilterSetSupport" />
+                <ref bean="searchFilterPublisher" />
             </list>
         </property>
         <!-- Set TagCloud configuration per discovery configuration -->
@@ -133,8 +131,9 @@
                 <ref bean="searchFilterPlace" />
                 <ref bean="searchFilterImage" />
                 <ref bean="searchFilterSound" />
-                <ref bean="searchFilterTypeSupport" />
                 <ref bean="searchFilterCodeOrigine" />
+                <ref bean="searchFilterPublisher" />
+                <ref bean="searchFilterSetSupport" />
             </list>
         </property>
         <!--The sort filters for the discovery search-->
@@ -235,10 +234,8 @@
                 <ref bean="searchFilterIssued" />
                 <ref bean="searchFilterSubject" />
                 <ref bean="searchFilterPlace" />
-                <ref bean="searchFilterImage" />
-                <ref bean="searchFilterSound" />
-                <ref bean="searchFilterTypeSupport" />
-                <!-- ref bean="searchFilterCodeOrigine" /-->
+                <ref bean="searchFilterSetSupport" />
+                <ref bean="searchFilterPublisher" />
             </list>
         </property>
         <!-- Set TagCloud configuration per discovery configuration -->
@@ -259,8 +256,9 @@
                 <ref bean="searchFilterPlace" />
                 <ref bean="searchFilterImage" />
                 <ref bean="searchFilterSound" />
-                <ref bean="searchFilterTypeSupport" />
                 <ref bean="searchFilterCodeOrigine" />
+                <ref bean="searchFilterPublisher" />
+                <ref bean="searchFilterSetSupport" />
             </list>
         </property>
         <!--The sort filters for the discovery search (same as defaultConfiguration above)-->
@@ -520,9 +518,11 @@
         <property name="indexFieldName" value="code_origine"/>
         <property name="metadataFields">
             <list>
+                <value>rtbf.code_origine.supportseq</value>
+                <value>rtbf.code_origine.supportprog</value>
                 <!-- This filter is not indexed directly from a DB metadata field, its exists already in solr index -->
                 <!-- code_origine, code_origine_keyword, code_origine_partial exists already as solr fields -->
-                <value>none</value>
+                <!-- value>none</value -->
            </list>
         </property>
     </bean>
@@ -540,7 +540,7 @@
     </bean>
 
     <!-- Lan 27.07.2015 - add rtbf.matter -->
-    <bean id="searchFilterSubject" class="org.dspace.discovery.configuration.HierarchicalSidebarFacetConfiguration">
+    <bean id="searchFilterSubject" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
         <property name="indexFieldName" value="subject"/>
         <property name="metadataFields">
             <list>
@@ -550,7 +550,6 @@
         </property>
         <property name="facetLimit" value="10"/>
         <property name="sortOrder" value="COUNT"/>
-        <property name="splitter" value="::"/>
     </bean>
 
     <bean id="searchFilterIssued" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
@@ -633,6 +632,7 @@
     </bean>
 
     <!-- Lan 04.10.2015 - add this filter to advanced search -->
+    <!-- Lan 20.02.2016 - remove
     <bean id="searchFilterTypeSupport" class="org.dspace.discovery.configuration.HierarchicalSidebarFacetConfiguration">
         <property name="indexFieldName" value="typesupport"/>
         <property name="metadataFields">
@@ -645,7 +645,34 @@
         <property name="splitter" value="::"/>
         <property name="skipFirstNodeLevel" value="false"/>
     </bean>
+    -->
+    <!-- Lan 24.02.2016 - add set only filter to advanced search -->
+    <bean id="searchFilterSetSupport" class="org.dspace.discovery.configuration.HierarchicalSidebarFacetConfiguration">
+        <property name="indexFieldName" value="set_support"/>
+        <property name="metadataFields">
+            <list>
+                <value>rtbf.type_plus_set</value>
+           </list>
+        </property>
+        <property name="facetLimit" value="10"/>
+        <property name="sortOrder" value="COUNT"/>
+        <property name="splitter" value="::"/>
+        <property name="skipFirstNodeLevel" value="true"/>
+    </bean>
     
+    <!-- Lan 20.02.2016 - add this filter to advanced search -->
+    <bean id="searchFilterPublisher" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
+        <property name="indexFieldName" value="publisher"/>
+        <property name="metadataFields">
+            <list>
+                <value>dc.publisher</value>
+           </list>
+        </property>
+        <property name="facetLimit" value="10"/>
+        <property name="sortOrder" value="COUNT"/>
+    </bean>
+    
+        
     <!--Sort properties-->
     <bean id="sortTitle" class="org.dspace.discovery.configuration.DiscoverySortFieldConfiguration">
         <property name="metadataField" value="dc.title"/>

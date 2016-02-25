@@ -202,21 +202,25 @@ public class SearchResponseParts {
  			Map<String, List<FacetResult>> m = queryResults.getFacetResults();
 			for (Map.Entry<String, List<FacetResult>> mEntry : m.entrySet()) {
 				List<Entry> entries = new ArrayList<Entry>();
+				String[] keyParts = mEntry.getKey().split(":");
+				String facetKey = keyParts[0];
+				String fqField = keyParts[keyParts.length-1];
 				for (FacetResult f : mEntry.getValue()) {
+					
 					Entry e = new Entry();
 					e.key = f.getDisplayedValue();
 					e.count = f.getCount();
-					e.fq = new Filter(mEntry.getKey(), f.getFilterType(), f.getAsFilterQuery());
-					if (mEntry.getKey().endsWith(Resource._DT)) { /* is a date math filter, then filter value is a preformatted range */
+					e.fq = new Filter(fqField, f.getFilterType(), f.getAsFilterQuery());
+					if (facetKey.endsWith(Resource._DT)) { /* is a date math filter, then filter value is a preformatted range */
 						String[] dtMath = Resource._DTMATH.get(f.getAsFilterQuery()); 
 						if (dtMath != null) { /* dtMath[1] is the preformatted range */
-							e.fq = new Filter(mEntry.getKey(), f.getFilterType(), dtMath[1]);
+							e.fq = new Filter(fqField, f.getFilterType(), dtMath[1]);
 						}
 					}
 										
 					entries.add(e);
 				}
-				this.facetEntries.put(mEntry.getKey(), entries);
+				this.facetEntries.put(facetKey, entries);
 			}					
  		}
 

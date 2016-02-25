@@ -8,10 +8,7 @@
 package org.dspace.rtbf.rest.search;
 
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -125,6 +122,9 @@ public abstract class Resource
         // Filter the facet results : ok if match with all patterns
         for (ListIterator<FacetResult> it = facets.listIterator(); it.hasNext();) {
             String facetVal = it.next().getSortValue();
+            // Remove diacritic
+            facetVal = OrderFormat.makeSortString(facetVal, null, OrderFormat.TEXT);
+
             for(Pattern pattern : patterns){
                 if (!pattern.matcher(facetVal).find()) {
                     it.remove();
@@ -149,9 +149,11 @@ public abstract class Resource
                 
         DiscoverQuery query = new DiscoverQuery();
 
-        DiscoverFacetField dff = new DiscoverFacetField(facetField,
-                DiscoveryConfigurationParameters.TYPE_AC, -1,
+	    DiscoverFacetField dff = new DiscoverFacetField("{!key="+facetField+"}"+facetField+"_keyword",
+                DiscoveryConfigurationParameters.TYPE_STANDARD,
+                org.dspace.rtbf.rest.common.Constants.LIMITMAX,
                 DiscoveryConfigurationParameters.SORT.VALUE);
+
         query.addFacetField(dff);
         query.setFacetMinCount(1);
         query.setMaxResults(0);
@@ -174,7 +176,7 @@ public abstract class Resource
 
            context.complete();
         } catch (Exception e) {
-          processException("Could not process authors. Message:"+e.getMessage(), context);
+          processException("Could not process getSimpleNodes. Message:"+e.getMessage(), context);
         } finally {
           processFinally(context);            
         }
@@ -283,6 +285,7 @@ public abstract class Resource
     		int facetLimit = searchRequest.getFacetLimit();
     		int facetOffset = searchRequest.getFacetOffset() * facetLimit;
     		
+    		// Facet on <f>_keyword
             String[][] facetFields = { {"matter","subject_keyword"}, {"place","place_keyword"} };
     		for (String[] keyword : facetFields) {
     	        DiscoverFacetField dff = new DiscoverFacetField("{!key="+keyword[0]+"}"+keyword[1]
@@ -294,10 +297,14 @@ public abstract class Resource
     	        query.setFacetMinCount(1);
     		}
 
-	        String[] rolePrefix = { "Journaliste", "Pr\u00e9sentateur", "Intervenant" };
+
+    		// Facet on role_contributor_filter with facet prefixes
+    		String[] rolePrefix = { "Journaliste", "Pr\u00e9sentateur", "Intervenant" };
     		for (String role : rolePrefix) {
-		        DiscoverFacetField dff = new DiscoverFacetField("{!key="+role+" facet.prefix="+role+"/}role_keyword"
-		                , DiscoveryConfigurationParameters.TYPE_STANDARD
+    			// remove diacritic + lower case
+    			String prefix = OrderFormat.makeSortString(role, null, OrderFormat.TEXT);
+    			DiscoverFacetField dff = new DiscoverFacetField("{!key="+role+":contributor_keyword"+"_filter"+" facet.prefix="+prefix+"/}role_contributor"
+		                , DiscoveryConfigurationParameters.TYPE_TEXT // TYPE_TEXT has effects : add _filter to role_contributor to process; remove _filter from key after processing
 		                , /* facet limit  */ facetLimit
 		                , /* facet sort   */ DiscoveryConfigurationParameters.SORT.COUNT
 		                , /* facet offset */ facetOffset);

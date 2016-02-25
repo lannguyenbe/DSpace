@@ -275,7 +275,8 @@
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_fr.txt" format="snowball" enablePositionIncrements="true" />
         <filter class="solr.ICUFoldingFilterFactory"/>
         <filter class="solr.SnowballPorterFilterFactory" language="French" protected="lang/protwords_fr.txt"/>
-        <!-- filter class="solr.RemoveDuplicatesTokenFilterFactory"/-->
+        <!-- filter class="solr.RemoveDuplicatesTokenFilterFactory"/--> <!-- Lan 23.02.2016 : uncomment, why is it comment ? -->
+        <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
       </analyzer>
       <analyzer type="query">
         <tokenizer class="solr.StandardTokenizerFactory"/>
@@ -304,6 +305,26 @@
         <filter class="solr.PatternReplaceFilterFactory" pattern="^(.{12})(.*)?" replacement="$1" replace="all"/>
       </analyzer>
     </fieldType>
+    
+    <!-- Lan text_contain 23.02.2016 -->
+    <!-- this is fieldtype for fields <f>_contain which are used when filter query with contains operator,
+         <f> field which is type "text" is not successful with contains operator when there are synonyms 
+    -->
+   	<fieldType name="text_contain" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="index">
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.ElisionFilterFactory" ignoreCase="true" articles="lang/contractions_fr.txt"/>
+        <filter class="solr.ICUFoldingFilterFactory"/>
+        <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.ElisionFilterFactory" ignoreCase="true" articles="lang/contractions_fr.txt"/>
+        <filter class="solr.ICUFoldingFilterFactory"/>
+        <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
     
     <!-- Less flexible matching, but less false matches.  Probably not ideal for product names,
          but may be good for SKUs.  Can insert dashes in the wrong place and still match. -->
@@ -667,6 +688,7 @@
      <!-- Lan - partial using ngram -->
      <!-- dynamicField name="*_partial" type="text" indexed="true" stored="true" multiValued="true" omitNorms="true" /-->
      <dynamicField name="*_partial" type="text_edge" indexed="true" stored="true" multiValued="true" omitNorms="true" />
+     <dynamicField name="*_contain" type="text_contain" indexed="true" stored="true" multiValued="true" omitNorms="true" />
      
      <!--Dynamic field used for hit highlighting-->
      <dynamicField name="*_hl" type="text" indexed="true" stored="true" multiValued="true" omitNorms="true"/>
@@ -797,22 +819,11 @@
  -->
  
 <!-- Lan ************************************************************************************ -->
-<!-- Lan 12.02.2016 : support for search on support reference : code_origine and place -->
-   <!--
-   <field name="rtbf.code_origine.supportseq" type="text" indexed="true" stored="true" multiValued="true"/>
-   <field name="rtbf.code_origine.supportprog" type="text" indexed="true" stored="true" multiValued="true"/>
-   <field name="code_origine_p1" type="text" indexed="true" stored="true" multiValued="true"/>
-   <field name="code_origine_p2" type="text" indexed="true" stored="true" multiValued="true"/>
-   -->
-   <field name="code_origine_p1" type="text" indexed="false" stored="false" multiValued="true"/>
-   <field name="code_origine_p2" type="text" indexed="false" stored="false" multiValued="true"/>
-   <field name="code_origine" type="code_origine_text_sku" indexed="true" stored="true" multiValued="true"/>
+<!-- Lan 12.02.2016 : search on support reference : code_origine and place -->
+   <field name="code_origine_contain" type="code_origine_text_sku" indexed="true" stored="true" multiValued="true"/>
    <field name="code_origine_partial" type="text_sku_edge" indexed="true" stored="true" multiValued="true"/>
    <field name="code_origine_keyword" type="keywordFilter" indexed="true" stored="true" multiValued="true" omitNorms="true" />
 
-   <copyField source="code_origine" dest="code_origine_keyword"/>
-   <copyField source="code_origine" dest="code_origine_partial"/>
-   
     <fieldType name="code_origine_text_sku" class="solr.TextField" positionIncrementGap="100" autoGeneratePhraseQueries="true">
       <analyzer type="index">
         <!-- char among ;,+()[] as token separator -->       
@@ -848,7 +859,7 @@
         <filter class="solr.PatternReplaceFilterFactory" pattern="^(.{25})(.*)?" replacement="$1" replace="all"/>
       </analyzer>
     </fieldType>
-   
+       
 <!-- Lan ************************************************************************************ -->
 
 

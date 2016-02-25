@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.Vector;
 
@@ -1764,32 +1765,45 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                         }
                         
 
-                        /* Lan code_origine test ******************************************/
+                        /* Lan code_origine hardcode ! ******************************************/
                         if (field.equals("rtbf.code_origine.supportseq") || field.equals("rtbf.code_origine.supportprog")) {
                         	/* isolate code_origine part */
-                        	String value_p1 = meta.value.replaceAll("^(((?!::).)+)::(((?!::).)+)(::)?(.*)?$", "$3").replaceAll("^(((?!\\\\\\\\).)+)(.*)$", "$1");
+                        	String value_p1 = value.replaceAll("^(((?!::).)+)::(((?!::).)+)(::)?(.*)?$", "$3").replaceAll("^(((?!\\\\\\\\).)+)(.*)$", "$1");
                             doc.addField(searchFilter.getIndexFieldName(), value_p1);
                             doc.addField(searchFilter.getIndexFieldName() + "_keyword", value_p1);
+                            doc.addField(searchFilter.getIndexFieldName() + "_contain", value_p1);
                             doc.addField(searchFilter.getIndexFieldName() + "_partial", value_p1);
                         	
                         	/* isolate place part */
-                        	String value_p2 = meta.value.replaceAll("^Fichier Sonuma.*$", "").replaceAll("^(((?!::).)+)::(((?!::).)+)(::)?(.*)?$", "$6");
+                        	String value_p2 = value.replaceAll("^Fichier Sonuma.*$", "").replaceAll("^(((?!::).)+)::(((?!::).)+)(::)?(.*)?$", "$6");
                         	if (!value_p2.isEmpty()) {
                         		doc.addField(searchFilter.getIndexFieldName(), value_p2);
                         		doc.addField(searchFilter.getIndexFieldName() + "_keyword", value_p2);
+                                doc.addField(searchFilter.getIndexFieldName() + "_contain", value_p2);
                         		doc.addField(searchFilter.getIndexFieldName() + "_partial", value_p2);
                         	}
                         	
                         	continue;
                         }
-                        
-                        /* Lan code_origine test ******************************************/
+                        /* Lan code_origine hardcode ! ******************************************/
+
+                        /* Lan rtbf.contributor_plus_role hardcode ! ******************************************/
+                        /* create role_contributor_filter solr field for prefix facetting */
+                        if (field.equals("rtbf.contributor_plus_role")) {
+                        	/* permute role before contributor */
+                        	String value_p1 = value.replaceAll("^(.+)/(.+)$", "$2/$1");
+                            // Remove diacritic + lower case
+                            String value_p2 = OrderFormat.makeSortString(value_p1, null, OrderFormat.TEXT);
+                        	doc.addField("role_"+searchFilter.getIndexFieldName() + "_filter", value_p2 + separator + value);
+
+                        }
+                        /* Lan rtbf.contributor_plus_role hardcode ! ******************************************/
 
                         doc.addField(searchFilter.getIndexFieldName(), value);
                         doc.addField(searchFilter.getIndexFieldName() + "_keyword", value);
-                        // Lan
-                        doc.addField(searchFilter.getIndexFieldName() + "_partial", value);
-                        
+                        // Lan add those following solr fields
+                        doc.addField(searchFilter.getIndexFieldName() + "_contain", value);
+                        doc.addField(searchFilter.getIndexFieldName() + "_partial", value);                        	
 
                         if (authority != null && preferedLabel == null)
                         {
@@ -1919,7 +1933,9 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                             {
                                 HierarchicalSidebarFacetConfiguration hierarchicalSidebarFacetConfiguration = (HierarchicalSidebarFacetConfiguration) searchFilter;
                                 String[] subValues = value.split(hierarchicalSidebarFacetConfiguration.getSplitter());
-                                if(hierarchicalSidebarFacetConfiguration.isSkipFirstNodeLevel() && 1 < subValues.length)
+                                // Lan 24.02.2015 : skip first node even the following node is null
+                                // if(hierarchicalSidebarFacetConfiguration.isSkipFirstNodeLevel() && 1 < subValues.length)
+                                if(hierarchicalSidebarFacetConfiguration.isSkipFirstNodeLevel() && 1 <= subValues.length)
                                 {
                                     //Remove the first element of our array
                                     subValues = (String[]) ArrayUtils.subarray(subValues, 1, subValues.length);
@@ -2868,12 +2884,19 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 if (isIndexed) { filterQuery.append("_keyword"); }
             }
             // Lan
+            /*
             else if ("contains".equals(operator))
             {
                 //Query the partial n-gram field !
                 if (isIndexed) { filterQuery.append("_partial"); }
             }
-            else if ("authority".equals(operator))
+            */
+            else if ("contains".equals(operator))
+            {
+                //Query the partial n-gram field !
+                if (isIndexed) { filterQuery.append("_contain"); }
+            }
+             else if ("authority".equals(operator))
             {
                 //Query the authority indexed field !
                 if (isIndexed) { filterQuery.append("_authority"); }
@@ -2908,8 +2931,24 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 //DO NOT ESCAPE RANGE QUERIES !
                 if(!value.matches("\\[.*TO.*\\]"))
                 {
+/*                	
+                    StringTokenizer tokens = new StringTokenizer(value, " ");
                 	value = ClientUtils.escapeQueryChars(value);
-                    filterQuery.append("(").append(value).append(")");
+                	if (tokens.countTokens() > 1) {
+                        filterQuery.append("\"").append(value).append("\"~9");                		
+                	} else {
+                        filterQuery.append(value);                		
+                		
+                	}
+*/                	
+                	String[] tokens = value.split("\\W+");
+                	value = ClientUtils.escapeQueryChars(value);
+                	if (tokens.length > 1) {
+                        filterQuery.append("\"").append(value).append("\"~9");                		
+                	} else {
+                        filterQuery.append(value);                		
+                		
+                	}
                 }
                 else
                 {
@@ -2922,11 +2961,13 @@ public class SolrServiceImpl implements SearchService, IndexingService {
              * 		compare {!q.op=AND}codeorigine_partial:DAL6140382 versus codeorigine_partial:DAL6140382
              * subquery _query_ is mandatory for join request in requestHandler /selectCollection and /selectCommunity
              */
+            /*
             if ("contains".equals(operator) || "notcontains".equals(operator)) {
             	// filterQuery.insert(0,"{!q.op=AND}");
             	filterQuery.insert(0,"_query_:\"{!q.op=AND}");
             	filterQuery.append("\"");
             }
+            */
         }
 
         result.setDisplayedValue(transformDisplayedValue(context, field, value));

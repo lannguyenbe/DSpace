@@ -28,6 +28,12 @@ public class RsApplication extends Application {
         set.add(SequencesResource.class);
         set.add(EpisodesResource.class);
         set.add(SeriesResource.class);
+        // LOV
+        set.add(AuthorsResource.class);
+        set.add(SubjectsResource.class);
+        set.add(PlacesResource.class);
+        set.add(IsPartOfTitlesResource.class);
+        set.add(codeOriginesResource.class);
         return set;
 	}
 

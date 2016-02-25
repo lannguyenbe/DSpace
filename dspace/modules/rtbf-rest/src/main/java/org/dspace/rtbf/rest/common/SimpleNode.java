@@ -6,12 +6,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class SimpleNode {
     
     public enum Attribute {
-        TITLE, NAME, SUBJECT
+        TITLE, NAME, KEY
     }
 	
 	private String title;
     private String name;
-    private String subject;
+    private String key;
 	
 	public SimpleNode() {}
 	
@@ -27,8 +27,8 @@ public class SimpleNode {
         return this.name;
     }
 
-    public String getSubject() {
-        return this.subject;
+    public String getKey() {
+        return this.key;
     }
 
     public void setTitle(String s) {
@@ -39,8 +39,8 @@ public class SimpleNode {
         this.name = s;
     }
     
-    public void setSubject(String s) {
-        this.subject = s;
+    public void setKey(String s) {
+        this.key = s;
     }
 
     public SimpleNode setAttribute(Attribute name, String val) {
@@ -51,8 +51,8 @@ public class SimpleNode {
         case NAME:
             this.name = val;
             break;
-        case SUBJECT:
-            this.subject = val;
+        case KEY:
+            this.key = val;
             break;
         default:
             break;

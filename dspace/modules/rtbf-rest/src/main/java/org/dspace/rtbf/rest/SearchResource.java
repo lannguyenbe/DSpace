@@ -169,7 +169,7 @@ public class SearchResource extends Resource {
             	if (isFacet) { expand += ",facets"; }
             }
             queryResults = getQueryResult(org.dspace.core.Constants.ITEM, context, searchRequest);
-           response = new SequencesSearchResponse(queryResults, expand, context, limit, offset);
+            response = new SequencesSearchResponse(queryResults, expand, context, limit, offset);
 
             context.complete();
 
