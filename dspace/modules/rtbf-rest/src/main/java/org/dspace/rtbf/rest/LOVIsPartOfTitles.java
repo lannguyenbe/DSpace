@@ -17,12 +17,12 @@ import org.apache.log4j.Logger;
 import org.dspace.rtbf.rest.common.SimpleNode;
 import org.dspace.rtbf.rest.search.Resource;
 
-@Path("/places")
-public class PlacesResource extends Resource {
-    private static Logger log = Logger.getLogger(SubjectsResource.class);
+@Path("/ispartof_titles")
+public class LOVIsPartOfTitles extends Resource {
+    private static Logger log = Logger.getLogger(LOVIsPartOfTitles.class);
     
-    public static final String FACETFIELD = "place";
-    public static final SimpleNode.Attribute ELEMENT = SimpleNode.Attribute.KEY;
+    public static final String FACETFIELD = "ispartof_title";
+    public static final SimpleNode.Attribute ELEMENT = SimpleNode.Attribute.TITLE;
 
     
     /**
@@ -38,9 +38,10 @@ public class PlacesResource extends Resource {
             @Context HttpHeaders headers, @Context HttpServletRequest request)
     throws WebApplicationException
     {
-        log.info("Reading places.(pt=" + partialTerms + ").");
+        log.info("Reading series titles.(pt=" + partialTerms + ").");
 
         return(getSimpleNodes(FACETFIELD, ELEMENT, partialTerms, headers, request));
     }
     
 }
+

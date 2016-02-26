@@ -17,11 +17,11 @@ import org.apache.log4j.Logger;
 import org.dspace.rtbf.rest.common.SimpleNode;
 import org.dspace.rtbf.rest.search.Resource;
 
-@Path("/code_origines")
-public class codeOriginesResource extends Resource {
-    private static Logger log = Logger.getLogger(AuthorsResource.class);
+@Path("/places")
+public class LOVPlaces extends Resource {
+    private static Logger log = Logger.getLogger(LOVPlaces.class);
     
-    public static final String FACETFIELD = "code_origine";
+    public static final String FACETFIELD = "place";
     public static final SimpleNode.Attribute ELEMENT = SimpleNode.Attribute.KEY;
 
     
@@ -38,10 +38,9 @@ public class codeOriginesResource extends Resource {
             @Context HttpHeaders headers, @Context HttpServletRequest request)
     throws WebApplicationException
     {
-        log.info("Reading supports code_origine.(pt=" + partialTerms + ").");
+        log.info("Reading places.(pt=" + partialTerms + ").");
 
         return(getSimpleNodes(FACETFIELD, ELEMENT, partialTerms, headers, request));
     }
     
 }
-

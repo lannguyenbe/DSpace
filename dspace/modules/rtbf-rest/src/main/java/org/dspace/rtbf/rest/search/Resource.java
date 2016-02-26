@@ -52,8 +52,6 @@ public abstract class Resource
 
     private static Logger log = Logger.getLogger(Resource.class);
     
-    private static final int FACETLIMIT = 100;
-    
     /**
      * Process exception, print message to logger error stream and abort DSpace
      * context.
@@ -192,7 +190,7 @@ public abstract class Resource
             results = new ArrayList<SimpleNode>();          
             for (FacetResult facet : facets) {
                 results.add(new SimpleNode().setAttribute(name, facet.getDisplayedValue()));
-                if (results.size() > FACETLIMIT)
+                if (results.size() > org.dspace.rtbf.rest.common.Constants.DEFAULT_LOV_RPP)
                     break;
             }
             return results;

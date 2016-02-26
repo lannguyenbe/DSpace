@@ -17,11 +17,11 @@ import org.apache.log4j.Logger;
 import org.dspace.rtbf.rest.common.SimpleNode;
 import org.dspace.rtbf.rest.search.Resource;
 
-@Path("/")
-public class SubjectsResource extends Resource {
-    private static Logger log = Logger.getLogger(SubjectsResource.class);
+@Path("/publishers")
+public class LOVPublishers extends Resource {
+    private static Logger log = Logger.getLogger(LOVPublishers.class);
     
-    public static final String FACETFIELD = "subject";
+    public static final String FACETFIELD = "publisher";
     public static final SimpleNode.Attribute ELEMENT = SimpleNode.Attribute.KEY;
 
     
@@ -32,14 +32,13 @@ public class SubjectsResource extends Resource {
      * @return String that will be returned as a text/plain response.
      */
     @GET
-    @Path("{alternatePaths: subjects|matters}")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public List<SimpleNode> getNames(
             @QueryParam("pt") @DefaultValue("") String partialTerms,
             @Context HttpHeaders headers, @Context HttpServletRequest request)
     throws WebApplicationException
     {
-        log.info("Reading subjects.(pt=" + partialTerms + ").");
+        log.info("Reading publishers.(pt=" + partialTerms + ").");
 
         return(getSimpleNodes(FACETFIELD, ELEMENT, partialTerms, headers, request));
     }

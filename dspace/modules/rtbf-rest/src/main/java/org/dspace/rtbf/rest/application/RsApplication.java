@@ -29,11 +29,12 @@ public class RsApplication extends Application {
         set.add(EpisodesResource.class);
         set.add(SeriesResource.class);
         // LOV
-        set.add(AuthorsResource.class);
-        set.add(SubjectsResource.class);
-        set.add(PlacesResource.class);
-        set.add(IsPartOfTitlesResource.class);
-        set.add(codeOriginesResource.class);
+        set.add(LOVAuthors.class);
+        set.add(LOVSubjects.class);
+        set.add(LOVPlaces.class);
+        set.add(LOVIsPartOfTitles.class);
+        set.add(LOVCodeOrigines.class);
+        set.add(LOVPublishers.class);
         return set;
 	}
 

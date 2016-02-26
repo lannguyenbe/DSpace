@@ -17,12 +17,12 @@ import org.apache.log4j.Logger;
 import org.dspace.rtbf.rest.common.SimpleNode;
 import org.dspace.rtbf.rest.search.Resource;
 
-@Path("/ispartof_titles")
-public class IsPartOfTitlesResource extends Resource {
-    private static Logger log = Logger.getLogger(AuthorsResource.class);
+@Path("/")
+public class LOVCodeOrigines extends Resource {
+    private static Logger log = Logger.getLogger(LOVCodeOrigines.class);
     
-    public static final String FACETFIELD = "ispartof_title";
-    public static final SimpleNode.Attribute ELEMENT = SimpleNode.Attribute.TITLE;
+    public static final String FACETFIELD = "code_origine";
+    public static final SimpleNode.Attribute ELEMENT = SimpleNode.Attribute.KEY;
 
     
     /**
@@ -32,16 +32,31 @@ public class IsPartOfTitlesResource extends Resource {
      * @return String that will be returned as a text/plain response.
      */
     @GET
+    @Path("code_origines")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    public List<SimpleNode> getNames(
+    public List<SimpleNode> getCodeOrigines(
             @QueryParam("pt") @DefaultValue("") String partialTerms,
             @Context HttpHeaders headers, @Context HttpServletRequest request)
     throws WebApplicationException
     {
-        log.info("Reading series titles.(pt=" + partialTerms + ").");
+        log.info("Reading supports code_origines.(pt=" + partialTerms + ").");
 
         return(getSimpleNodes(FACETFIELD, ELEMENT, partialTerms, headers, request));
     }
     
+    @GET
+    @Path("sets")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public List<SimpleNode> getSets(
+            @QueryParam("pt") @DefaultValue("") String partialTerms,
+            @Context HttpHeaders headers, @Context HttpServletRequest request)
+    throws WebApplicationException
+    {
+    	partialTerms = ""; // results are always the same list; arg pt= is ignored
+        log.info("Reading support sets.(pt=" + partialTerms + ").");
+
+        return(getSimpleNodes("set", SimpleNode.Attribute.KEY, partialTerms, headers, request));
+    }
+
 }
 
