@@ -20,6 +20,7 @@ public class SearchParameters implements Request {
 //public class SearchParameters {
 
 	private String scope;
+	private String[] scopes;
 	private String q;
 	private int limit = Constants.DEFAULT_RPP;
 	private int offset = 0;
@@ -28,9 +29,9 @@ public class SearchParameters implements Request {
 	private String order = Constants.DEFAULT_ORDER;
 	@JsonProperty("facet")
 	private boolean isFacet = false;
-	@JsonProperty("facet.limit")
+	@JsonProperty("facet_limit")
 	private int facetLimit = Constants.DEFAULT_FACET_RPP;
-	@JsonProperty("facet.offset")
+	@JsonProperty("facet_offset")
 	private int facetOffset = Constants.DEFAULT_FACET_OFFSET;
 	@JsonProperty("highlight")
 	private boolean isHighlight = true;
@@ -41,11 +42,29 @@ public class SearchParameters implements Request {
 	private List<Map<String, String>> filters = new ArrayList<Map<String, String>> ();
 
 	public String getScope() {
-		return scope;
+		if (scope != null) {
+			return scope;
+		} else if (scopes != null && scopes.length > 0) {
+			StringBuffer sb = new StringBuffer();;
+			for (String str : scopes) {
+				sb.append(str);
+				sb.append(' ');
+			}
+			return(sb.toString());
+		}
+		return(null);
 	}
 
 	public void setScope(String scope) {
 		this.scope = scope;
+	}
+
+	public String[] getScopes() {
+		return scopes;
+	}
+
+	public void setScopes(String[] scopes) {
+		this.scopes = scopes;
 	}
 
 	public String getQ() {
@@ -159,8 +178,8 @@ public class SearchParameters implements Request {
 		if ((str = mvm.getFirst("sort-by")) != null && str.length() > 0) { this.sortBy = str;}
 		if ((str = mvm.getFirst("order")) != null && str.length() > 0) { this.order = str;}
 		if ((str = mvm.getFirst("facet")) != null && str.length() > 0) { this.isFacet = Boolean.parseBoolean(str);}
-		if ((str = mvm.getFirst("facet.limit")) != null && str.length() > 0) { this.facetLimit = Integer.parseInt(str);}
-		if ((str = mvm.getFirst("facet.offset")) != null && str.length() > 0) { this.facetOffset = Integer.parseInt(str);}
+		if ((str = mvm.getFirst("facet_limit")) != null && str.length() > 0) { this.facetLimit = Integer.parseInt(str);}
+		if ((str = mvm.getFirst("facet_offset")) != null && str.length() > 0) { this.facetOffset = Integer.parseInt(str);}
 		if ((str = mvm.getFirst("highlight")) != null && str.length() > 0) { this.isHighlight = Boolean.parseBoolean(str);}
 		if ((str = mvm.getFirst("snippet")) != null && str.length() > 0) { this.isSnippet = Boolean.parseBoolean(str);}
 		if ((str = mvm.getFirst("expand")) != null && str.length() > 0) { this.expand = str;}

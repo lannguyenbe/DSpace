@@ -52,7 +52,7 @@ public class SearchResource extends Resource {
     		, @QueryParam("limit") Integer limit, @QueryParam("offset") Integer offset
     		, @QueryParam("sort-by") String orderBy, @QueryParam("order") String order
     		, @QueryParam("facet") Boolean isFacet
-    		, @QueryParam("facet.limit") Integer facetLimit, @QueryParam("facet.offset") Integer facetOffset
+    		, @QueryParam("facet_limit") Integer facetLimit, @QueryParam("facet_offset") Integer facetOffset
     		, @QueryParam("highlight") Boolean isHighlight 
     		, @QueryParam("snippet") Boolean isSnippet
     		, @QueryParam("expand") String expand

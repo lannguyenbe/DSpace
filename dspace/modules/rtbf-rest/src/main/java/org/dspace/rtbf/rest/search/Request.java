@@ -2,6 +2,7 @@ package org.dspace.rtbf.rest.search;
 
 import java.util.List;
 import java.util.Map;
+
 import org.dspace.discovery.DiscoverQuery.SORT_ORDER;
 
 public interface Request {
@@ -12,6 +13,8 @@ public interface Request {
 	public String getScope();
 	public void setScope(String scope);
 
+	public String[] getScopes();
+	public void setScopes(String[] scope);
 
 	public String getQuery();
 	public void setQuery(String query);

@@ -215,6 +215,7 @@ public abstract class Resource
         // limit the search within community/collection
         String scope = searchRequest.getScope();
     	if (scope != null) { // scope contains logical expression of handles
+    		
     		// a. Replace handle by m{community_id} or l{collection_id}
     		StringBuffer sb = new StringBuffer();    		
     		Pattern pattern = Pattern.compile("\\d+/\\d+");
@@ -249,8 +250,11 @@ public abstract class Resource
     		}
 
     		// b. Add filter query
-    		query.addFilterQueries("{!q.op=OR}" + "location:(" + sb.toString() + ")");
+    		if (sb.length() > 0) {
+    			query.addFilterQueries("{!q.op=OR}" + "location:(" + sb.toString() + ")");
+    		}
     	}
+    	
 
     	// Pagination
     	query.setMaxResults(searchRequest.getLimit());

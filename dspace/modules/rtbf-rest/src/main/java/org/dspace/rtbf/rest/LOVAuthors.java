@@ -1,5 +1,6 @@
 package org.dspace.rtbf.rest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
 import org.dspace.rtbf.rest.common.SimpleNode;
+import org.dspace.rtbf.rest.common.Constants;
 import org.dspace.rtbf.rest.search.Resource;
 
 /**
@@ -32,24 +34,35 @@ public class LOVAuthors extends Resource {
     @Path("{alternatePaths: authors|contributors/names}")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public List<SimpleNode> getNames(
-            @QueryParam("pt") @DefaultValue("") String partialTerms,
+    		@QueryParam("pt") @DefaultValue(Constants.LOV_ALL) String pt,
             @Context HttpHeaders headers, @Context HttpServletRequest request)
     throws WebApplicationException
     {
+        String partialTerms = pt.trim();
+        if (partialTerms.isEmpty()) {
+        	return(new ArrayList<SimpleNode>());
+        } else if (partialTerms.equals(Constants.LOV_ALL)) {
+        	partialTerms = "";
+        }
+        
         log.info("Reading contributor name.(pt=" + partialTerms + ").");
-
         return(getSimpleNodes(FACETFIELD, ELEMENT, partialTerms, headers, request));
     }
     
     @GET
-    @Path("{alternatePaths: roles|contributors/roles}")
+    @Path("contributors/roles")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public List<SimpleNode> getRoles(
-            @QueryParam("pt") @DefaultValue("") String partialTerms,
+            @QueryParam("pt") @DefaultValue(Constants.LOV_ALL) String pt,
             @Context HttpHeaders headers, @Context HttpServletRequest request)
     throws WebApplicationException
     {
-    	partialTerms = ""; // results are always the same list
+        String partialTerms = pt.trim();
+        if (partialTerms.isEmpty()) {
+        	return(new ArrayList<SimpleNode>());
+        }
+
+        partialTerms = ""; // results are always the same list
         log.info("Reading contributor roles.(pt=" + partialTerms + ").");
 
         return(getSimpleNodes("role", SimpleNode.Attribute.KEY, partialTerms, headers, request));

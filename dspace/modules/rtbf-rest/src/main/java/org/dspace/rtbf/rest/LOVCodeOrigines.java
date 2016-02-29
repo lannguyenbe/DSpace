@@ -1,5 +1,6 @@
 package org.dspace.rtbf.rest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -14,6 +15,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
+import org.dspace.rtbf.rest.common.Constants;
 import org.dspace.rtbf.rest.common.SimpleNode;
 import org.dspace.rtbf.rest.search.Resource;
 
@@ -35,10 +37,16 @@ public class LOVCodeOrigines extends Resource {
     @Path("code_origines")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public List<SimpleNode> getCodeOrigines(
-            @QueryParam("pt") @DefaultValue("") String partialTerms,
+            @QueryParam("pt") @DefaultValue(Constants.LOV_ALL) String pt,
             @Context HttpHeaders headers, @Context HttpServletRequest request)
     throws WebApplicationException
     {
+        String partialTerms = pt.trim();
+        if (partialTerms.isEmpty()) {
+        	return(new ArrayList<SimpleNode>());
+        } else if (partialTerms.equals(Constants.LOV_ALL)) {
+        	partialTerms = "";
+        }
         log.info("Reading supports code_origines.(pt=" + partialTerms + ").");
 
         return(getSimpleNodes(FACETFIELD, ELEMENT, partialTerms, headers, request));
@@ -48,11 +56,16 @@ public class LOVCodeOrigines extends Resource {
     @Path("sets")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public List<SimpleNode> getSets(
-            @QueryParam("pt") @DefaultValue("") String partialTerms,
+            @QueryParam("pt") @DefaultValue(Constants.LOV_ALL) String pt,
             @Context HttpHeaders headers, @Context HttpServletRequest request)
     throws WebApplicationException
     {
-    	partialTerms = ""; // results are always the same list; arg pt= is ignored
+        String partialTerms = pt.trim();
+        if (partialTerms.isEmpty()) {
+        	return(new ArrayList<SimpleNode>());
+        }
+
+        partialTerms = ""; // results are always the same list; arg pt= is ignored
         log.info("Reading support sets.(pt=" + partialTerms + ").");
 
         return(getSimpleNodes("set", SimpleNode.Attribute.KEY, partialTerms, headers, request));
