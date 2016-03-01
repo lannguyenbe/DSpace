@@ -36,7 +36,7 @@ public class Constants extends org.dspace.core.Constants {
     public static final int        DEFAULT_FACET_RPP = 10;
     public static final int        DEFAULT_FACET_OFFSET = 0;
     public static final int        DEFAULT_LOV_RPP = 100;
-    public static final String     LOV_ALL = "*";
+    public static final String     LOV_ALL = "\\n";
 
     
     // Keys for accessing metadata
