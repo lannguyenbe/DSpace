@@ -553,7 +553,7 @@
     </bean>
 
     <bean id="searchFilterIssued" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
-        <property name="indexFieldName" value="dateIssued"/>
+        <property name="indexFieldName" value="date_issued"/>
         <property name="metadataFields">
             <list>
                 <value>dc.date.issued</value>
@@ -621,7 +621,7 @@
     <!-- actually comment inside configuration beans because it results on solr error about date format while indexing -->
     <!-- when it is used simultanously with copyField to a tdate type as defined in schema.xml -->
     <bean id="searchFilterDiffusion" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
-        <property name="indexFieldName" value="datediffusion"/>
+        <property name="indexFieldName" value="date_diffusion"/>
         <property name="metadataFields">
             <list>
                 <value>rtbf.date_diffusion.*</value>

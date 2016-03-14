@@ -200,6 +200,17 @@ cp dspace-api-4.2.jar $DS/lib
 ## to recompile:end
 
 -----------------------------------------  S O L R  --------------------------------------------------
+# facet pivot
+http://localhost:8070/solr/search/select?q=*%3A*&fq=search.resourcetype%3A3&rows=0&wt=json&indent=true&facet=true&facet.pivot=child.item,date_diffusion_keyword,search.uniqueid&facet.pivot.mincount=1
+http://localhost:8070/solr/search/select?q=*%3A*&fq=search.resourcetype%3A3&rows=0&wt=json&indent=true&facet=true&facet.pivot=child.item,search.uniqueid,date_diffusion_dt&facet.pivot.mincount=1
+
+# join - subquery
+http://localhost:8070/solr/search/selectNew?q=search.resourcetype%3A2&fq=%7B!query+v%3D%24serieTitleQ%7D&fl=dc.title%2C+dc.date.issued&wt=json&indent=true&debugQuery=true&serieTitleV=NIOUZZ&dateEventV=dc.date.issued:2015
+#get sequence fron contraint on serie title and episode date_issued
+http://vm-dev4.inf.rtbf.be:8081/solr/search/selectNoCollapse?q=search.resourcetype%3A2&fq=%7B!join+from%3Dsearch.uniqueid+to%3Dlocation.collection%7D(search.resourcetype%3A3+AND+dc.date.issued%3A2010+AND+_query_%3A%22%7B!join+from%3Dsearch.uniqueid+to%3Dlocation.community%7D(search.resourcetype%3A4+AND+dc.title%3AWALLON)%22)&rows=50&fl=search.uniqueid%2Cdc.title%2C+dcterms.isPartOf.title%2Crtbf.channel_plus_date_diffusion.*&wt=json&indent=true
+# get episode from serie title
+http://vm-dev4.inf.rtbf.be:8081/solr/search/selectNoCollapse?q=search.resourcetype%3A3+AND+dc.date.issued%3A2007&fq=%7B!join+from%3Dsearch.uniqueid+to%3Dlocation.community%7D(search.resourcetype%3A4+AND+dc.title%3AART)&wt=json&indent=true
+
 # advandced search
 dc.date.issued_dt:"2013-07-21T06:52:14.72Z"
 dc.date.issued_dt:[2013-07-21T06:52:14.72Z TO *]

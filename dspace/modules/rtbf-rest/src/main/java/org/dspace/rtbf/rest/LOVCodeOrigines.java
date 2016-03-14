@@ -63,9 +63,9 @@ public class LOVCodeOrigines extends Resource {
         String partialTerms = pt.trim();
         if (partialTerms.isEmpty()) {
         	return(new ArrayList<SimpleNode>());
-        } else if (partialTerms.equals(Constants.LOV_ALL)) {
-        	partialTerms = "";
         }
+        
+        partialTerms = ""; // results are always the same list
         log.info("Reading support sets.(pt=" + partialTerms + ").");
 
         return(getSimpleNodes("set", SimpleNode.Attribute.KEY, partialTerms, headers, request));

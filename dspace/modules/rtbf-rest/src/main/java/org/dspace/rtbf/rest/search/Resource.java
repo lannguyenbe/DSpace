@@ -314,7 +314,13 @@ public abstract class Resource
 		        query.setFacetMinCount(1);
     		}
     		
-    		addDateIssuedFacet("date_issued", "dc.date.issued_dt", "dateIssued.year", query, context);
+    		// addDateIssuedFacet("date_issued", "dc.date.issued_dt", "dateIssued.year", query, context);
+    		addDateIssuedFacet("date_issued", "date_issued_dt", "date_issued.year", query, context);
+    		/* 10.03.2016 Lan : call to addDateIssuedFacet(String keyName, String dateFacet, String yearFacet, DiscoverQuery query, Context context)
+    		 * where <keyName>_dt matched with <dateFacet> 
+    		 * "date_issued" as <keyName> = indexFieldName in SearchFilter in discovery.xml, determines <keyName>_dt that is used as filtertype for searching
+    		 * "date_issued_dt" as <dateFacet> = real solr field in date type; the mapping from <keyName>_dt to <facetName> is done in rtbf-rest.cfg, is optional in this case
+    		 */
     		
     	}
     	
@@ -386,6 +392,12 @@ public abstract class Resource
     	_DTMATH.put("[ +1YEAR ]" , new String[] {"{!key=\"${keyName}_dt:[ +1YEAR ]\"}",  "[ * TO NOW/DAY-1YEAR-1MILLI ]"});
     }
 
+	/* 
+	 * 10.03.2016 Lan :
+	 * 1st param keyName : will fixed the names (<keyName>, <keyName>_dt) used as filtertype
+	 * 2nd param dateFacet : name of the solr field in date type (not text type)
+	 * 3rd param yearFacet : name of the solr field containing year only
+	 */
 	private void addDateIssuedFacet(String keyName, String dateFacet, String yearFacet, DiscoverQuery query, Context context) throws SearchServiceException {
 
 		// Get results count from 12 last months

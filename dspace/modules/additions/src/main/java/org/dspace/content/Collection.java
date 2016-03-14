@@ -1448,6 +1448,43 @@ public class Collection extends DSpaceObject
         return communityArray;
     }
 
+    /* 11.03.2016 Lan : fast get item id */
+    public Integer[] getItemsID() throws SQLException
+    {
+        // Get the bundle table rows
+        TableRowIterator tri = DatabaseManager.queryTable(ourContext,"item",
+                        "SELECT collection2item.item_id FROM collection2item " +
+                        "WHERE collection2item.collection_id= ? ",
+                        getID());
+
+        // Build a list of Community objects
+        List<Integer> ids = new ArrayList<Integer>();
+
+        try
+        {
+            while (tri.hasNext())
+            {
+                TableRow row = tri.next();
+
+                ids.add(row.getIntColumn("item_id"));
+
+            }
+        }
+        finally
+        {
+            // close the TableRowIterator to free up resources
+            if (tri != null)
+            {
+                tri.close();
+            }
+        }
+
+        Integer[] idArray = new Integer[ids.size()];
+        idArray = (Integer[]) ids.toArray(idArray);
+
+        return idArray;
+    }
+    
     /**
      * Return <code>true</code> if <code>other</code> is the same Collection
      * as this object, <code>false</code> otherwise
