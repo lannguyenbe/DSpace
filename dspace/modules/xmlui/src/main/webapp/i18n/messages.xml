@@ -45,7 +45,33 @@
 	<message key="xmlui.ArtifactBrowser.Navigation.browse_ispartof_title">Serie Titles</message>
 	<message key="xmlui.ArtifactBrowser.ConfigurableBrowse.general.match_with">Or enter few letters:</message>
 	<message key="xmlui.ArtifactBrowser.ConfigurableBrowse.general.match_with_help">Browse for strings that match these letters</message>
+	<message key="xmlui.ArtifactBrowser.Navigation.browse_contributor">Contributor</message>
+	<message key="xmlui.ArtifactBrowser.ConfigurableBrowse.contributor.column_heading">Contributor</message>
     
+	<!-- Custom facets & filters -->    
+    <!--  07.01.2015 Lan : new facet labels -->
+	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_identifier_attributor">Source</message>
+	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.identifier_attributor">Source</message>
+    <message key="xmlui.ArtifactBrowser.SimpleSearch.filter.ispartof_title">Serie Title</message>
+    <!--  25.09.2015 Lan : new facet labels -->
+	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_channel">Channel</message>
+	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.channel">Channel</message>
+	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_place">Location</message>
+	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.place">Location</message>
+   <message key="xmlui.ArtifactBrowser.AdvancedSearch.type_contributor">Contributor</message>
+	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.contributor">Contributor</message>
+    <!--  05.04.2015 Lan : new facet labels -->
+	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_date_issued">Date Issued</message>
+	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.date_issued">Date Issued</message>
+	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_date_diffusion">Date Broadcasted</message>
+	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.date_diffusion">Date Broadcasted</message>
+	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_set_support">Set support</message>
+	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.set_support">Set support</message>
+	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_publisher">Publisher</message>
+	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.publisher">Publisher</message>
+	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_code_origine">Support Code Origine</message>
+	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.code_origine">Support Code Origine</message>
+
 	<!-- General keys -->
 	<message key="xmlui.general.dspace_home">DSpace Home</message>
 	<message key="xmlui.general.search">Search</message>
@@ -146,25 +172,7 @@
 	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_language">Language (ISO)</message>
 	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_keyword">Keyword</message>
 
-    <!--  07.01.2015 Lan : new facet identifier_attributor -->
-	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_identifier_attributor">Source</message>
-	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.identifier_attributor">Source</message>
-    <!--  25.09.2015 Lan : new facet labels -->
-	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_channel">Channel</message>
-	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.channel">Channel</message>
-	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_datediffusion">Date Broadcasted</message>
-	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.datediffusion">Date Broadcasted</message>
-	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_place">Location</message>
-	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.place">Location</message>
-	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_image">Image</message>
-	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.image">Image</message>
-	<message key="xmlui.ArtifactBrowser.AdvancedSearch.type_sound">Sound</message>
-	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.sound">Sound</message>
-	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.contributor">Contributor</message>
-	<message key="xmlui.ArtifactBrowser.SimpleSearch.filter.codeorigine">Support</message>
-
    <!--  some common other possibilities for Advanced Search Fields -->
-   <message key="xmlui.ArtifactBrowser.AdvancedSearch.type_contributor">Contributor</message>
    <message key="xmlui.ArtifactBrowser.AdvancedSearch.type_creator">Creator</message>
    <message key="xmlui.ArtifactBrowser.AdvancedSearch.type_subject">Subject</message>
    <message key="xmlui.ArtifactBrowser.AdvancedSearch.type_description">Description</message>

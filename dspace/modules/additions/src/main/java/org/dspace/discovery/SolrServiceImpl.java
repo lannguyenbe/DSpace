@@ -77,6 +77,7 @@ import org.dspace.content.Metadatum;
 import org.dspace.content.DSpaceObject;
 import org.dspace.content.Item;
 import org.dspace.content.ItemIterator;
+import org.dspace.content.ItemAdd.DiffusionItem;
 import org.dspace.content.authority.ChoiceAuthorityManager;
 import org.dspace.content.authority.Choices;
 import org.dspace.content.authority.MetadataAuthorityManager;
@@ -1214,6 +1215,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
 
     protected List<String> getCollectionLocations(Collection target) throws SQLException {
         List<String> locations = new Vector<String>();
+
         // build list of community ids
         Community[] communities = target.getCommunities();
 
@@ -1222,10 +1224,10 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         {
             locations.add("m" + community.getID());
         }
-
+        
         return locations;
     }
-
+    
     /**
      * Write the document to the index under the appropriate handle.
      *
@@ -1452,6 +1454,10 @@ public class SolrServiceImpl implements SearchService, IndexingService {
 
             String value = meta.value;
             Date value_dt = null;
+            
+            String indexFieldName;
+            String yearUTC;
+            String sort_dt;
 
             if (value == null) { continue; }
 
@@ -1475,10 +1481,37 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 doc.addField(field, value);
                 doc.addField(field + "_sort", value);
                 break;
-            case "dc.date.issued":
+            case "dc.date.issued": // TODO: remove hardcode
                 value_dt = MultiFormatDateParser.parse(value);
-                doc.addField(field + "_dt", value_dt);
                 value = DateFormatUtils.formatUTC(value_dt, "yyyy-MM-dd");
+                /* searchFilter of this name exists in discovery.conf */
+                indexFieldName = "date_issued";
+            	doc.addField(indexFieldName + "_dt", value_dt);
+            	doc.addField(indexFieldName + "_keyword", value);
+                yearUTC = DateFormatUtils.formatUTC(value_dt, "yyyy");
+            	doc.addField(indexFieldName + "_keyword", yearUTC);
+            	doc.addField(indexFieldName + "_contain", value);
+            	doc.addField(indexFieldName, value);
+                /* sortFieldConfig of this name exists in discovery.conf */
+            	sort_dt = DateFormatUtils.ISO_DATETIME_FORMAT.format(value_dt);
+            	/* field index */
+            	doc.addField(field + "_sort", sort_dt);
+                doc.addField(field, value);
+            	break;
+            case "rtbf.date_diffusion.version": // TODO: remove hardcode
+                value_dt = MultiFormatDateParser.parse(value);
+                value = DateFormatUtils.formatUTC(value_dt, "yyyy-MM-dd");
+                /* searchFilter of this name exists in discovery.conf */
+                indexFieldName = "date_diffusion";
+            	doc.addField(indexFieldName + "_dt", value_dt);
+            	doc.addField(indexFieldName + "_keyword", value);
+                yearUTC = DateFormatUtils.formatUTC(value_dt, "yyyy");
+            	doc.addField(indexFieldName + "_keyword", yearUTC);
+            	doc.addField(indexFieldName + "_contain", value);
+            	doc.addField(indexFieldName, value);
+                /* sortFieldConfig of this name exists in discovery.conf */
+            	sort_dt = DateFormatUtils.ISO_DATETIME_FORMAT.format(value_dt);
+            	/* field index */
                 doc.addField(field, value);
             	break;
             case "rtbf.channel_issued":
@@ -1532,10 +1565,10 @@ public class SolrServiceImpl implements SearchService, IndexingService {
      * @throws SQLException
      * @throws IOException
      * 
-     * 03.12.2015 Lan : changer dc.date_issued_dt pour contenir aussi la partie heure, supprimer dateIssued_dt introduit précédemment
-     * 10.10.2015 Lan : si un field DB de type date fait l'objet d'un searchFilter, ajouter field index de nom getIndexFieldName() + "_dt"
-     * 		exemple: pour dc.date.issued, on crée dateIssued_dt qui comporte date et HEURE
-     * 			alors que dc.date.issued_dt ne contient plus la partie heure
+     * 10.10.2015 Lan : si un field DB de type date fait l'objet d'un searchFilter, ajouter 1 field index de nom getIndexFieldName() + "_dt"
+     * 		exemple: pour dc.date.issued, on crée date_issued_dt de type date et contient date ET HEURE
+     * 09.03.2016 Lan : si un field DB de type date fait l'objet d'un sortFieldConfiguration, le field index de nom getIndexFieldName() + "_sort" comporte la partie heure
+     * 		exemple: pour dc.date.issued (qui n'a plus la partie heure), dc.date.issued_sort est de type text et contient date ET HEURE
      */
     protected void buildDocument(Context context, Item item)
             throws SQLException, IOException {
@@ -1761,9 +1794,24 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                             {
                                 //TODO: make this date format configurable !
                                 value = DateFormatUtils.formatUTC(value_dt, "yyyy-MM-dd");
+                                // 09.03.2015 Lan : add _dt that contains date AND time, not only date
+                            	doc.addField(searchFilter.getIndexFieldName() + "_dt", value_dt);
+                            }else{
+                            	log.warn("Error while indexing search date field, item: " + item.getHandle() + " metadata field: " + field + " date value: " + value);
                             }
                         }
                         
+
+                        /* Lan rtbf.channel_plus_date_diffusion hardcode ! ******************************************/
+                        /* create role_contributor_filter solr field for prefix facetting */
+                        if (field.equals("rtbf.channel_plus_date_diffusion.segment") || field.equals("rtbf.channel_plus_date_diffusion.version")) {
+                        	/* get only channel value */
+                        	String[] subValues = value.split("/");
+                        	if (subValues.length > 0) {
+                        		value = subValues[0];
+                        	}
+                        }
+                        /* Lan rtbf.channel_plus_date_diffusion hardcode ! ******************************************/
 
                         /* Lan code_origine hardcode ! ******************************************/
                         if (field.equals("rtbf.code_origine.supportseq") || field.equals("rtbf.code_origine.supportprog")) {
@@ -1803,7 +1851,10 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                         doc.addField(searchFilter.getIndexFieldName() + "_keyword", value);
                         // Lan add those following solr fields
                         doc.addField(searchFilter.getIndexFieldName() + "_contain", value);
-                        doc.addField(searchFilter.getIndexFieldName() + "_partial", value);                        	
+                        if(!(searchFilter.getType().equals(DiscoveryConfigurationParameters.TYPE_DATE)))
+                        {
+                        	doc.addField(searchFilter.getIndexFieldName() + "_partial", value);
+                        }
 
                         if (authority != null && preferedLabel == null)
                         {
@@ -1977,7 +2028,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                         type = recentSubmissionsConfigurationMap.get(field).getType();
                     }
 
-                    // 03.12.2015 Lan : <field>_dt contains date AND time, not only date
+                    // 09.03.2015 Lan : <field>_sort for date contains date AND time, not only date
                     if(type.equals(DiscoveryConfigurationParameters.TYPE_DATE))
                     {
                     	if (value_dt == null) {
@@ -1985,9 +2036,10 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                     	}
                         if(value_dt != null)
                         {
-                            doc.addField(field + "_dt", value_dt);
+                        	String sort_dt = DateFormatUtils.ISO_DATETIME_FORMAT.format(value_dt);
+                            doc.addField(field + "_sort", sort_dt);
                         }else{
-                            log.warn("Error while indexing sort date field, item: " + item.getHandle() + " metadata field: " + field + " date value: " + value_dt);
+                            log.warn("Error while indexing sort date field, item: " + item.getHandle() + " metadata field: " + field + " date value: " + value);
                         }
                     }else{
                         doc.addField(field + "_sort", value);
@@ -2133,6 +2185,44 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         {
             log.error("Error while writing item to discovery index: " + handle + " message:"+ e.getMessage(), e);
         }
+        
+        // duplicate the item as many as diffusion_path
+        ItemAdd.DiffusionItem[] dItems = ItemAdd.DiffusionItem.findByItem(context, item.getID());
+        
+        for (DiffusionItem dit : dItems) { /* TODO: remove hard code */
+            doc.setField("search.uniqueid", dit.getDiffusion_path());
+            doc.setField("owning_community", Constants.COMMUNITY+"-"+dit.getCommunity_id());
+            doc.setField("owning_collection", Constants.COLLECTION+"-"+dit.getCollection_id());
+            doc.setField("rtbf.channel_issued", dit.getChannel_event());
+            
+            String field = "dc.date.issued";
+            String value = dit.getDate_event();
+            Date value_dt = MultiFormatDateParser.parse(value);
+            value = DateFormatUtils.formatUTC(value_dt, "yyyy-MM-dd");
+            /* searchFilter of this name exists in discovery.conf */
+            String indexFieldName = "date_issued";
+        	doc.setField(indexFieldName + "_dt", value_dt);
+        	doc.setField(indexFieldName + "_keyword", value);
+            String yearUTC = DateFormatUtils.formatUTC(value_dt, "yyyy");
+        	doc.setField(indexFieldName + "_keyword", yearUTC);
+        	doc.setField(indexFieldName + "_contain", value);
+        	doc.setField(indexFieldName, value);
+            /* sortFieldConfig of this name exists in discovery.conf */
+        	String sort_dt = DateFormatUtils.ISO_DATETIME_FORMAT.format(value_dt);
+        	/* field index */
+        	doc.setField(field + "_sort", sort_dt);
+            doc.setField(field, value);
+
+            try {
+                writeDocument(doc, streams);
+                log.info("Wrote Dup Item: " + handle + " on resourceid "+ dit.getDiffusion_path() + " to Index");
+            } catch (RuntimeException e)
+            {
+                log.error("Error while writing item to discovery index: " + handle + " message:"+ e.getMessage(), e);
+            }
+        }
+       
+        
     }
 
     /**
@@ -2172,25 +2262,21 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         {
             for (String location : locations)
             {
-                doc.addField("location", location);
-                if (location.startsWith("om"))
-                {
-                    doc.addField("owning_community", Constants.COMMUNITY+"-"+location.substring(2));
-                }
-                else if (location.startsWith("ol"))
-                {
-                    doc.addField("owning_collection", Constants.COLLECTION+"-"+location.substring(2));
-                }
-                else if (location.startsWith("m"))
-                {
-                    doc.addField("location.comm", location.substring(1));
-                    doc.addField("location.community", Constants.COMMUNITY+"-"+location.substring(1));
-                }
-                else
-                {
-                    doc.addField("location.coll", location.substring(1));
-                    doc.addField("location.collection", Constants.COLLECTION+"-"+location.substring(1));
-                }
+            	doc.addField("location", location);
+            	if (location.startsWith("om")) {
+            		doc.addField("owning_community", Constants.COMMUNITY+"-"+location.substring(2));
+            	}
+            	else if (location.startsWith("ol")) {
+            		doc.addField("owning_collection", Constants.COLLECTION+"-"+location.substring(2));
+            	}
+            	else if (location.startsWith("m")) {
+            		doc.addField("location.comm", location.substring(1));
+            		doc.addField("location.community", Constants.COMMUNITY+"-"+location.substring(1));
+            	}
+            	else if (location.startsWith("l")) {
+            		doc.addField("location.coll", location.substring(1));
+            		doc.addField("location.collection", Constants.COLLECTION+"-"+location.substring(1));
+            	}
             }
         }
 
@@ -2869,8 +2955,8 @@ public class SolrServiceImpl implements SearchService, IndexingService {
     
 
     // Lan 15.01.2016
-    // isIndexed is true when the field is configured as a searchFilterin discovery.xml e.g. exists solr fields <field>_keyword, <field>_partial
-    // then append field with _keyword or _partial in the filter query
+    // isIndexed is true when the field is configured as a searchFilterin discovery.xml e.g. exists solr fields <field>_keyword, <field>_contain
+    // then append field with _keyword or _contain in the filter query
     private DiscoverFilterQuery toFilterQuery(boolean isIndexed, Context context, String field, String operator, String value) throws SQLException{
         DiscoverFilterQuery result = new DiscoverFilterQuery();
 
@@ -2883,14 +2969,6 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 //Query the keyword indexed field !
                 if (isIndexed) { filterQuery.append("_keyword"); }
             }
-            // Lan
-            /*
-            else if ("contains".equals(operator))
-            {
-                //Query the partial n-gram field !
-                if (isIndexed) { filterQuery.append("_partial"); }
-            }
-            */
             else if ("contains".equals(operator))
             {
                 //Query the partial n-gram field !
@@ -3032,14 +3110,10 @@ public class SolrServiceImpl implements SearchService, IndexingService {
     }
 
     @Override
+    // 10.03.2016 Lan : Use only by xmlui
     public String toSortFieldIndex(String metadataField, String type)
     {
-        if(type.equals(DiscoveryConfigurationParameters.TYPE_DATE))
-        {
-            return metadataField + "_dt";
-        }else{
-            return metadataField + "_sort";
-        }
+        return metadataField + "_sort";
     }
 
     protected String transformFacetField(DiscoverFacetField facetFieldConfig, String field, boolean removePostfix)

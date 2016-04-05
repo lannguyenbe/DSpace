@@ -122,15 +122,13 @@
                 <!-- Lan 16.02.2015 Remove title, add TitleCommunity to advanced search -->
                 <!-- ref bean="searchFilterTitle" /-->
                 <ref bean="searchFilterTitleCommunity" />
-                <ref bean="searchFilterAuthor" />
+                <!-- ref bean="searchFilterAuthor" /-->
                 <ref bean="searchFilterContributor" />
                 <ref bean="searchFilterChannel" />
                 <ref bean="searchFilterDiffusion" />
                 <ref bean="searchFilterIssued" />
                 <ref bean="searchFilterSubject" />
                 <ref bean="searchFilterPlace" />
-                <ref bean="searchFilterImage" />
-                <ref bean="searchFilterSound" />
                 <ref bean="searchFilterCodeOrigine" />
                 <ref bean="searchFilterPublisher" />
                 <ref bean="searchFilterSetSupport" />
@@ -247,15 +245,13 @@
                 <!-- Lan 16.02.2015 Remove title, add titlecom to advanced search -->
                 <!-- ref bean="searchFilterTitle" /-->
                 <ref bean="searchFilterTitleCommunity" />
-                <ref bean="searchFilterAuthor" />
+                <!-- ref bean="searchFilterAuthor" /-->
                 <ref bean="searchFilterContributor" />
                 <ref bean="searchFilterChannel" />
                 <ref bean="searchFilterDiffusion" />
                 <ref bean="searchFilterIssued" />
                 <ref bean="searchFilterSubject" />
                 <ref bean="searchFilterPlace" />
-                <ref bean="searchFilterImage" />
-                <ref bean="searchFilterSound" />
                 <ref bean="searchFilterCodeOrigine" />
                 <ref bean="searchFilterPublisher" />
                 <ref bean="searchFilterSetSupport" />
@@ -520,9 +516,6 @@
             <list>
                 <value>rtbf.code_origine.supportseq</value>
                 <value>rtbf.code_origine.supportprog</value>
-                <!-- This filter is not indexed directly from a DB metadata field, its exists already in solr index -->
-                <!-- code_origine, code_origine_keyword, code_origine_partial exists already as solr fields -->
-                <!-- value>none</value -->
            </list>
         </property>
     </bean>
@@ -553,7 +546,7 @@
     </bean>
 
     <bean id="searchFilterIssued" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
-        <property name="indexFieldName" value="dateIssued"/>
+        <property name="indexFieldName" value="date_issued"/>
         <property name="metadataFields">
             <list>
                 <value>dc.date.issued</value>
@@ -576,6 +569,7 @@
     </bean>
 
     <!-- Lan 24.08.2015 - add this filter to advanced search -->
+    <!-- 05.04.2016 - not used -->
     <bean id="searchFilterImage" class="org.dspace.discovery.configuration.HierarchicalSidebarFacetConfiguration">
         <property name="indexFieldName" value="image"/>
         <property name="metadataFields">
@@ -590,6 +584,7 @@
     </bean>
     
     <!-- Lan 24.08.2015 - add this filter to advanced search -->
+    <!-- 05.04.2016 - not used -->
     <bean id="searchFilterSound" class="org.dspace.discovery.configuration.HierarchicalSidebarFacetConfiguration">
         <property name="indexFieldName" value="sound"/>
         <property name="metadataFields">
@@ -604,7 +599,7 @@
     </bean>
     
     <!-- Lan 25.08.2015 - add this filter to advanced search -->
-    <bean id="searchFilterChannel" class="org.dspace.discovery.configuration.HierarchicalSidebarFacetConfiguration">
+    <bean id="searchFilterChannel" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
         <property name="indexFieldName" value="channel"/>
         <property name="metadataFields">
             <list>
@@ -613,15 +608,11 @@
         </property>
         <property name="facetLimit" value="10"/>
         <property name="sortOrder" value="COUNT"/>
-        <property name="splitter" value="/"/>
-        <property name="skipFirstNodeLevel" value="false"/>
     </bean>
 
     <!-- Lan 25.08.2015 - add this filter to advanced search -->
-    <!-- actually comment inside configuration beans because it results on solr error about date format while indexing -->
-    <!-- when it is used simultanously with copyField to a tdate type as defined in schema.xml -->
     <bean id="searchFilterDiffusion" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
-        <property name="indexFieldName" value="datediffusion"/>
+        <property name="indexFieldName" value="date_diffusion"/>
         <property name="metadataFields">
             <list>
                 <value>rtbf.date_diffusion.*</value>
@@ -631,22 +622,8 @@
         <property name="sortOrder" value="VALUE"/>
     </bean>
 
-    <!-- Lan 04.10.2015 - add this filter to advanced search -->
-    <!-- Lan 20.02.2016 - remove
-    <bean id="searchFilterTypeSupport" class="org.dspace.discovery.configuration.HierarchicalSidebarFacetConfiguration">
-        <property name="indexFieldName" value="typesupport"/>
-        <property name="metadataFields">
-            <list>
-                <value>rtbf.type_plus_set</value>
-           </list>
-        </property>
-        <property name="facetLimit" value="10"/>
-        <property name="sortOrder" value="COUNT"/>
-        <property name="splitter" value="::"/>
-        <property name="skipFirstNodeLevel" value="false"/>
-    </bean>
-    -->
-    <!-- Lan 24.02.2016 - add set only filter to advanced search -->
+    <!-- Lan 24.02.2016 - add set_support filter to advanced search -->
+    <!-- watch out on skipFirstNodeLevel is true to index on set and not on type -->
     <bean id="searchFilterSetSupport" class="org.dspace.discovery.configuration.HierarchicalSidebarFacetConfiguration">
         <property name="indexFieldName" value="set_support"/>
         <property name="metadataFields">

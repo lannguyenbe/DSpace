@@ -519,9 +519,10 @@
         <analyzer>
             <!--Treats the entire field as a single token, regardless of its content-->
             <tokenizer class="solr.KeywordTokenizerFactory"/>
-
             <!--<filter class="solr.LowerCaseFilterFactory" />-->
             <filter class="solr.TrimFilterFactory" />
+            <!-- remove blank value -->
+            <filter class="solr.LengthFilterFactory" min="1" max="255" /> 
         </analyzer>
     </fieldType>
 
@@ -700,7 +701,7 @@
 
      <!--Date matching-->
     <dynamicField name="*.year" type="sint" indexed="true" stored="true" multiValued="true" omitNorms="true" />
-    <dynamicField name="*_dt" type="date" indexed="true" stored="true" multiValued="false" omitNorms="true"  docValues="true"/>
+    <dynamicField name="*_dt" type="date" indexed="true" stored="true" multiValued="true" omitNorms="true"  docValues="true"/>
 
 
     <!--Used for matching on all other fields -->
@@ -760,11 +761,12 @@
     <field name="identifier_attributor_ac" type="rtbf_entityID" indexed="true" stored="true" multiValued="false" omitNorms="true"/>
     <field name="identifier_attributor_filter" type="rtbf_entityID" indexed="true" stored="true" multiValued="false" omitNorms="true"/>
 
-    <!-- 07.10.2015 Lan : support datediffusion_dt as multivalue field -->
-    <field name="datediffusion_dt" type="tdate" indexed="true" stored="true" multiValued="true" omitNorms="true"  docValues="true"/>
-    <!-- 01.12.2015 Lan : dateIssued_dt as sort field with nulls last -->
-    <!-- field name="dateIssued_dt" type="tdate" indexed="true" stored="true" multiValued="false" sortMissingLast="true" omitNorms="true"  docValues="true"/-->
-    <field name="dc.date.issued_dt" type="tdate" indexed="true" stored="true" multiValued="false" sortMissingLast="true" omitNorms="true"  docValues="true"/>
+
+    <!-- 01.12.2015 Lan : date_issued_dt as boost field in solrconfig.xml : multiValued="false"-->
+    <!--                  date_issued_dt as sort field with nulls last in rtbf-rest.cfg use by rtbf-rest -->
+    <field name="date_issued_dt" type="tdate" indexed="true" stored="true" multiValued="false" omitNorms="true" sortMissingLast="true" docValues="true"/>
+    <!-- 10.03.2016 Lan : dc.date.issued_sort as sort field with nulls last - use only by xmlui-->
+    <field name="dc.date.issued_sort" type="lowerCaseSort" indexed="true" stored="true" multiValued="false" omitNorms="true" sortMissingLast="true"/>
     <!-- 01.12.2015 Lan : rtbf.channel_issued as sort field with nulls last -->
     <field name="rtbf.channel_issued" type="lowerCaseSort" indexed="true" stored="true" multiValued="false" omitNorms="true"/>
     <field name="rtbf.royalty_code" type="lowerCaseSort" indexed="true" stored="true" multiValued="false" omitNorms="true"/>
