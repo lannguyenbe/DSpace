@@ -775,7 +775,6 @@
     <field name="owning_community" type="string" indexed="true" stored="true" multiValued="false" omitNorms="true" />
     <field name="location.community" type="string" indexed="true" stored="true" multiValued="true" omitNorms="true" />
     <field name="location.collection" type="string" indexed="true" stored="true" multiValued="true" omitNorms="true" />
-    <field name="child.item" type="string" indexed="true" stored="true" multiValued="true" omitNorms="true" />
     
     </fields>
 

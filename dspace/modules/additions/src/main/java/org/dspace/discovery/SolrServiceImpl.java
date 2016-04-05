@@ -77,6 +77,7 @@ import org.dspace.content.Metadatum;
 import org.dspace.content.DSpaceObject;
 import org.dspace.content.Item;
 import org.dspace.content.ItemIterator;
+import org.dspace.content.ItemAdd.DiffusionItem;
 import org.dspace.content.authority.ChoiceAuthorityManager;
 import org.dspace.content.authority.Choices;
 import org.dspace.content.authority.MetadataAuthorityManager;
@@ -1224,18 +1225,6 @@ public class SolrServiceImpl implements SearchService, IndexingService {
             locations.add("m" + community.getID());
         }
         
-        /* 14.03.2016 Lan : not a good idea because synchro difficulty on RAD of child
-        // 11.03.2016 Lan : add child items
-        // build list of items ids
-        Integer[] itemsID = target.getItemsID();
-
-        // now put those into strings
-        for (int id : itemsID)
-        {
-            locations.add("ci" + id);
-        }
-        */
-
         return locations;
     }
     
@@ -1813,6 +1802,17 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                         }
                         
 
+                        /* Lan rtbf.channel_plus_date_diffusion hardcode ! ******************************************/
+                        /* create role_contributor_filter solr field for prefix facetting */
+                        if (field.equals("rtbf.channel_plus_date_diffusion.segment") || field.equals("rtbf.channel_plus_date_diffusion.version")) {
+                        	/* get only channel value */
+                        	String[] subValues = value.split("/");
+                        	if (subValues.length > 0) {
+                        		value = subValues[0];
+                        	}
+                        }
+                        /* Lan rtbf.channel_plus_date_diffusion hardcode ! ******************************************/
+
                         /* Lan code_origine hardcode ! ******************************************/
                         if (field.equals("rtbf.code_origine.supportseq") || field.equals("rtbf.code_origine.supportprog")) {
                         	/* isolate code_origine part */
@@ -2185,6 +2185,44 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         {
             log.error("Error while writing item to discovery index: " + handle + " message:"+ e.getMessage(), e);
         }
+        
+        // duplicate the item as many as diffusion_path
+        ItemAdd.DiffusionItem[] dItems = ItemAdd.DiffusionItem.findByItem(context, item.getID());
+        
+        for (DiffusionItem dit : dItems) { /* TODO: remove hard code */
+            doc.setField("search.uniqueid", dit.getDiffusion_path());
+            doc.setField("owning_community", Constants.COMMUNITY+"-"+dit.getCommunity_id());
+            doc.setField("owning_collection", Constants.COLLECTION+"-"+dit.getCollection_id());
+            doc.setField("rtbf.channel_issued", dit.getChannel_event());
+            
+            String field = "dc.date.issued";
+            String value = dit.getDate_event();
+            Date value_dt = MultiFormatDateParser.parse(value);
+            value = DateFormatUtils.formatUTC(value_dt, "yyyy-MM-dd");
+            /* searchFilter of this name exists in discovery.conf */
+            String indexFieldName = "date_issued";
+        	doc.setField(indexFieldName + "_dt", value_dt);
+        	doc.setField(indexFieldName + "_keyword", value);
+            String yearUTC = DateFormatUtils.formatUTC(value_dt, "yyyy");
+        	doc.setField(indexFieldName + "_keyword", yearUTC);
+        	doc.setField(indexFieldName + "_contain", value);
+        	doc.setField(indexFieldName, value);
+            /* sortFieldConfig of this name exists in discovery.conf */
+        	String sort_dt = DateFormatUtils.ISO_DATETIME_FORMAT.format(value_dt);
+        	/* field index */
+        	doc.setField(field + "_sort", sort_dt);
+            doc.setField(field, value);
+
+            try {
+                writeDocument(doc, streams);
+                log.info("Wrote Dup Item: " + handle + " on resourceid "+ dit.getDiffusion_path() + " to Index");
+            } catch (RuntimeException e)
+            {
+                log.error("Error while writing item to discovery index: " + handle + " message:"+ e.getMessage(), e);
+            }
+        }
+       
+        
     }
 
     /**
@@ -2224,24 +2262,20 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         {
             for (String location : locations)
             {
-            	if (location.startsWith("ci")) {
-                    doc.addField("child.item", Constants.ITEM+"-"+location.substring(2));            		
-            	} else {
-            		doc.addField("location", location);
-            		if (location.startsWith("om")) {
-            			doc.addField("owning_community", Constants.COMMUNITY+"-"+location.substring(2));
-            		}
-            		else if (location.startsWith("ol")) {
-            			doc.addField("owning_collection", Constants.COLLECTION+"-"+location.substring(2));
-            		}
-            		else if (location.startsWith("m")) {
-            			doc.addField("location.comm", location.substring(1));
-            			doc.addField("location.community", Constants.COMMUNITY+"-"+location.substring(1));
-            		}
-            		else if (location.startsWith("l")) {
-            			doc.addField("location.coll", location.substring(1));
-            			doc.addField("location.collection", Constants.COLLECTION+"-"+location.substring(1));
-            		}
+            	doc.addField("location", location);
+            	if (location.startsWith("om")) {
+            		doc.addField("owning_community", Constants.COMMUNITY+"-"+location.substring(2));
+            	}
+            	else if (location.startsWith("ol")) {
+            		doc.addField("owning_collection", Constants.COLLECTION+"-"+location.substring(2));
+            	}
+            	else if (location.startsWith("m")) {
+            		doc.addField("location.comm", location.substring(1));
+            		doc.addField("location.community", Constants.COMMUNITY+"-"+location.substring(1));
+            	}
+            	else if (location.startsWith("l")) {
+            		doc.addField("location.coll", location.substring(1));
+            		doc.addField("location.collection", Constants.COLLECTION+"-"+location.substring(1));
             	}
             }
         }

@@ -1448,7 +1448,7 @@ public class Collection extends DSpaceObject
         return communityArray;
     }
 
-    /* 11.03.2016 Lan : fast get item id */
+    /* 11.03.2016 Lan : fast get item id -- not use */
     public Integer[] getItemsID() throws SQLException
     {
         // Get the bundle table rows
