@@ -229,8 +229,8 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                         /**
                          * If the item is in the repository now, add it to the index
                          */
-                        if (requiresIndexing(handle, ((Item) dso).getLastModified())
-                                || force)
+                    	// Lan 06.04.2016 - force at the left of || for optimization purpose
+                        if (force || requiresIndexing(handle, ((Item) dso).getLastModified()))
                         {
                             unIndexContent(context, handle);
                             buildDocument(context, (Item) dso);
