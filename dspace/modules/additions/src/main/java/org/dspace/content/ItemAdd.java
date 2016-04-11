@@ -168,11 +168,11 @@ public class ItemAdd extends Item {
         {
         	String myQuery = "SELECT t.diffusion_path, c2c.community_id, t.collection_id, t.resource_id item_id"
     	    	+ " , to_char(t.event_date,'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') date_event"
-    	    	+ " , to_char(t.diffusion_datetime,'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') date_diffusion"
+    	    	+ " , to_char(t.diffusion_dt,'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') date_diffusion"
     	    	+ " , t.channel_event"
     	    	+ " FROM"
     	    	+ " (SELECT diffusion_path, resource_id, collection_id, event_date"
-    	    	+ "  , min(diffusion_datetime)"
+    	    	+ "  , min(diffusion_datetime) diffusion_dt"
     	    	+ "  , sum(is_premdiff) premdiff"
     	    	+ "  , min(channel) keep (dense_rank first order by diffusion_datetime) channel_event"
     	    	+ " FROM t_diffusion"
