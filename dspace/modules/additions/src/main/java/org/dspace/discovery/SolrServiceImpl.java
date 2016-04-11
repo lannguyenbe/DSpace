@@ -796,15 +796,12 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 {
                     HandleLog handleLog = hlogs.next();
                     
-//                    String uniqueID = handleLog.getType() + "-" + handleLog.getID();
-//                    System.out.println(handleLog.getOper() + ", " + uniqueID + ", " + handleLog.getHandleID());
-//                    getSolr().deleteById(uniqueID);
-
                     String handle = handleLog.getHandle();
+                    // 11.04.2016 Lan : because of duplication of items on their diffusions
+                    // Multiple documents may correspond to the handle (same handle, different search.uniqueid)
                     getSolr().deleteByQuery("handle:\"" + handle + "\"");
 
                     handleLog.populateLogDone();
-//                    log.info("Sync delete search.uniqueid: " + uniqueID + " handleid: " + handleLog.getHandleID() + " from Index");
                     log.info("Sync delete handleid: " + handleLog.getHandleID() + " from Index");
                     
                 }
@@ -2198,7 +2195,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
             doc.setField("rtbf.channel_issued", dit.getChannel_event());
             
             String field = "dc.date.issued";
-            String value = dit.getDate_event();
+            String value = dit.getDate_diffusion();
             Date value_dt = MultiFormatDateParser.parse(value);
             value = DateFormatUtils.formatUTC(value_dt, "yyyy-MM-dd");
             /* searchFilter of this name exists in discovery.conf */

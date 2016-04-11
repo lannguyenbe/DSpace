@@ -150,14 +150,16 @@ public class ItemAdd extends Item {
         private int collection_id = -1;
         private int item_id = -1;
     	private String date_event = null;
+    	private String date_diffusion = null;
     	private String channel_event = null;
     	
-    	public DiffusionItem(String diffusion_path, int community_id, int collection_id, int item_id, String date_event, String channel_event) {
+    	public DiffusionItem(String diffusion_path, int community_id, int collection_id, int item_id, String date_event, String date_diffusion, String channel_event) {
     		this.diffusion_path = diffusion_path;
     		this.community_id = community_id;
     		this.collection_id = collection_id;
     		this.item_id = item_id;
     		this.date_event = date_event;
+    		this.date_diffusion = date_diffusion;
     		this.channel_event = channel_event;
     	}
     	
@@ -165,10 +167,12 @@ public class ItemAdd extends Item {
                 throws SQLException
         {
         	String myQuery = "SELECT t.diffusion_path, c2c.community_id, t.collection_id, t.resource_id item_id"
-    	    	+ " , to_char(event_date,'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') date_event"
+    	    	+ " , to_char(t.event_date,'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') date_event"
+    	    	+ " , to_char(t.diffusion_datetime,'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') date_diffusion"
     	    	+ " , t.channel_event"
     	    	+ " FROM"
-    	    	+ " (SELECT diffusion_path, resource_id, collection_id, event_date, sum(is_premdiff) premdiff"
+    	    	+ " (SELECT diffusion_path, resource_id, collection_id, event_date, diffusion_datetime"
+    	    	+ "  , sum(is_premdiff) premdiff"
     	    	+ "  , min(channel) keep (dense_rank first order by diffusion_datetime) channel_event"
     	    	+ " FROM t_diffusion"
     	    	+ " WHERE resource_type_id = " + Constants.ITEM
@@ -195,6 +199,7 @@ public class ItemAdd extends Item {
 							, row.getIntColumn("collection_id")
 							, row.getIntColumn("item_id")
 							, row.getStringColumn("date_event")
+							, row.getStringColumn("date_diffusion")
 							, row.getStringColumn("channel_event")
 					));
 				}
@@ -225,6 +230,10 @@ public class ItemAdd extends Item {
 
 		public String getDate_event() {
 			return date_event;
+		}
+
+		public String getDate_diffusion() {
+			return date_diffusion;
 		}
 
 		public String getChannel_event() {
