@@ -25,14 +25,15 @@ public class HandleLog {
 	public static final String DATEOPER = "dateoper";
 	public static final String LOGID = "logid";
 	public static final String HANDLE_ID = "handle_id";
+	public static final String HANDLE = "handle";
 	
 	HandleLog(Context context, TableRow row) throws SQLException {
         ourContext = context;
 
         
-        if (null == row.getTable())
+/*        if (null == row.getTable())
         	row.setTable("t_handle_log");
-        
+*/        
         handleLogRow = row;
 	}
 	        
@@ -60,17 +61,24 @@ public class HandleLog {
     	return handleLogRow.getIntColumn(HANDLE_ID);
     }
 
+    public String getHandle() {
+    	return handleLogRow.getStringColumn(HANDLE);
+    }
 
     public static HandleLogIterator findAll(Context context) throws SQLException
     {
-        String myQuery = "SELECT * FROM t_handle_log";
+        String myQuery = "SELECT l.* "
+        				+ " (select h.handle from handle h where h.handle_id = l.handle_id) handle"
+        				+ " FROM t_handle_log l";
 
         return new HandleLogIterator(context, myQuery);
     }
 
     public static HandleLogIterator findAllDel(Context context) throws SQLException
     {
-        String myQuery = "SELECT * FROM t_handle_log"
+        String myQuery = "SELECT l.* "
+        				+ " (select h.handle from handle h where h.handle_id = l.handle_id) handle"
+        				+ " FROM t_handle_log l"
                 		+ " WHERE oper = 'DEL'"
                 		+ " ORDER BY resource_type_id ASC"; // do not remove this order
 
@@ -81,6 +89,7 @@ public class HandleLog {
     {
     	/* Retrieve the last operation among INS or UPD on each resource_id */
     	String myQuery = "SELECT lastlog.*"
+						+ " (select h.handle from handle h where h.handle_id = l.handle_id) handle"
 		        	    + " FROM ("
 		        	    + "    SELECT l.*"
 		        	    + "     , MAX(dateoper) OVER (PARTITION BY l.resource_id) lastdateoper"
@@ -96,6 +105,7 @@ public class HandleLog {
     {
     	/* Retrieve the last operation among INS or UPD on each resource_id */
     	String myQuery = "SELECT lastlog.*"
+						+ " (select h.handle from handle h where h.handle_id = l.handle_id) handle"
 		        	    + " FROM ("
 		        	    + "    SELECT l.*"
 		        	    + "     , MAX(dateoper) OVER (PARTITION BY l.resource_id) lastdateoper"
@@ -111,6 +121,7 @@ public class HandleLog {
     {
     	/* Retrieve the last operation among INS or UPD on each resource_id */
     	String myQuery = "SELECT lastlog.*"
+						+ " (select h.handle from handle h where h.handle_id = l.handle_id) handle"
 		        	    + " FROM ("
 		        	    + "    SELECT l.*"
 		        	    + "     , MAX(dateoper) OVER (PARTITION BY l.resource_id) lastdateoper"
