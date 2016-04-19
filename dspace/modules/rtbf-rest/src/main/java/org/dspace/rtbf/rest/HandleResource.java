@@ -68,25 +68,117 @@ public class HandleResource {
             }
             log.info("DSO Lookup by handle: [" + prefix + "] / [" + suffix + "] got result of: " + dso.getTypeText() + "_" + dso.getID());
 
-            if(AuthorizeManager.authorizeActionBoolean(context, dso, org.dspace.core.Constants.READ)) {
-                switch(dso.getType()) {
-                    case Constants.COMMUNITY:
-                        return new Serie(viewType, (org.dspace.content.Community) dso, expand+","+Constants.SERIE_EXPAND_OPTIONS, context);
-                    case Constants.COLLECTION:
-                    	return new Episode(viewType, (org.dspace.content.Collection) dso, expand+","+Constants.EPISODE_EXPAND_OPTIONS, context);
-                    case Constants.ITEM:
-                        // return new Sequence(viewType, (org.dspace.content.Item) dso, expand+","+Constants.SEQUENCE_EXPAND_OPTIONS, context);
-                    	// STANDARD_VIEW is MIN_VIEW + retrieve all linkedDocuments from solr
-                        return new Sequence(Constants.STANDARD_VIEW, (org.dspace.content.Item) dso, expand+","+Constants.SEQUENCE_EXPAND_OPTIONS, context);
-                    default:
-                        return new RTBObject(dso);
-                }
-            } else {
-                throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+            switch(dso.getType()) {
+            case Constants.COMMUNITY:
+            	return new Serie(viewType, (org.dspace.content.Community) dso, expand+","+Constants.SERIE_EXPAND_OPTIONS, context);
+            case Constants.COLLECTION:
+            	return new Episode(viewType, (org.dspace.content.Collection) dso, expand+","+Constants.EPISODE_EXPAND_OPTIONS, context);
+            case Constants.ITEM:
+            	// return new Sequence(viewType, (org.dspace.content.Item) dso, expand+","+Constants.SEQUENCE_EXPAND_OPTIONS, context);
+            	// STANDARD_VIEW is MIN_VIEW + retrieve all linkedDocuments from solr
+            	return new Sequence(Constants.STANDARD_VIEW, (org.dspace.content.Item) dso, expand+","+Constants.SEQUENCE_EXPAND_OPTIONS, context);
+            default:
+            	return new RTBObject(dso);
             }
         } catch (SQLException e) {
             log.error(e.getMessage());
             throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GET
+    @Path("/{prefix}/{suffix}/{docId}")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public org.dspace.rtbf.rest.common.RTBObject getObjectByDocId(@PathParam("prefix") String prefix, @PathParam("suffix") String suffix
+    			, @PathParam("docId") String docId
+    			, @QueryParam("expand") String expand
+        		, @QueryParam("omitExpand") @DefaultValue("true") boolean omitExpand
+        		, @Context UriInfo info
+        		, @QueryParam("userIP") String user_ip, @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor
+                , @Context HttpHeaders headers, @Context HttpServletRequest request)
+                throws WebApplicationException
+    {
+
+    	int viewType = Constants.MIN_VIEW;
+
+    	if (!omitExpand) { viewType = Constants.EXPANDELEM_VIEW; }
+
+    	try {
+            if(context == null || !context.isValid() ) {
+                context = new org.dspace.core.Context();
+                context.getDBConnection();
+            }
+
+            org.dspace.content.DSpaceObject dso = HandleManager.resolveToObject(context, prefix + "/" + suffix);
+            if(dso == null) {
+                throw new WebApplicationException(Response.Status.NOT_FOUND);
+            }
+            log.info("DSO Lookup by handle: [" + prefix + "] / [" + suffix + "] / [" + docId + "] got result of: " + dso.getTypeText() + "_" + dso.getID());
+
+            switch(dso.getType()) {
+            case Constants.COMMUNITY:
+            	return new Serie(viewType, (org.dspace.content.Community) dso, expand+","+Constants.SERIE_EXPAND_OPTIONS, context);
+            case Constants.COLLECTION:
+            	return new Episode(viewType, (org.dspace.content.Collection) dso, expand+","+Constants.EPISODE_EXPAND_OPTIONS, context);
+            case Constants.ITEM:
+            	// STANDARD_VIEW is MIN_VIEW + all linkedDocuments from solr
+            	return new Sequence(Constants.STANDARD_VIEW, (org.dspace.content.Item) dso, expand+","+Constants.SEQUENCE_EXPAND_OPTIONS, context, docId);
+            default:
+            	return new RTBObject(dso);
+            }
+            
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+
+    public org.dspace.rtbf.rest.common.RTBObject getObjectWithAuthorize(@PathParam("prefix") String prefix, @PathParam("suffix") String suffix
+    		, @QueryParam("expand") String expand
+    		, @QueryParam("omitExpand") @DefaultValue("true") boolean omitExpand
+    		, @Context UriInfo info
+    		, @QueryParam("userIP") String user_ip, @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor
+    		, @Context HttpHeaders headers, @Context HttpServletRequest request)
+    				throws WebApplicationException
+    				{
+
+    	int viewType = Constants.MIN_VIEW;
+
+    	if (!omitExpand) { viewType = Constants.EXPANDELEM_VIEW; }
+
+    	try {
+    		if(context == null || !context.isValid() ) {
+    			context = new org.dspace.core.Context();
+    			context.getDBConnection();
+    		}
+
+    		org.dspace.content.DSpaceObject dso = HandleManager.resolveToObject(context, prefix + "/" + suffix);
+    		if(dso == null) {
+    			throw new WebApplicationException(Response.Status.NOT_FOUND);
+    		}
+    		log.info("DSO Lookup by handle: [" + prefix + "] / [" + suffix + "] got result of: " + dso.getTypeText() + "_" + dso.getID());
+
+    		if(AuthorizeManager.authorizeActionBoolean(context, dso, org.dspace.core.Constants.READ)) {
+    			switch(dso.getType()) {
+    			case Constants.COMMUNITY:
+    				return new Serie(viewType, (org.dspace.content.Community) dso, expand+","+Constants.SERIE_EXPAND_OPTIONS, context);
+    			case Constants.COLLECTION:
+    				return new Episode(viewType, (org.dspace.content.Collection) dso, expand+","+Constants.EPISODE_EXPAND_OPTIONS, context);
+    			case Constants.ITEM:
+    				// return new Sequence(viewType, (org.dspace.content.Item) dso, expand+","+Constants.SEQUENCE_EXPAND_OPTIONS, context);
+    				// STANDARD_VIEW is MIN_VIEW + retrieve all linkedDocuments from solr
+    				return new Sequence(Constants.STANDARD_VIEW, (org.dspace.content.Item) dso, expand+","+Constants.SEQUENCE_EXPAND_OPTIONS, context);
+    			default:
+    				return new RTBObject(dso);
+    			}
+    		} else {
+    			throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+    		}
+    	} catch (SQLException e) {
+    		log.error(e.getMessage());
+    		throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+    	}
+    }
+
 }

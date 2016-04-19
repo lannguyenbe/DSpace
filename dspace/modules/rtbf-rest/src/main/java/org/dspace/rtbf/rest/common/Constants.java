@@ -29,15 +29,14 @@ public class Constants extends org.dspace.core.Constants {
 
     // Default values
     public static final String[] TYPETEXT = { "none", "none", "SEQUENCE", "EPISODE", "SERIE", "none", "none", "none" };
-    public static final int        LIMITMAX = 5000;
-    public static final String     DEFAULT_LIMIT = "100";
-    public static final int        DEFAULT_RPP = Integer.valueOf(DEFAULT_LIMIT);
-    public static final String     DEFAULT_ORDER = "asc";
-    public static final int        DEFAULT_FACET_RPP = 10;
-    public static final int        DEFAULT_FACET_OFFSET = 0;
-    public static final int        DEFAULT_LOV_RPP = 100;
-    public static final String     LOV_ALL = "\\n"; // the literal \n not the LF
-
+    public static final int      LIMITMAX = 5000;
+    public static final String   DEFAULT_LIMIT = "100";
+    public static final int      DEFAULT_RPP = Integer.valueOf(DEFAULT_LIMIT);
+    public static final String   DEFAULT_ORDER = "asc";
+    public static final int      DEFAULT_FACET_RPP = 10;
+    public static final int      DEFAULT_FACET_OFFSET = 0;
+    public static final int      DEFAULT_LOV_RPP = 100;
+    public static final String   LOV_ALL = "\\n"; // the literal \n not the LF
     
     // Keys for accessing metadata
     public static final String ATTRIBUTOR = "rtbf.identifier.attributor";
@@ -48,6 +47,7 @@ public class Constants extends org.dspace.core.Constants {
     public static final String CHANNEL_ISSUED = "rtbf.channel_issued";
     public static final String CODE_ORIGINE = "rtbf.code_origine.*";
     public static final String TITLE = "dc.title";
+    
     
     // Schema to skip
     public static final String OLD_SCHEMA = "old";

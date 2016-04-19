@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.WebApplicationException;
 import javax.xml.bind.annotation.XmlTransient;
@@ -71,14 +73,28 @@ public class SearchResponseParts {
 						switch (resultType) {
 						case Constants.ITEM:
 		                    Sequence sequence = new Sequence(Constants.SEARCH_RESULT_VIEW, (Item) result, Constants.SEARCH_SEQUENCE_EXPAND_OPTIONS, null);
-
+		                    
+		                    // 18.04.2016 Lan : if queryResults from Solr return an dup item, then replace somme metadata in the default sequence
+		                    SearchDocument doc = queryResults.getSearchDocument(result).get(0);
+		                    String docId = doc.getSearchFieldValues("doc_uniqueid").get(0);
+		                    if (!(docId.equals(String.valueOf(resultType) +'-'+ result.getID()))) { // is dup item
+		                    	sequence.setupFromSearchDocument(Constants.SEARCH_RESULT_VIEW, doc, Constants.SEARCH_SEQUENCE_EXPAND_OPTIONS, context);
+	                    	}
+		                    
 		                    // Add linked Documents 
 		                    // the linked documents to this dso were already retrieved by the same search - in the expanded section ot solr response - 
 		                    // only their handle are available
 		                    List<RTBObject> linkedDocuments = new ArrayList<RTBObject>();	                    
 		                    List<DiscoverResult.SearchDocument> entries = queryResults.getExpandDocuments(result);
 		            		for (SearchDocument entry : entries) {
-		            			linkedDocuments.add(new RTBObject(new DiscoverExpandedItems.ExpandedItem(entry)));
+		            			Set<String> uniques = new HashSet<String>();
+		            			// 19.04.2016 Lan : eliminate dup item in expanded items
+		            			String entryHandle = entry.getSearchFieldValues("handle").get(0);
+		            			if (!(result.getHandle().equals(entryHandle))) { // is not dup item
+		            				if (uniques.add(entryHandle)) { // is unique among expanded item     		            				
+		            					linkedDocuments.add(new RTBObject(new DiscoverExpandedItems.ExpandedItem(entry)));
+		            				}
+		            			}
 		            		}
 		            		if (linkedDocuments.size() > 0) {
 		            			sequence.setLinkedDocuments(linkedDocuments);

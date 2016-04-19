@@ -206,6 +206,22 @@ public abstract class Resource
 		// 1. Prepare the query
         DiscoverQuery query = new DiscoverQuery();
 
+        // 1.1 Use specific request handler instead of the default /select
+        // 18.04.2016 Lan : new /selectSequence request handle to support the binding of 2 search criteria : serie title & date diffusion
+        switch (resourceType) {
+			case Constants.COMMUNITY:
+		        query.addProperty("qt", "/selectSerie");
+				break;
+			case Constants.COLLECTION:
+		        query.addProperty("qt", "/selectEpisode");
+				break;
+			case Constants.ITEM:
+		        query.addProperty("qt", "/selectSequence");
+				break;
+			default :
+				break;
+        }
+        
         // q terms
         query.setQuery(searchRequest.getQuery());
 

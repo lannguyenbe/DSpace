@@ -41,6 +41,7 @@ public class RTBObject {
     private String handle;
     private String type;
     private MetadataEntry title;
+    private String docId;
 
     // SEARCH_RESULT_VIEW results basic elements
     //
@@ -167,6 +168,15 @@ public class RTBObject {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+	@XmlAttribute
+    public String getDocId() {
+        return docId;
+    }
+
+    public void setDocId(String docId) {
+        this.docId = docId;
     }
 
     public String getType() {

@@ -200,14 +200,24 @@ cp dspace-api-4.2.jar $DS/lib
 ## to recompile:end
 
 -----------------------------------------  S O L R  --------------------------------------------------
+#fiches dup within TV
+http://localhost:8070/solr/search/selectNoCollapse?q=*%3A*&fq=identifier_attributor%3ATramontane%5C+TV&fl=handle%2Cidentifier_origin&wt=json&indent=true&facet=true&facet.field=identifier_origin&facet.mincount=2
+
+#fiches liées TV et Sonuma
+http://localhost:8070/solr/search/selectNoCollapse?q=*%3A*&fq=identifier_attributor%3ASonuma%5C+TV&fq=identifier_weight%3A1&fl=identifier_origin&wt=json&indent=true
+
 # get dupplicate sequence resourceid using facet
 http://localhost:8070/solr/search/selectNoCollapse?q=*%3A*&fq=search.resourcetype%3A2&fq=search.uniqueid%3A2-*-*&rows=0&fl=search.resourceid%2Csearch.uniqueid%2Csearch.resourceid&wt=json&indent=true&facet=true&facet.field=search.resourceid&facet.mincount=2
+
 # get first diffusion (oldest date_diffusion) from core diffusion
 http://localhost:8070/solr/diffusion/selectFirstDiffusion?q=*%3A*&fq=%7B!query+v%3D%24serieTitleFQ%7D&fq=%7B!query+v%3D%24seqFQ%7D&fl=diffusion_type%2Ccommunity_id%2Cdate_diffusion_dt&wt=json&indent=true&facet=true&facet.field=community_title&serieTitleQ=*&dateDiffusionQ=date_diffusion_keyword:2012&facet.mincount=1
+
 # search serie of the below sequences search with serieTitleQ and dateDiffusionQ and seqQ
 http://localhost:8070/solr/search/selectSerie?q=*%3A*&fq=%7B!query+v%3D%24serieTitleFQ%7D&fq=%7B!query+v%3D%24seqFQ%7D&fl=dc.title%2Csearch.uniqueid%2C+score%2C+date_diffusion_dt&wt=json&indent=true&seqQ=footballeur&dateDiffusionQ=date_diffusion_keyword:2012-04-14&serieTitleQ=*&facet.mincount=1
+
 # search episode of the below sequences search with serieTitleQ and dateDiffusionQ and seqQ
 http://localhost:8070/solr/search/selectEpisode?q=*%3A*&fq=%7B!query+v%3D%24serieTitleFQ%7D&fq=%7B!query+v%3D%24seqFQ%7D&fl=search.uniqueid%2C+date_diffusion_dt%2C+date_diffusion_keyword&wt=json&indent=true&facet=true&facet.field=location.community&seqQ=footballeur&dateDiffusionQ=date_diffusion_keyword:2012-04-14&serieTitleQ=*&facet.mincount=1
+
 # search sequence with serieTitleQ and dateDiffusionQ
 http://localhost:8070/solr/search/selectSequence?q=footballeur&fq=%7B!query+v%3D%24serieTitleFQ%7D&fl=search.uniqueid%2C+dcterms.isPartOf.title%2C+date_diffusion_dt&wt=json&indent=true&dateDiffusionQ=date_diffusion_keyword=2012-05-14&serieTitleQ=*&facet.mincount=1
 

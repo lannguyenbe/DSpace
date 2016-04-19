@@ -1,12 +1,18 @@
 package org.dspace.rtbf.rest.common;
 
 import org.apache.log4j.Logger;
+import org.dspace.content.Collection;
 import org.dspace.content.Metadatum;
 import org.dspace.core.Context;
 import org.dspace.discovery.DiscoverExpandedItems;
+import org.dspace.discovery.DiscoverQuery;
 import org.dspace.discovery.DiscoverResult;
+import org.dspace.discovery.SearchService;
+import org.dspace.discovery.SearchServiceException;
+import org.dspace.discovery.DiscoverResult.SearchDocument;
 import org.dspace.discovery.configuration.DiscoveryHitHighlightFieldConfiguration;
 import org.dspace.rtbf.rest.util.RsDiscoveryConfiguration;
+import org.dspace.utils.DSpace;
 
 import javax.ws.rs.WebApplicationException;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -32,7 +38,13 @@ public class Sequence extends RTBObject{
     	this(viewType, item);
     	setup(viewType, item, expand, context);    	
     }
-    
+
+    public Sequence(int viewType, org.dspace.content.Item item, String expand, Context context
+    		, String docId) throws SQLException, WebApplicationException {
+    	this(viewType, item);
+    	setupDocId(viewType, item, expand, context, docId);    	
+    }
+
     private void setup(int viewType, org.dspace.content.Item item, String expand, Context context) throws SQLException {
     	int innerViewType = 0;
     	
@@ -127,6 +139,73 @@ public class Sequence extends RTBObject{
         
     }
     
+    private void setupDocId(int viewType, org.dspace.content.Item item, String expand, Context context, String docId) throws SQLException {
+        DiscoverResult queryResults;
+  
+    	// 1. Setup from DB metadata
+        this.setup(viewType, item, expand, context);
+    	
+    	// 2. then retouch some metadata with Solr document metatada
+    	try {
+    		queryResults = searchDocId(context, docId);
+			if (queryResults != null && queryResults.getSearchDocument(item).size() > 0) {
+				SearchDocument doc = queryResults.getSearchDocument(item).get(0);
+				this.setupFromSearchDocument(viewType, doc, expand, context);
+			}
+    	} catch (SearchServiceException e) {
+			log.error("Unable to searchDocId : "+ e.getMessage());
+		}    	    	
+    }
+    
+    public void setupFromSearchDocument(int viewType, SearchDocument doc, String expand, Context context) throws SQLException {
+    	
+    	// The doc_ metadata is set in SorlServiceImpl.retrieveResult()
+    	this.setDocId(doc.getSearchFieldValues("doc_uniqueid").get(0));
+    	
+    	int innerViewType = 0;
+    	
+    	switch(viewType) {
+    	case Constants.SEARCH_RESULT_VIEW:
+        	this.setDateIssued(new MetadataEntry(Constants.DATE_ISSUED, doc.getSearchFieldValues("doc_date_issued").get(0), null));
+        	this.setChannelIssued(new MetadataEntry(Constants.CHANNEL_ISSUED, doc.getSearchFieldValues("doc_channel_issued").get(0), null));
+    		innerViewType = Constants.MIN_VIEW;
+    		break;
+    	case Constants.STANDARD_VIEW:
+    		innerViewType = Constants.MIN_VIEW;
+    		break;
+    	default:
+    		innerViewType = viewType;
+    	}
+    	
+        Integer collectionId = Integer.parseInt(doc.getSearchFieldValues("doc_owning_collection").get(0).replaceFirst(String.valueOf(Constants.COLLECTION) + '-', ""));
+
+        if(expand.contains("owningParentList")) {
+            List<RTBObject> entries = new ArrayList<RTBObject>();
+            // collection level
+            org.dspace.content.Collection owningCollection = Collection.find(context, collectionId);
+            entries.add(new Episode(innerViewType, owningCollection, null, context));
+            // serie level
+            org.dspace.content.Community parentCommunity = (org.dspace.content.Community) owningCollection.getParentObject();
+            entries.add(new Serie(innerViewType, parentCommunity, null, context));
+            // repository level
+            org.dspace.content.Community topparentCommunity = parentCommunity.getParentCommunity();
+            if (topparentCommunity != null) { // already at top for orphan item
+            	entries.add(new Serie(innerViewType, topparentCommunity, null, context));
+            }
+            this.setOwningParentList(entries);
+        }
+    	
+        if(expand.contains("owningEpisode")) {
+        	this.setOwningEpisode(new Episode(innerViewType, Collection.find(context, collectionId), null, context));
+        }
+        
+    	if(expand.contains("owningSerie")) {
+            org.dspace.content.Collection owningCollection = Collection.find(context, collectionId);
+            org.dspace.content.Community parentCommunity = (org.dspace.content.Community) owningCollection.getParentObject();
+            this.setOwningSerie(new Serie(innerViewType, parentCommunity, null, context));
+        }
+    }
+        
     public void render(DiscoverResult.DSpaceObjectHighlightResult highlightedResults) {
     	// Cons highlight part for each sequence 
     	Map<String, List<String>> hlEntries = new LinkedHashMap<String, List<String>>();
@@ -155,5 +234,31 @@ public class Sequence extends RTBObject{
     		}
     	}
     }
+    
+    private DiscoverResult searchDocId(Context context, String docId) throws SearchServiceException, SQLException {
+
+        DiscoverResult queryResults;
+    	DiscoverQuery query = new DiscoverQuery();
+        
+        String[] searchFields = {"search.uniqueid"};
+        for (String sf : searchFields) {
+        	query.addSearchField(sf);			
+		}
+        // filter query
+        query.addFilterQueries("search.uniqueid:"+docId);
+        
+        return (getSearchService().search(context, query));
+    }
+
+    protected SearchService getSearchService()
+    {
+        DSpace dspace = new DSpace();
+        
+        org.dspace.kernel.ServiceManager manager = dspace.getServiceManager() ;
+
+        return manager.getServiceByName(SearchService.class.getName(),SearchService.class);
+    }
+
+    
     		                    
 }
