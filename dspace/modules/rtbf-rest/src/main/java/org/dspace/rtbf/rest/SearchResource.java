@@ -188,6 +188,89 @@ public class SearchResource extends Resource {
         Request searchRequest = (Request) params;
         
         String qterms = searchRequest.getQuery();
+    	Boolean isFacet = searchRequest.isFacet();
+    	Integer limit = searchRequest.getLimit();
+    	Integer offset = searchRequest.getOffset();
+    	// String orderBy = searchRequest.getSortField();
+
+    	String expand = params.getExpand();
+
+        org.dspace.core.Context context = null;
+        log.info("Searching episodes(q=" + qterms + ").");
+        SearchResponse response = null;
+        DiscoverResult queryResults = null;
+
+        try {
+            context = new org.dspace.core.Context();
+            context.getDBConnection();
+            
+            // expand the results if there is a query
+            if (qterms != null && qterms.length() > 0) {
+            	expand += ",results";
+            	if (isFacet) { expand += ",facets"; }
+            }
+            queryResults = getQueryResult(org.dspace.core.Constants.COLLECTION, context, searchRequest);
+            response = new EpisodesSearchResponse(queryResults, expand, context, limit, offset);
+            
+            context.complete();
+
+        } catch (Exception e) {
+           processException("Could not process search episodes. Message:"+e.getMessage(), context);
+        } finally {
+           processFinally(context);            
+        }
+
+        return response;
+    }
+
+
+    protected SearchResponse getSeriesSearchResponse(SearchParameters params)
+    {
+        Request searchRequest = (Request) params;
+        
+        String qterms = searchRequest.getQuery();
+    	Boolean isFacet = searchRequest.isFacet();
+    	Integer limit = searchRequest.getLimit();
+    	Integer offset = searchRequest.getOffset();
+
+    	String expand = params.getExpand();
+
+    	org.dspace.core.Context context = null;
+        log.info("Searching series(q=" + qterms + ").");
+        SearchResponse response = null;
+        DiscoverResult queryResults = null;
+
+        try {
+            context = new org.dspace.core.Context();
+            context.getDBConnection();
+            
+            // expand the results if there is a query
+            if (qterms != null && qterms.length() > 0) {
+            	expand += ",results";
+            	if (isFacet) { expand += ",facets"; }
+            }
+	        queryResults = getQueryResult(org.dspace.core.Constants.COMMUNITY, context, searchRequest);
+	        response = new SeriesSearchResponse(queryResults, expand, context, limit, offset);
+
+            context.complete();
+
+        } catch (Exception e) {
+           processException("Could not process search series. Message:"+e.getMessage(), context);
+        } finally {
+           processFinally(context);            
+        }
+
+        return response;
+    }
+    
+
+    // TODO: TODEL 
+
+    protected SearchResponse getCollectionsSearchResponse_old(SearchParameters params)
+    {
+        Request searchRequest = (Request) params;
+        
+        String qterms = searchRequest.getQuery();
     	Integer limit = searchRequest.getLimit();
     	Integer offset = searchRequest.getOffset();
     	String orderBy = searchRequest.getSortField();
@@ -225,8 +308,7 @@ public class SearchResource extends Resource {
         return response;
     }
     
-
-    protected SearchResponse getSeriesSearchResponse(SearchParameters params)
+    protected SearchResponse getSeriesSearchResponse_old(SearchParameters params)
     {
         Request searchRequest = (Request) params;
         

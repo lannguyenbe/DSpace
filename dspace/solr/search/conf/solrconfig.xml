@@ -968,8 +968,8 @@
               - inside Tramontane when multiple programs share the same sequence;
               - between Tramontane & Sonuma -->
          <!-- str name="fq">{!collapse field=identifier_origin max=identifier_weight nullPolicy=expand}</str-->
-         <!-- Lan 22.03.2016 : within Tramontane, choose the shortest search.uniqueid  -->
-         <str name="fq">{!collapse field=identifier_origin max=sub(identifier_weight,ord(search.uniqueid)) nullPolicy=expand}</str>
+         <!-- Lan 15.04.2016 : within Tramontane since dup item (dup handle), choose the earliest -->
+         <str name="fq">{!collapse field=identifier_origin max=sum(log(identifier_weight),recip(date_issued_dt,1,1,1)) nullPolicy=expand}</str>
          <str name="expand">true</str>
        </lst>
     <!-- "invariants" are a way of letting the Solr maintainer lock down
@@ -1047,8 +1047,8 @@
             - inside Tramontane when multiple programs share the same sequence;
             - between Tramontane & Sonuma -->
        <!-- str name="fq">{!collapse field=identifier_origin max=identifier_weight nullPolicy=expand}</str-->
-       <!-- Lan 22.03.2016 : since the duplication of sequence by its diffusion, within Tramontane, choose the sequence document with shortest search.uniqueid  -->
-       <str name="fq">{!collapse field=identifier_origin max=sub(identifier_weight,ord(search.uniqueid)) nullPolicy=expand}</str>
+       <!-- Lan 22.03.2016 : since the duplication of sequence by its diffusion, within Tramontane, choose the sequence document the earliest  -->
+       <str name="fq">{!collapse field=identifier_origin max=sum(log(identifier_weight),recip(date_issued_dt,3.16e-11,1,1)) nullPolicy=expand}</str>
        <str name="expand">true</str>
      </lst>
     </requestHandler>
@@ -1262,7 +1262,8 @@
        <str name="mm">3&lt;-25% 9&lt;-3</str>
        <str name="pf">search_text^50</str>
        <str name="ps">5</str>
-       <str name="serieTitleFQ">{! df=dc.title v=$serieTitleQ}</str>
+       <!-- do not delete *:* AND -->
+       <str name="serieTitleFQ">(*:* AND {! df=dc.title v=$serieTitleQ})</str>
      </lst>
      <lst name="appends">
        <str name="fq">{!query v=$serieTitleFQ}</str>

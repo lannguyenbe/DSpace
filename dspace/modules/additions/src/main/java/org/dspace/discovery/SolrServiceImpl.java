@@ -2198,12 +2198,12 @@ public class SolrServiceImpl implements SearchService, IndexingService {
             String value = dit.getDate_diffusion();
             Date value_dt = MultiFormatDateParser.parse(value);
             value = DateFormatUtils.formatUTC(value_dt, "yyyy-MM-dd");
+            String yearUTC = DateFormatUtils.formatUTC(value_dt, "yyyy");
             /* searchFilter of this name exists in discovery.conf */
             String indexFieldName = "date_issued";
         	doc.setField(indexFieldName + "_dt", value_dt);
         	doc.setField(indexFieldName + "_keyword", value);
-            String yearUTC = DateFormatUtils.formatUTC(value_dt, "yyyy");
-        	doc.setField(indexFieldName + "_keyword", yearUTC);
+        	doc.addField(indexFieldName + "_keyword", yearUTC);
         	doc.setField(indexFieldName + "_contain", value);
         	doc.setField(indexFieldName, value);
             /* sortFieldConfig of this name exists in discovery.conf */
@@ -2649,7 +2649,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 //18.04.2016 Lan : fiels that are different among dup items
                 resultDoc.addSearchField("doc_uniqueid", (String) doc.getFieldValue("search.uniqueid"));
                 resultDoc.addSearchField("doc_owning_collection", (String) doc.getFieldValue("owning_collection"));                
-                resultDoc.addSearchField("doc_date_issued", DateFormatUtils.formatUTC((Date) doc.getFieldValue("date_issued_dt"),"yyyy-MM-dd'T'HH:mm:ss'Z'"));
+                resultDoc.addSearchField("doc_date_issued", (doc.getFieldValue("date_issued_dt") == null) ? null : DateFormatUtils.formatUTC((Date) doc.getFieldValue("date_issued_dt"),"yyyy-MM-dd'T'HH:mm:ss'Z'"));
                 resultDoc.addSearchField("doc_channel_issued", (String) doc.getFieldValue("rtbf.channel_issued"));
 
                 //Add information about our search fields

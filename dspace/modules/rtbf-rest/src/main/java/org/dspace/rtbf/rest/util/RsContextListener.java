@@ -33,7 +33,7 @@ public class RsContextListener implements ServletContextListener {
 	    Properties sortableEntries = new Properties();
 	    while ((definition = ConfigurationManager.getProperty(Constants.WEBAPP_NAME, Constants.SORTMETA+".field." + idx)) != null) {
 	        List<String> fields = new ArrayList<String>();
-	        fields = Arrays.asList(definition.split(":"));
+	        fields = Arrays.asList(definition.split(":", 2));
             sortableEntries.put(fields.get(0), fields.get(1));
 	    	
 	    	idx++;
@@ -45,7 +45,7 @@ public class RsContextListener implements ServletContextListener {
 	    Properties namingEntries = new Properties();
 	    while ((definition = ConfigurationManager.getProperty(Constants.WEBAPP_NAME, Constants.NAMINGMETA+".field." + idx)) != null) {
 	        List<String> fields = new ArrayList<String>();
-	        fields = Arrays.asList(definition.split(":"));
+	        fields = Arrays.asList(definition.split(":", 2));
             namingEntries.put(fields.get(0), fields.get(1));
 	    	
 	    	idx++;
@@ -57,7 +57,7 @@ public class RsContextListener implements ServletContextListener {
 	    Properties filterEntries = new Properties();
 	    while ((definition = ConfigurationManager.getProperty(Constants.WEBAPP_NAME, Constants.FILTERMETA+".field." + idx)) != null) {
 	        List<String> fields = new ArrayList<String>();
-	        fields = Arrays.asList(definition.split(":"));
+	        fields = Arrays.asList(definition.split(":", 2));
             filterEntries.put(fields.get(0), fields.get(1));
 	    	
 	    	idx++;

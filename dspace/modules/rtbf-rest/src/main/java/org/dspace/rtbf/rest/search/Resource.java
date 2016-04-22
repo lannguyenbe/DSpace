@@ -297,8 +297,13 @@ public abstract class Resource
     		query.addFilterQueries(fq);
     	}
 
+    	// Search properties
+    	Map<String,String> sps = getFilterProperties(context, searchRequest);
+    	for (Map.Entry<String, String> sp : sps.entrySet()) {
+    		query.addProperty(sp.getKey(), sp.getValue());
+		}
 
-        // Facetting and facet pagination
+    	// Facetting and facet pagination
     	if (searchRequest.isFacet()) {
     		int facetLimit = searchRequest.getFacetLimit();
     		int facetOffset = searchRequest.getFacetOffset() * facetLimit;
@@ -367,7 +372,9 @@ public abstract class Resource
 
             if(StringUtils.isNotBlank(filterValue)){
             	if (filterType.equals("*")) { return new String[0]; } // any filterType = not filter at all
-                filterType = getSearchFilterName(filterType); // get searchFilter name from filterType front end name from rtbf-rest.cfg
+                filterType = getSearchFilterName(filterType); // get searchFilter name from filterType front end name in rtbf-rest.cfg
+
+                if (filterType == null) { continue; }
                 boolean isIndexed = RsDiscoveryConfiguration.getSearchFilters().containsKey(filterType); // verify if searchFilter is configured in discovery.xml
                 try {
                 	allFilterQueries.add(getSearchService().toFilterQuery(context
@@ -383,17 +390,72 @@ public abstract class Resource
 		return allFilterQueries.toArray(new String[allFilterQueries.size()]);
 	}
 	
+	// Lan 20.04.2016 : Some search filters become raw properties
+	public Map<String,String> getFilterProperties(Context context, Request searchRequest) {
+		
+		Map<String,String> allFilterProperties = new HashMap<String, String>();
+		
+		for (Map<String, String> fq : searchRequest.getParameterFilterQueries()) {
+            String filterType = fq.get("filtertype");
+            String filterOperator = fq.get("filter_relational_operator");
+            String filterValue = fq.get("filter");
+            
+            String rawProperty;
+
+            if(StringUtils.isNotBlank(filterValue)){
+            	if (filterType.equals("*")) { return allFilterProperties; } // any filterType = not filter at all
+            	String strArray[] = new String[] { filterType, null };
+                rawProperty = getSearchFilterProperty(strArray); // get Property name from filterType front end name in rtbf-rest.cfg
+                if (rawProperty == null) { continue; }
+                filterType = strArray[1];
+                boolean isIndexed = RsDiscoveryConfiguration.getSearchFilters().containsKey(filterType); // verify if searchFilter is configured in discovery.xml
+                try {
+                	String propVal;
+                	propVal = getSearchService().toFilterQuery(context
+                			, (isIndexed || filterType.matches("'(.+)'")) ? filterType 
+                					: "'"+filterType+"'" // within quote the filterType stayed unchanged, not suffix by _keyword or _partial
+                			, filterOperator, filterValue).getFilterQuery();
+
+                	allFilterProperties.put(rawProperty, propVal); 
+
+                } catch (SQLException e) {
+                	break;
+                }
+           }
+		}
+
+		return allFilterProperties;
+	}
+	
+	
 	protected String getSearchFilterName(String key) {
 		Properties mapper = (Properties) RsConfigurationManager.getInstance().getAttribute(org.dspace.rtbf.rest.common.Constants.FILTERMETA);
 		if (mapper != null) {
-	    	String label = mapper.getProperty(key);
-	    	if (label != null) {
-	    		return label;
+	    	String definition = mapper.getProperty(key);
+	    	if (definition != null) {
+	    		String parts[] = definition.split(":");
+	    		if (parts.length > 1) { return null; }
+	    		return definition;
 	    	}
 		}
     	return key;
 	}
-
+	
+	protected String getSearchFilterProperty(String[] keys) {
+		String key = keys[0];
+		Properties mapper = (Properties) RsConfigurationManager.getInstance().getAttribute(org.dspace.rtbf.rest.common.Constants.FILTERMETA);
+		if (mapper != null) {
+	    	String definition = mapper.getProperty(key);
+	    	if (definition != null) {
+	    		String parts[] = definition.split(":");
+	    		if (parts.length > 1) {
+	    			keys[1] = parts[0];
+	    			return parts[1];
+	    		}
+	    	}
+		}
+    	return null;
+	}	
 
     // Date Math
     public static final String _DT = "_dt";
@@ -605,6 +667,7 @@ public abstract class Resource
     	String[] fqs = getFilterQueries(context, searchRequest);
     	for (String fq : fqs) {
     		query.addFilterQueries(fq);
+    		
     	}
 
     	// 2. Perform query
