@@ -230,7 +230,7 @@ public class IndexClient {
             checkRebuildSpellCheck(line, indexer2);
         } else if (line.hasOption("S")) { /* Lan 15.09.2015 */
             log.info("Sync the index to the database based on t_handle_log.");
-            indexer2.updateIndexS(context, true);
+            indexer2.updateIndexS(contextRO, true);
             checkRebuildSpellCheck(line, indexer2);
         } else if (line.hasOption("C")) { /* Lan 21.11.2014 */
             log.info("(Re)building index for the community id.");
