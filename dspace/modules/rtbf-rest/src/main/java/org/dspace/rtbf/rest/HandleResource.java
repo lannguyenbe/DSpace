@@ -133,7 +133,29 @@ public class HandleResource {
         }
     }
     
+    @GET
+    @Path("/admin/clearCache")
+    @Produces({MediaType.TEXT_PLAIN})
+    public String clearCache(@Context HttpServletRequest request) throws WebApplicationException
+    // TODO : add WithAuthorizea 27.04.2016
+    {
+    	String done = "Done";
+    	
+    	try {
+    		if (!(context == null || !context.isValid())) {
+    			context.complete();
+    		}
+    	} catch (SQLException e) {
+            log.error(e.getMessage());
+            throw new WebApplicationException(e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
+    	}
 
+		return done;
+    }
+    
+    
+    
+    // Not use
     public org.dspace.rtbf.rest.common.RTBObject getObjectWithAuthorize(@PathParam("prefix") String prefix, @PathParam("suffix") String suffix
     		, @QueryParam("expand") String expand
     		, @QueryParam("omitExpand") @DefaultValue("true") boolean omitExpand
