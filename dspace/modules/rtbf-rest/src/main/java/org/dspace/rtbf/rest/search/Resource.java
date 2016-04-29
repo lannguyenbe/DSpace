@@ -406,7 +406,7 @@ public abstract class Resource
             	if (filterType.equals("*")) { return allFilterProperties; } // any filterType = not filter at all
             	String strArray[] = new String[] { filterType, null };
                 rawProperty = getSearchFilterProperty(strArray); // get Property name from filterType front end name in rtbf-rest.cfg
-                if (rawProperty == null) { continue; }
+                if (rawProperty == null) { continue; } // not a property
                 filterType = strArray[1];
                 boolean isIndexed = RsDiscoveryConfiguration.getSearchFilters().containsKey(filterType); // verify if searchFilter is configured in discovery.xml
                 try {

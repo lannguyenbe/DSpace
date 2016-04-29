@@ -53,6 +53,9 @@
                <!--Use site to override the default configuration for the home page & default discovery page-->
                <entry key="site" value-ref="homepageConfiguration" />
                <!--<entry key="123456789/7621" value-ref="defaultConfiguration"/>-->
+
+               <!--Community-->
+               <entry key="COMMUNITY" value-ref="communityConfiguration" />
             </map>
         </property>
         <property name="toIgnoreMetadataFields">
@@ -94,6 +97,34 @@
                     </list>
                 </entry>
             </map>
+        </property>
+    </bean>
+
+    <!--The configuration settings for COMMUNITY for discovery-->
+    <bean id="communityConfiguration" class="org.dspace.discovery.configuration.DiscoveryConfiguration" scope="prototype">
+        <property name="sidebarFacets">
+            <list>
+                <ref bean="searchFilterIdAttributor" />
+            </list>
+        </property>
+        <property name="searchFilters">
+            <list>
+                <ref bean="searchFilterIdAttributor" />
+                <ref bean="searchFilterTitle" />
+            </list>
+        </property>
+        <property name="searchSortConfiguration">
+            <bean class="org.dspace.discovery.configuration.DiscoverySortConfiguration">
+                <!--<property name="defaultSort" ref="sortDateIssued"/>-->
+                <!--DefaultSortOrder can either be desc or asc (desc is default)-->
+                <property name="defaultSortOrder" value="desc"/>
+                <property name="sortFields">
+                    <list>
+                        <ref bean="sortTitle" />
+                        <ref bean="sortDateIssued" />
+                    </list>
+                </property>
+            </bean>
         </property>
     </bean>
 

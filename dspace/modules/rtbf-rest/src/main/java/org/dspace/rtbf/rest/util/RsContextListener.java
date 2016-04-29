@@ -70,7 +70,7 @@ public class RsContextListener implements ServletContextListener {
         // Get List of highlight fields from discovery.xml
         // Get List of searchFilter fields from discovery.xml
         RsDiscoveryConfiguration discoveryConfig = RsDiscoveryConfiguration.getInstance();
-        discoveryConfig.setConfiguration(SearchUtils.getDiscoveryConfiguration());
+        discoveryConfig.setConfiguration(SearchUtils.getAllDiscoveryConfigurations());
 		
 	}
 

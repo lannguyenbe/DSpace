@@ -13,7 +13,7 @@ public class RsDiscoveryConfiguration {
 	
 	private static RsDiscoveryConfiguration instance = new RsDiscoveryConfiguration();
 	
-	private org.dspace.discovery.configuration.DiscoveryConfiguration config;
+	private List<org.dspace.discovery.configuration.DiscoveryConfiguration> configs;
 	private List<org.dspace.discovery.configuration.DiscoveryHitHighlightFieldConfiguration> highlightFields = new ArrayList<DiscoveryHitHighlightFieldConfiguration>();
 	private Map<String, org.dspace.discovery.configuration.DiscoverySearchFilter> searchFilters = new HashMap<String, DiscoverySearchFilter>();
 	
@@ -21,21 +21,26 @@ public class RsDiscoveryConfiguration {
 		return instance;
 	}
 	
-	public void setConfiguration(DiscoveryConfiguration config) {
-		this.config = config;
-		if (config.getHitHighlightingConfiguration() != null) {
-			this.highlightFields = config.getHitHighlightingConfiguration().getMetadataFields();
-		}
-		if (config.getSearchFilters() != null) {
-			for (DiscoverySearchFilter sf : config.getSearchFilters()) {
-				String indexField = sf.getIndexFieldName();
-				this.searchFilters.put(indexField, sf);
+	public void setConfiguration(List<DiscoveryConfiguration> configs) {
+		this.configs = configs;
+
+		for (DiscoveryConfiguration config : configs) {	
+			if (config.getId().equals("homepageConfiguration") && config.getHitHighlightingConfiguration() != null) {
+				if (config.getHitHighlightingConfiguration() != null) {
+					this.highlightFields = config.getHitHighlightingConfiguration().getMetadataFields();
+				}
+			}
+			if (config.getSearchFilters() != null) {
+				for (DiscoverySearchFilter sf : config.getSearchFilters()) {
+					String indexField = sf.getIndexFieldName();
+					this.searchFilters.put(indexField, sf);
+				}
 			}
 		}
 	}
 	
-	public DiscoveryConfiguration getConfig() {
-		return this.config;
+	private List<DiscoveryConfiguration> getConfigs() {
+		return this.configs;
 	}
 	
 	public static List<DiscoveryHitHighlightFieldConfiguration> getHighlightFieldConfigurations() {

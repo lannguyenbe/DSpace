@@ -1360,6 +1360,9 @@ public class SolrServiceImpl implements SearchService, IndexingService {
             case "dc.title":
                 doc.addField(field, value);
                 doc.addField(field + "_sort", value);
+                // Lan 28.04.2016 :to search exactly on serie title
+                doc.addField("title_keyword", value);
+                doc.addField("title_contain", value);
                 break;
             case "rtbf.identifier.attributor":
             case "rtbf.royalty_code":
@@ -1593,7 +1596,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         List<String> sortFieldsAdded = new ArrayList<String>();
         // Set<String> hitHighlightingFields = new HashSet<String>(); // Lan 16.02.2016 : not use anymore
         try {
-            List<DiscoveryConfiguration> discoveryConfigurations = SearchUtils.getAllDiscoveryConfigurations(item);
+            List<DiscoveryConfiguration> discoveryConfigurations = SearchUtils.getDiscoveryConfigurations(item);
 
             //A map used to save each sidebarFacet config by the metadata fields
             Map<String, List<DiscoverySearchFilter>> searchFilters = new HashMap<String, List<DiscoverySearchFilter>>();
