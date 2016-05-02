@@ -82,7 +82,7 @@ public class Episode extends RTBObject {
             this.addExpand("owningParentList");
         }
 
-        //Item paging : limit, offset/page
+        // Item paging : limit, offset/page
         if(expandFields.contains("sequences") || expandFields.contains("all")) {
             ItemIterator childItems;
             
@@ -92,11 +92,14 @@ public class Episode extends RTBObject {
                 offset = 0;
             }
             
-            childItems = collection.getItems(limit, offset);
+            // Lan 02.05.2016 : order by date diffusion
+            childItems = collection.getItemsOrderByDateDiffusion(limit, offset);
         	List<Sequence> entries = new ArrayList<Sequence>();
             while(childItems.hasNext()) {
                 org.dspace.content.Item item = childItems.next();
-                	entries.add(new Sequence(innerViewType, item, null, context));
+                	// entries.add(new Sequence(innerViewType, item, null, context));
+                	// Lan 02.05.2016 = with Constants.SEARCH_RESULT_VIEW to get date diffusion and channel
+                	entries.add(new Sequence(Constants.SEARCH_RESULT_VIEW, item, null, context));
             }
             this.setSequences(entries);
         } else {

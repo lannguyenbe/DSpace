@@ -15,7 +15,7 @@ public class HandleLog {
     protected Context ourContext;
 
     /** log4j category */
-    private static final Logger log = Logger.getLogger(DSpaceObject.class);
+    private static final Logger log = Logger.getLogger(HandleLog.class);
 
     private final TableRow handleLogRow;
 	

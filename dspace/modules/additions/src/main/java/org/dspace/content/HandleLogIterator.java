@@ -62,7 +62,7 @@ public class HandleLogIterator {
 
 	
 	/**
-	 * Inner class
+	 * Inner class - not used
 	 * @author nln
 	 *
 	 */
