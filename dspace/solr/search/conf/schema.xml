@@ -672,6 +672,10 @@
    <!--<copyField source="dc.creator" dest="dc.contributor.author_filter"/>-->
    <!--<copyField source="dc.creator" dest="dc.contributor.author_sort"/>-->
 
+   <!-- use by rtbf-rest LOV on contributor name  --> 
+   <copyField source="dc.contributor.author" dest="author_keyword" />
+   <copyField source="dc.contributor.author" dest="author_partial" />
+
 
  	<!--Dynamic field used to store metadata for projection-->
     <dynamicField name="*_stored" type="dspaceMetadataProjection" indexed="false" stored="true" multiValued="true"/>

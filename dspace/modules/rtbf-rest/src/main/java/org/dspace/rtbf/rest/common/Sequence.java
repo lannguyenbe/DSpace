@@ -49,6 +49,7 @@ public class Sequence extends RTBObject{
     	int innerViewType = 0;
     	
     	switch(viewType) {
+    	case Constants.PLAYLIST_VIEW:
     	case Constants.SEARCH_RESULT_VIEW:
     		this.setDateIssued(getMetadataEntry(Constants.DATE_ISSUED,item));
     		this.setChannelIssued(getMetadataEntry(Constants.CHANNEL_ISSUED,item));

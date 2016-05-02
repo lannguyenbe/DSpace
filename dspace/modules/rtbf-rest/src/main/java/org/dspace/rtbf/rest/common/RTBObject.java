@@ -117,6 +117,7 @@ public class RTBObject {
             setRoyaltyRemark(getMetadataEntry(Constants.ROYALTY_REMARK,dso));
             setDescriptionAbstract(getMetadataEntry(Constants.ABSTRACT,dso));
             break;
+    	case Constants.PLAYLIST_VIEW:
     	case Constants.STANDARD_VIEW:
     	case Constants.MIN_VIEW:
     		disableExpand();

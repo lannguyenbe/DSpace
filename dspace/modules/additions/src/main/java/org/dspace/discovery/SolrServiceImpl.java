@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -1360,9 +1361,12 @@ public class SolrServiceImpl implements SearchService, IndexingService {
             case "dc.title":
                 doc.addField(field, value);
                 doc.addField(field + "_sort", value);
-                // Lan 28.04.2016 :to search exactly on serie title
+                // Lan 28.04.2016 : for "equals" search on serie title
                 doc.addField("title_keyword", value);
+                // Lan 28.04.2016 : for "contains" search on serie title
                 doc.addField("title_contain", value);
+                // Lan 02.05.2016 : for LOV on serie title
+                doc.addField("title_partial", value);
                 break;
             case "rtbf.identifier.attributor":
             case "rtbf.royalty_code":
@@ -1596,7 +1600,8 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         List<String> sortFieldsAdded = new ArrayList<String>();
         // Set<String> hitHighlightingFields = new HashSet<String>(); // Lan 16.02.2016 : not use anymore
         try {
-            List<DiscoveryConfiguration> discoveryConfigurations = SearchUtils.getDiscoveryConfigurations(item);
+        	// Lan 02.05.2014 : this list contains only 1 configuration, the one specific to item
+        	List<DiscoveryConfiguration> discoveryConfigurations = Arrays.asList(SearchUtils.getDiscoveryConfiguration(item));
 
             //A map used to save each sidebarFacet config by the metadata fields
             Map<String, List<DiscoverySearchFilter>> searchFilters = new HashMap<String, List<DiscoverySearchFilter>>();

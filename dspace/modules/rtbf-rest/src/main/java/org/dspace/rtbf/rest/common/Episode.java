@@ -98,8 +98,8 @@ public class Episode extends RTBObject {
             while(childItems.hasNext()) {
                 org.dspace.content.Item item = childItems.next();
                 	// entries.add(new Sequence(innerViewType, item, null, context));
-                	// Lan 02.05.2016 = with Constants.SEARCH_RESULT_VIEW to get date diffusion and channel
-                	entries.add(new Sequence(Constants.SEARCH_RESULT_VIEW, item, null, context));
+                	// Lan 02.05.2016 = with Constants.PLAYLIST_VIEW to get date diffusion and channel
+                	entries.add(new Sequence(Constants.PLAYLIST_VIEW, item, null, context));
             }
             this.setSequences(entries);
         } else {

@@ -23,7 +23,12 @@ import org.dspace.rtbf.rest.search.Resource;
 public class LOVIsPartOfTitles extends Resource {
     private static Logger log = Logger.getLogger(LOVIsPartOfTitles.class);
     
-    public static final String FACETFIELD = "ispartof_title";
+    // public static final String FACETFIELD = "ispartof_title";
+    /*
+     *  Lan 02.05.2015 : now is list of title of all communitites even if there is no child sequence
+     *  title_keyword only exists for idocument of resource_type_id=4
+     */
+    public static final String FACETFIELD = "title";
     public static final SimpleNode.Attribute ELEMENT = SimpleNode.Attribute.TITLE;
 
     

@@ -44,6 +44,7 @@ public class SearchUtils {
         return getDiscoveryConfiguration(null);
     }
 
+    // Lan 02.05.2016 : use in builDocument for Item
     public static DiscoveryConfiguration getDiscoveryConfiguration(DSpaceObject dso){
         DiscoveryConfigurationService configurationService = getConfigurationService();
 
@@ -84,6 +85,10 @@ public class SearchUtils {
      * A configuration object can be returned for each parent community/collection
      * @param item the DSpace item
      * @return a list of configuration objects
+     * 
+     * 02.05.2016 Lan : there was a bug in getId (which returns always null), this function used to return only 1 configuration, the "site" one;
+     * by now it returns many configurations, at least 2 : the "default" and the "site" configurations,
+     * this causes failure when builDocument for Item : for instance due to multiple add values to a single value field identifier_origin
      */
     public static List<DiscoveryConfiguration> getAllDiscoveryConfigurations(Item item) throws SQLException {
         Map<String, DiscoveryConfiguration> result = new HashMap<String, DiscoveryConfiguration>();
@@ -137,7 +142,6 @@ public class SearchUtils {
     
 
 
-    // Lan 28.04.2016 : use in builDocument
     public static List<DiscoveryConfiguration> getDiscoveryConfigurations(DSpaceObject dso) throws SQLException {
         Map<String, DiscoveryConfiguration> result = new HashMap<String, DiscoveryConfiguration>();
         
@@ -146,7 +150,7 @@ public class SearchUtils {
             result.put(configuration.getId(), configuration);
         }
 
-        //Also add one for the default
+        // Also add one for the site
         configuration = getDiscoveryConfiguration(null);
         if(!result.containsKey(configuration.getId())){
             result.put(configuration.getId(), configuration);
