@@ -541,20 +541,32 @@ public abstract class Resource
 
 		// Get results count from 12 last months
         DiscoverQuery yearRangeQuery = new DiscoverQuery();
+        
+        // Build this query from main query :
+        // 1. add q
         yearRangeQuery.setQuery(query.getQuery());
+        // 2. add filters
         yearRangeQuery.setDSpaceObjectFilter(query.getDSpaceObjectFilter());
         for (String f : query.getFilterQueries()) {
         	yearRangeQuery.addFilterQueries(f);
         }
+        // 3. add properties
+        Map<String, List<String>> sps = query.getProperties();
+        for (String k : sps.keySet()) {
+        	yearRangeQuery.addProperty(k, sps.get(k).get(0));
+        }
+        // get count of results only
         yearRangeQuery.setMaxResults(0);
 
-		yearRangeQuery.addFilterQueries(dateFacet + ":[ NOW/DAY-1YEAR TO NOW ]");
+		// add filter within last 12 months
+        yearRangeQuery.addFilterQueries(dateFacet + ":[ NOW/DAY-1YEAR TO NOW ]");
         DiscoverResult last12MonthsResult = getSearchService().search(context, yearRangeQuery);
+
         if (last12MonthsResult.getTotalSearchResults() > 0) { // result found within 12 months
 			for (Map.Entry<String, String[]> todayMath : _DTMATH.entrySet()) {
         		query.addFacetQuery(todayMath.getValue()[0].replaceFirst("\\$\\{keyName\\}", keyName)  + dateFacet + ":" + todayMath.getValue()[1]);					
 			}        	
-        } else { // no result found within 12 months
+        } else { // no result found within last 12 months
         	addDateFacet(keyName, dateFacet, yearFacet, query, context);       	
         }
 	}
@@ -565,15 +577,24 @@ public abstract class Resource
         int newestYear = -1;
 
            
-        // Get the oldest year
+        // Build yearRangeQuery from main query :
         DiscoverQuery yearRangeQuery = new DiscoverQuery();
+        // 1. add q
         yearRangeQuery.setQuery(query.getQuery());
+        // 2. add filters
         yearRangeQuery.setDSpaceObjectFilter(query.getDSpaceObjectFilter());
         for (String f : query.getFilterQueries()) {
         	yearRangeQuery.addFilterQueries(f);
         }
+        // 3. add properties
+        Map<String, List<String>> sps = query.getProperties();
+        for (String k : sps.keySet()) {
+        	yearRangeQuery.addProperty(k, sps.get(k).get(0));
+        }
+        // get only 1 result
         yearRangeQuery.setMaxResults(1);
 
+        // First get the oldest year
         //Set our query to anything that has this value
         yearRangeQuery.addFieldPresentQueries(yearFacet);
         //Set sorting so our last value will appear on top
