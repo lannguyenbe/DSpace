@@ -1361,6 +1361,8 @@ public class SolrServiceImpl implements SearchService, IndexingService {
             case "dc.title":
                 doc.addField(field, value);
                 doc.addField(field + "_sort", value);
+                // Lan 04.05.2016 : for "notequals" and "notcontains" search on serie title
+                doc.addField("title", value);
                 // Lan 28.04.2016 : for "equals" search on serie title
                 doc.addField("title_keyword", value);
                 // Lan 28.04.2016 : for "contains" search on serie title

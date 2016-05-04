@@ -1036,10 +1036,15 @@
        <!-- To filter on Serie Title or Date Diffusion : fq={!query v=$serieTitleFQ}; 2 raw query params: serieTitleQ=dc.title:BULLETIN&dateDiffusionQ=date_diffusion_keyword:2015  -->
        <!-- str name="serieTitleFQ">{!join from=search.uniqueid to=location.collection}(search.resourcetype:3 AND {!query v=$dateDiffusionQ} AND _query_:"{!join from=search.uniqueid to=location.community}(search.resourcetype:4 AND {! df=dc.title v=$serieTitleQ})")</str-->
        <!-- use owning_collection instead of location.collection since then duplication of sequence document -->
-       <str name="serieTitleFQ">{!join from=search.uniqueid to=owning_collection}(search.resourcetype:3 AND {!query v=$dateDiffusionQ} AND _query_:"{!join from=search.uniqueid to=location.community}(search.resourcetype:4 AND {! df=dc.title v=$serieTitleQ})")</str>
+       <!-- str name="serieTitleFQ">{!join from=search.uniqueid to=owning_collection}(search.resourcetype:3 AND {!query v=$dateDiffusionQ} AND _query_:"{!join from=search.uniqueid to=location.community}(search.resourcetype:4 AND {! df=dc.title v=$serieTitleQ})")</str-->
+       <!-- str name="notserieTitleFQ">{!join from=search.uniqueid to=owning_collection}(search.resourcetype:3 AND {!query v=$dateDiffusionQ} AND _query_:"{!join from=search.uniqueid to=location.community}(search.resourcetype:4 AND NOT {! df=dc.title v=$serieTitleQ})")</str-->
+       <!-- Since dup item on diffusion date, join to episode is no more useful -->
+       <str name="serieTitleFQ">{!join from=search.uniqueid to=owning_community}(search.resourcetype:4 AND {! df=dc.title v=$serieTitleQ})</str>
+       <str name="notserieTitleFQ">{!join from=search.uniqueid to=owning_community}(search.resourcetype:4 AND NOT {! df=dc.title v=$serieTitleQ})</str>
      </lst>
      <lst name="appends">
-       <str name="fq">{!query v=$serieTitleFQ}</str>
+       <!-- Programmatically add $serieTitleFQ or $notserieTitleFQ -->
+       <!-- str name="fq">{!query v=$serieTitleFQ}</str-->
        <!-- the following is useful if none of FQ filter is enabled -->
        <str name="fq">search.resourcetype:2</str>
        <!-- Lan 09.02.2015 : Impose this default filter query to collapse multiple

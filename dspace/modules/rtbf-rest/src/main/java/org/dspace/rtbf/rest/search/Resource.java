@@ -298,9 +298,13 @@ public abstract class Resource
     	}
 
     	// Search properties
-    	Map<String,String> sps = getFilterProperties(context, searchRequest);
-    	for (Map.Entry<String, String> sp : sps.entrySet()) {
-    		query.addProperty(sp.getKey(), sp.getValue());
+    	Map<String,String[]> sps = getFilterProperties(context, searchRequest);
+    	for (Map.Entry<String, String[]> sp : sps.entrySet()) {
+    		query.addProperty(sp.getKey(), sp.getValue()[0]);
+    		String fq = sp.getValue()[1];
+    		if (fq != null) {
+        		query.addFilterQueries(fq);    			
+    		}
 		}
 
     	// Facetting and facet pagination
@@ -391,7 +395,61 @@ public abstract class Resource
 	}
 	
 	// Lan 20.04.2016 : Some search filters become raw properties
-	public Map<String,String> getFilterProperties(Context context, Request searchRequest) {
+	public Map<String,String[]> getFilterProperties(Context context, Request searchRequest) {
+		
+		Map<String,String[]> allFilterProperties = new HashMap<String, String[]>();
+		
+		for (Map<String, String> fq : searchRequest.getParameterFilterQueries()) {
+            String filterType = fq.get("filtertype");
+            String filterOperator = fq.get("filter_relational_operator");
+            String filterValue = fq.get("filter");
+            
+            String rawProperty;
+
+            if(StringUtils.isNotBlank(filterValue)){
+            	if (filterType.equals("*")) { return allFilterProperties; } // any filterType = not filter at all
+            	String strArray[] = new String[] { filterType, null, null };
+                rawProperty = getSearchFilterProperty(strArray); // get Property name from filterType front end name in rtbf-rest.cfg
+                if (rawProperty == null) { continue; } // not a property
+                // if strArray.length < 3 then there id no specific FQ
+                // if strArray.length > 2 then ...
+                String[] mapValue = new String[] {null, null};
+                filterType = strArray[1];
+                boolean isIndexed = RsDiscoveryConfiguration.getSearchFilters().containsKey(filterType); // verify if searchFilter is configured in discovery.xml
+                try {
+                	String propVal;
+                	propVal = getSearchService().toFilterQuery(context
+                			, (isIndexed || filterType.matches("'(.+)'")) ? filterType 
+                					: "'"+filterType+"'" // within quote the filterType stayed unchanged, not suffix by _keyword or _partial
+                			, filterOperator, filterValue).getFilterQuery();
+
+                    // if strArray.length > 2 then ...
+                	if (strArray.length > 2) {
+	                    String propFQ;
+	                    propFQ = strArray[2];
+	                    if (filterOperator.startsWith("not")) {
+	                    	mapValue[0] = propVal.substring(1); // remove "-"
+	                    	mapValue[1] = "{!query v=$not"+ propFQ +"}"; // use "not"+<propFQ> predefined variable
+	                    } else {
+	                    	mapValue[0] = propVal;
+	                    	mapValue[1] = "{!query v=$"+ propFQ +"}";                    	
+	                    }
+                	} else {
+                		mapValue[0] = propVal;
+                	}
+
+                	allFilterProperties.put(rawProperty, mapValue); 
+
+                } catch (SQLException e) {
+                	break;
+                }
+           }
+		}
+
+		return allFilterProperties;
+	}
+
+	public Map<String,String> getFilterProperties_old(Context context, Request searchRequest) {
 		
 		Map<String,String> allFilterProperties = new HashMap<String, String>();
 		
@@ -441,15 +499,18 @@ public abstract class Resource
     	return key;
 	}
 	
-	protected String getSearchFilterProperty(String[] keys) {
-		String key = keys[0];
+	protected String getSearchFilterProperty(String[] keyArray) {
+		String key = keyArray[0];
 		Properties mapper = (Properties) RsConfigurationManager.getInstance().getAttribute(org.dspace.rtbf.rest.common.Constants.FILTERMETA);
 		if (mapper != null) {
 	    	String definition = mapper.getProperty(key);
 	    	if (definition != null) {
 	    		String parts[] = definition.split(":");
 	    		if (parts.length > 1) {
-	    			keys[1] = parts[0];
+	    			keyArray[1] = parts[0];
+		    		if (parts.length > 2) {
+		    			keyArray[2] = parts[2];
+		    		}
 	    			return parts[1];
 	    		}
 	    	}
