@@ -469,16 +469,18 @@ public class Collection extends DSpaceObject
     // Lan 29.04.2016
     public ItemIterator getItemsOrderByDateDiffusion() throws SQLException
     {
-        String myQuery = "SELECT item.* "
-        		+ " FROM collection2item c2i, t_diffusion diff, item"
-        		+ " WHERE c2i.collection_id = ? "
-                + " AND diff.collection_id (+) = c2i.collection_id"
-                + " AND diff.resource_id (+) = c2i.item_id"
-                + " AND item.item_id = c2i.item_id"
-                + " ORDER BY diff.diffusion_datetime, c2i.rank, item.item_id";
-
-        TableRowIterator rows = DatabaseManager.queryTable(ourContext, "item",
-                myQuery,getID());
+        String myQuery = "SELECT item.*"
+		        + " FROM ("
+		        + "    SELECT c2i.item_id"
+		        + "    , (SELECT MIN(diff.diffusion_datetime) FROM t_diffusion diff WHERE diff.collection_id = c2i.collection_id AND diff.resource_id = c2i.item_id) mindatediff"
+		        + "    , c2i.rank"
+		        + "    FROM collection2item c2i"
+		        + "    WHERE c2i.collection_id= ? "
+		        + "    ORDER BY mindatediff, c2i.rank, c2i.item_id"
+		        + " ) t, item"
+		        + " WHERE item.item_id = t.item_id";  
+        
+        TableRowIterator rows = DatabaseManager.queryTable(ourContext, "item", myQuery, getID());
 
         return new ItemIterator(ourContext, rows);
     }
@@ -487,13 +489,16 @@ public class Collection extends DSpaceObject
     {
         List<Serializable> params = new ArrayList<Serializable>();
         StringBuffer myQuery = new StringBuffer(
-        		"SELECT item.* "
-        		+ " FROM collection2item c2i, t_diffusion diff, item"
-        		+ " WHERE c2i.collection_id = ? "
-                + " AND diff.collection_id (+) = c2i.collection_id"
-                + " AND diff.resource_id (+) = c2i.item_id"
-                + " AND item.item_id = c2i.item_id"
-                + " ORDER BY diff.diffusion_datetime, c2i.rank, item.item_id"
+        		"SELECT item.*"
+				+ " FROM ("
+				+ "    SELECT c2i.item_id"
+				+ "    , (SELECT MIN(diff.diffusion_datetime) FROM t_diffusion diff WHERE diff.collection_id = c2i.collection_id AND diff.resource_id = c2i.item_id) mindatediff"
+				+ "    , c2i.rank"
+				+ "    FROM collection2item c2i"
+				+ "    WHERE c2i.collection_id= ? "
+				+ "    ORDER BY mindatediff, c2i.rank, c2i.item_id"
+				+ " ) t, item"
+				+ " WHERE item.item_id = t.item_id"
                 );
 
         params.add(getID());

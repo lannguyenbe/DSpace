@@ -969,7 +969,9 @@
               - between Tramontane & Sonuma -->
          <!-- str name="fq">{!collapse field=identifier_origin max=identifier_weight nullPolicy=expand}</str-->
          <!-- Lan 15.04.2016 : within Tramontane since dup item (dup handle), choose the earliest -->
-         <str name="fq">{!collapse field=identifier_origin max=sum(log(identifier_weight),recip(date_issued_dt,1,1,1)) nullPolicy=expand}</str>
+         <!-- str name="fq">{!collapse field=identifier_origin max=sum(log(identifier_weight),recip(date_issued_dt,1,1,1)) nullPolicy=expand}</str-->
+         <!-- Lan 22.03.2016 : since the duplication of sequence by its diffusion, within Tramontane, choose the sequence document the earliest  -->
+         <str name="fq">{!collapse field=identifier_origin max=sum(log(identifier_weight),recip(date_issued_dt,3.16e-11,1,1)) nullPolicy=expand}</str>
          <str name="expand">true</str>
        </lst>
     <!-- "invariants" are a way of letting the Solr maintainer lock down
@@ -1035,15 +1037,15 @@
        <!-- Lan 08.03.2016 : resolve filter for Serie Title and Date Diffusion using subquery -->
        <!-- To filter on Serie Title or Date Diffusion : fq={!query v=$serieTitleFQ}; 2 raw query params: serieTitleQ=dc.title:BULLETIN&dateDiffusionQ=date_diffusion_keyword:2015  -->
        <!-- str name="serieTitleFQ">{!join from=search.uniqueid to=location.collection}(search.resourcetype:3 AND {!query v=$dateDiffusionQ} AND _query_:"{!join from=search.uniqueid to=location.community}(search.resourcetype:4 AND {! df=dc.title v=$serieTitleQ})")</str-->
-       <!-- use owning_collection instead of location.collection since then duplication of sequence document -->
+       <!-- For resourcetype=2 use owning_collection instead of location.collection since duplication of sequence document -->
        <!-- str name="serieTitleFQ">{!join from=search.uniqueid to=owning_collection}(search.resourcetype:3 AND {!query v=$dateDiffusionQ} AND _query_:"{!join from=search.uniqueid to=location.community}(search.resourcetype:4 AND {! df=dc.title v=$serieTitleQ})")</str-->
        <!-- str name="notserieTitleFQ">{!join from=search.uniqueid to=owning_collection}(search.resourcetype:3 AND {!query v=$dateDiffusionQ} AND _query_:"{!join from=search.uniqueid to=location.community}(search.resourcetype:4 AND NOT {! df=dc.title v=$serieTitleQ})")</str-->
-       <!-- Since dup item on diffusion date, join to episode is no more useful -->
+       <!-- Lan 03.05.2016 : Since dup item on diffusion date, join to episode is no more useful -->
        <str name="serieTitleFQ">{!join from=search.uniqueid to=owning_community}(search.resourcetype:4 AND {! df=dc.title v=$serieTitleQ})</str>
        <str name="notserieTitleFQ">{!join from=search.uniqueid to=owning_community}(search.resourcetype:4 AND NOT {! df=dc.title v=$serieTitleQ})</str>
      </lst>
      <lst name="appends">
-       <!-- Programmatically add $serieTitleFQ or $notserieTitleFQ -->
+       <!-- Lan 08.03.2016 : remove default fq, add programmatically $serieTitleFQ or $notserieTitleFQ -->
        <!-- str name="fq">{!query v=$serieTitleFQ}</str-->
        <!-- the following is useful if none of FQ filter is enabled -->
        <str name="fq">search.resourcetype:2</str>
