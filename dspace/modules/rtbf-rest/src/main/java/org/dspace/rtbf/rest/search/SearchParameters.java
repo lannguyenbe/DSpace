@@ -24,7 +24,7 @@ public class SearchParameters implements Request {
 	private String q;
 	private int limit = Constants.DEFAULT_RPP;
 	private int offset = 0;
-	@JsonProperty("sort-by")
+	@JsonProperty("sort_by")
 	private String sortBy;
 	private String order = Constants.DEFAULT_ORDER;
 	@JsonProperty("facet")
@@ -175,7 +175,7 @@ public class SearchParameters implements Request {
 		if ((str = mvm.getFirst("q")) != null && str.length() > 0) { this.q = str;}
 		if ((str = mvm.getFirst("limit")) != null && str.length() > 0) { this.limit = Integer.parseInt(str);}
 		if ((str = mvm.getFirst("offset")) != null && str.length() > 0) { this.offset = Integer.parseInt(str);}
-		if ((str = mvm.getFirst("sort-by")) != null && str.length() > 0) { this.sortBy = str;}
+		if ((str = mvm.getFirst("sort_by")) != null && str.length() > 0) { this.sortBy = str;}
 		if ((str = mvm.getFirst("order")) != null && str.length() > 0) { this.order = str;}
 		if ((str = mvm.getFirst("facet")) != null && str.length() > 0) { this.isFacet = Boolean.parseBoolean(str);}
 		if ((str = mvm.getFirst("facet_limit")) != null && str.length() > 0) { this.facetLimit = Integer.parseInt(str);}

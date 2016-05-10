@@ -50,7 +50,7 @@ public class SearchResource extends Resource {
     		@QueryParam("scope") String scope
     		, @QueryParam("q") String qterms
     		, @QueryParam("limit") Integer limit, @QueryParam("offset") Integer offset
-    		, @QueryParam("sort-by") String orderBy, @QueryParam("order") String order
+    		, @QueryParam("sort_by") String orderBy, @QueryParam("order") String order
     		, @QueryParam("facet") Boolean isFacet
     		, @QueryParam("facet_limit") Integer facetLimit, @QueryParam("facet_offset") Integer facetOffset
     		, @QueryParam("highlight") Boolean isHighlight 
@@ -92,7 +92,7 @@ public class SearchResource extends Resource {
     		@QueryParam("scope") String scope
     		, @QueryParam("q") String qterms
     		, @QueryParam("limit") Integer limit, @QueryParam("offset") Integer offset
-    		, @QueryParam("sort-by") String orderBy, @QueryParam("order") String order
+    		, @QueryParam("sort_by") String orderBy, @QueryParam("order") String order
     		, @QueryParam("expand") String expand
     		, @Context UriInfo info
     		, @QueryParam("userIP") String user_ip, @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor
@@ -129,7 +129,7 @@ public class SearchResource extends Resource {
     		@QueryParam("scope") String scope
     		, @QueryParam("q") String qterms
     		, @QueryParam("limit") Integer limit, @QueryParam("offset") Integer offset
-    		, @QueryParam("sort-by") String orderBy, @QueryParam("order") String order
+    		, @QueryParam("sort_by") String orderBy, @QueryParam("order") String order
     		, @QueryParam("expand") String expand
     		, @Context UriInfo info
     		, @QueryParam("userIP") String user_ip, @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor
