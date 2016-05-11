@@ -200,11 +200,17 @@ cp dspace-api-4.2.jar $DS/lib
 ## to recompile:end
 
 -----------------------------------------  S O L R  --------------------------------------------------
+# Orphelins Sonuma
+http://vm-dev4.inf.rtbf.be:8080/solr/search/selectSequence?q=*%3A*&fq=identifier_attributor%3ASonuma%5C+TV&fq=-location%3Dm2&wt=json&indent=true
+
 # Pour trouver les sequences ayant des dup
 http://vm-dev4.inf.rtbf.be:8080/solr/search/selectNoCollapse?q=*%3A*&fq=search.uniqueid%3A2-*-*&fq=%7B!collapse+field%3Didentifier_origin+nullPolicy%3Dexpand%7D&sort=identifier_origin+asc&rows=200000&fl=search.resourceid&wt=csv&indent=true
 
 # pour test selectionner précisément 1 fiche sur 3 en jouant avec raw properties serieTitleQ et dateDiffusionQ
 http://localhost:8070/solr/search/selectSequence?q=football&fq=channel_keyword%3ALa%5C+Une&fq=identifier_origin%3ATV%2F399124&fl=identifier_origin%2Csearch.uniqueid%2Cdate_issued_dt%2Cowning_collection%2Chandle%2Cidentifier_origin%2Cchannel_keyword%2Cispartof_title_keyword&wt=json&indent=true&serieTitleQ=attente&dateDiffusionQ=date_issued_keyword:2012-04-14
+
+# fiches dup TV et liés Sonuma
+http://vm-dev4.inf.rtbf.be:8080/solr/search/selectNoCollapse?q=*%3A*&fq=search.resourcetype%3A2&rows=0&fl=handle%2Csearch.uniqueid%2Cidentifier_attributor&wt=json&indent=true&facet=true&facet.pivot=identifier_origin,identifier_attributor&facet.pivot.mincount=2
 
 #fiches dup within TV
 http://localhost:8070/solr/search/selectNoCollapse?q=*%3A*&fq=identifier_attributor%3ATramontane%5C+TV&fl=handle%2Cidentifier_origin&wt=json&indent=true&facet=true&facet.field=identifier_origin&facet.mincount=2

@@ -973,6 +973,8 @@
          <!-- Lan 22.03.2016 : since the duplication of sequence by its diffusion, within Tramontane, choose the sequence document the earliest  -->
          <str name="fq">{!collapse field=identifier_origin max=sum(log(identifier_weight),recip(date_issued_dt,3.16e-11,1,1)) nullPolicy=expand}</str>
          <str name="expand">true</str>
+         <!-- Lan 10.05.2016 : expand.rows default is 5, is not enough -->
+         <str name="expand.rows">100</str>
        </lst>
     <!-- "invariants" are a way of letting the Solr maintainer lock down
          the options available to Solr clients.  Any params values
@@ -1057,6 +1059,8 @@
        <!-- Lan 22.03.2016 : since the duplication of sequence by its diffusion, within Tramontane, choose the sequence document the earliest  -->
        <str name="fq">{!collapse field=identifier_origin max=sum(log(identifier_weight),recip(date_issued_dt,3.16e-11,1,1)) nullPolicy=expand}</str>
        <str name="expand">true</str>
+       <!-- Lan 10.05.2016 : expand.rows default is 5, is not enough -->
+       <str name="expand.rows">100</str>
      </lst>
     </requestHandler>
     

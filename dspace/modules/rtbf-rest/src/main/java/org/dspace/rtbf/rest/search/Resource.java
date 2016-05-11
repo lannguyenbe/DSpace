@@ -309,7 +309,9 @@ public abstract class Resource
 
     	// Facetting and facet pagination
     	if (searchRequest.isFacet()) {
-    		int facetLimit = searchRequest.getFacetLimit();
+	        query.setFacetMinCount(1);
+
+	        int facetLimit = searchRequest.getFacetLimit();
     		int facetOffset = searchRequest.getFacetOffset() * facetLimit;
     		
     		// Facet on <f>_keyword
@@ -321,7 +323,6 @@ public abstract class Resource
     	                , /* facet sort   */ DiscoveryConfigurationParameters.SORT.COUNT
     	                , /* facet offset */ facetOffset);
     	        query.addFacetField(dff);
-    	        query.setFacetMinCount(1);
     		}
 
 
@@ -336,7 +337,6 @@ public abstract class Resource
 		                , /* facet sort   */ DiscoveryConfigurationParameters.SORT.COUNT
 		                , /* facet offset */ facetOffset);
 		        query.addFacetField(dff);
-		        query.setFacetMinCount(1);
     		}
     		
     		// addDateIssuedFacet("date_issued", "dc.date.issued_dt", "dateIssued.year", query, context);
@@ -571,7 +571,7 @@ public abstract class Resource
         }
 	}
 
-		
+	// Inspired from SidebarFacetsTransformer.getQueryArgs()	
 	private void addDateFacet(String keyName, String dateFacet, String yearFacet, DiscoverQuery query, Context context) throws SearchServiceException {
         int oldestYear = -1;
         int newestYear = -1;

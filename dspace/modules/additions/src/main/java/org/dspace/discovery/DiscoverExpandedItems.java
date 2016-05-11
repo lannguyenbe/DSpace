@@ -67,7 +67,7 @@ public class DiscoverExpandedItems {
         }
                 
         if (queryResults != null && 0 < queryResults.getDspaceObjects().size()) {
-            // normally exactly 1 result that represents the most representativ of the items having the same indentifier_origin
+            // normally exactly 1 result that represents the most representativ of the items having the same identifier_origin
             // the return result may have a different handle from the one we are questionning 
             DSpaceObject resultDso = queryResults.getDspaceObjects().get(0);
             String handle = dso.getHandle(); // questionning handle
@@ -81,7 +81,7 @@ public class DiscoverExpandedItems {
             List<DiscoverResult.SearchDocument> expandDocuments = queryResults.getExpandDocuments(resultDso);
             for (SearchDocument docE : expandDocuments) {
             	String handleE = docE.getSearchFieldValues("handle").get(0);
-            	if (!handle.equals(handleE)) {
+            	if (!handleE.equals(handle) && !handleE.equals(resultDso.getHandle())) {
             		expandList.add(new ExpandedItem(docE));
             	}
             }
