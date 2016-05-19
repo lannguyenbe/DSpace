@@ -2215,6 +2215,9 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         	doc.setField(indexFieldName + "_keyword", value);
         	doc.addField(indexFieldName + "_keyword", yearUTC);
         	doc.setField(indexFieldName + "_contain", value);
+        	// 19.05.2016 Lan : index fields .year and .year_sort are mandotory for facetting
+        	doc.addField(indexFieldName + ".year", yearUTC);
+        	doc.addField(indexFieldName + ".year_sort", yearUTC);
         	doc.setField(indexFieldName, value);
             /* sortFieldConfig of this name exists in discovery.conf */
         	String sort_dt = DateFormatUtils.ISO_DATETIME_FORMAT.format(value_dt);
@@ -3134,6 +3137,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
 
     protected String transformFacetField(DiscoverFacetField facetFieldConfig, String field, boolean removePostfix)
     {
+    	int lastIndexOf;
         if(facetFieldConfig.getType().equals(DiscoveryConfigurationParameters.TYPE_TEXT))
         {
             if(removePostfix)
@@ -3146,7 +3150,8 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         {
             if(removePostfix)
             {
-                return field.substring(0, field.lastIndexOf(".year"));
+            	lastIndexOf = field.lastIndexOf(".year");
+            	return ((lastIndexOf >= 0) ? field.substring(0, lastIndexOf) : field);
             }else{
                 return field + ".year";
             }

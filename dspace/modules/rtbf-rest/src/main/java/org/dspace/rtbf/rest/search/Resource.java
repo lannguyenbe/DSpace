@@ -10,6 +10,7 @@ package org.dspace.rtbf.rest.search;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -520,7 +521,7 @@ public abstract class Resource
 
     // Date Math
     public static final String _DT = "_dt";
-    public static final Map<String, String[]> _DTMATH = new HashMap<>();
+    public static final Map<String, String[]> _DTMATH = new LinkedHashMap<>(); // LinkedHashMap to preserve insert order when iterate over it
     static {
     	_DTMATH.put("[ -1DAY ]"  , new String[] {"{!key=\"${keyName}_dt:[ -1DAY ]\"}",   "[ NOW/DAY-1DAY TO NOW/DAY+1DAY ]"});
     	// Lan 19.01.2015 : use inclusive range with -1MILLI because exclusive range with {} gives error "Invalid date String" (solrj bug ?)
@@ -639,8 +640,10 @@ public abstract class Resource
             //We have a date range add faceting for our field
             //The faceting will automatically be limited to the 10 years in our span due to our filterquery
         	query.addFacetField(new DiscoverFacetField(
-        			"{!key="+ keyName +"}"+ yearFacet
-        			, DiscoveryConfigurationParameters.TYPE_STANDARD
+//        			"{!key="+ keyName +"}"+ yearFacet
+//        			, DiscoveryConfigurationParameters.TYPE_STANDARD
+        			"{!key="+ keyName +"}"+ keyName
+        			, DiscoveryConfigurationParameters.TYPE_DATE
             		, -1 // facet limit 
             		,  DiscoveryConfigurationParameters.SORT.VALUE)); // facet sort 
         } else {
