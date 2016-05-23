@@ -152,10 +152,13 @@ public class Sequence extends RTBObject{
     		queryResults = searchDocId(context, item.getHandle(), fromIndexValue);
 			if (queryResults != null && queryResults.getSearchDocument(item).size() > 0) {
 				SearchDocument doc = queryResults.getSearchDocument(item).get(0);
-				this.setupFromSearchDocument(viewType, doc, expand, context);
+				String docId = doc.getSearchFieldValues("doc_uniqueid").get(0);
+                if (!(docId.equals(item.getType() +"-"+ item.getID()))) { // is dup item
+    				this.setupFromSearchDocument(viewType, doc, expand, context);
+            	}
 			}
     	} catch (SearchServiceException e) {
-			log.error("Unable to searchDocId : "+ e.getMessage());
+			log.error("Unable to setupDocId : "+ e.getMessage());
 		}    	    	
     }
     
@@ -239,7 +242,6 @@ public class Sequence extends RTBObject{
     
     private DiscoverResult searchDocId(Context context, String handle, String fromIndexValue) throws SearchServiceException, SQLException {
 
-        DiscoverResult queryResults;
     	DiscoverQuery query = new DiscoverQuery();
         
         String[] searchFields = {"search.uniqueid"};
