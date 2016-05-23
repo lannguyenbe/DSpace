@@ -2216,8 +2216,8 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         	doc.addField(indexFieldName + "_keyword", yearUTC);
         	doc.setField(indexFieldName + "_contain", value);
         	// 19.05.2016 Lan : index fields .year and .year_sort are mandotory for facetting
-        	doc.addField(indexFieldName + ".year", yearUTC);
-        	doc.addField(indexFieldName + ".year_sort", yearUTC);
+        	doc.setField(indexFieldName + ".year", yearUTC);
+        	doc.setField(indexFieldName + ".year_sort", yearUTC);
         	doc.setField(indexFieldName, value);
             /* sortFieldConfig of this name exists in discovery.conf */
         	String sort_dt = DateFormatUtils.ISO_DATETIME_FORMAT.format(value_dt);
