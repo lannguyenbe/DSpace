@@ -232,44 +232,11 @@ public abstract class Resource
         // limit the search within community/collection
         String scope = searchRequest.getScope();
     	if (scope != null) { // scope contains logical expression of handles
-    		
-    		// a. Replace handle by m{community_id} or l{collection_id}
-    		StringBuffer sb = new StringBuffer();    		
-    		Pattern pattern = Pattern.compile("\\d+/\\d+");
-    		Matcher matcher = pattern.matcher(scope);
-
-    		while (matcher.find()) {
-    			String handle = matcher.group();
-    			String replacement;
-
-    			org.dspace.content.DSpaceObject dso = null;
-    			try {
-    				dso = HandleManager.resolveToObject(context, handle);
-    			} catch (Exception e) {
-    				processException("Could not process getQueryResults. Message:"+e.getMessage(), context);
-    			};
-
-    			if(dso == null) {
-    				replacement = handle;
-    			} else {
-    				switch (dso.getType()) {
-    				case Constants.COMMUNITY:
-    					replacement = "m" + dso.getID();
-    					break;
-    				case Constants.COLLECTION:
-    					replacement = "l" + dso.getID();
-    					break;
-    				default :
-    					replacement = handle;
-    				}
-    			}
-    			matcher.appendReplacement(sb, replacement);
-    		}
-
-    		// b. Add filter query
-    		if (sb.length() > 0) {
-    			query.addFilterQueries("{!q.op=OR}" + "location:(" + sb.toString() + ")");
-    		}
+			try {
+	    		addScope(scope, query, context);
+			} catch (Exception e) {
+				processException("Could not process getQueryResults. Message:"+e.getMessage(), context);
+			};
     	}
     	
 
@@ -678,11 +645,68 @@ public abstract class Resource
         
 	}
 	
+/*
+ * 26.05.2016 Lan : filter query also on owning_collection to isolate the 
+ */
+	private void addScope(String scope, DiscoverQuery query, Context context) throws SearchServiceException, IllegalStateException, SQLException {
+
+		// a. Replace handle by m{community_id} or l{collection_id}
+		StringBuffer sb = new StringBuffer();    		
+		Pattern pattern = Pattern.compile("\\d+/\\d+");
+		Matcher matcher = pattern.matcher(scope);
+		
+		List<String> owning_communities = new ArrayList<String>();    		
+		List<String> owning_collections = new ArrayList<String>();    		
+
+
+		while (matcher.find()) {
+			String handle = matcher.group();
+			String replacement;
+
+			org.dspace.content.DSpaceObject dso = null;
+			dso = HandleManager.resolveToObject(context, handle);
+
+			if(dso == null) {
+				replacement = handle;
+			} else {
+				switch (dso.getType()) {
+				case Constants.COMMUNITY:
+					replacement = "m" + dso.getID();
+					if (((org.dspace.content.Community) dso).getParentCommunity() != null) { // not a top community
+						owning_communities.add(org.dspace.core.Constants.COMMUNITY + "-" + dso.getID());
+					}
+					break;
+				case Constants.COLLECTION:
+					replacement = "l" + dso.getID();
+					owning_collections.add(org.dspace.core.Constants.COLLECTION + "-" + dso.getID());
+					break;
+				default :
+					replacement = handle;
+				}
+			}
+			matcher.appendReplacement(sb, replacement);
+		}
+
+		// b. Add filter query
+		if (sb.length() > 0) {
+			query.addFilterQueries("{!q.op=OR}" + "location:(" + sb.toString() + ")");
+		}
+		
+		// c. filter on owning
+		if (!owning_communities.isEmpty()) {
+			query.addFilterQueries("{!q.op=OR}" + "owning_community:(" + StringUtils.join(owning_communities, ' ') + ")");			
+		}
+		if (!owning_collections.isEmpty()) {
+			query.addFilterQueries("{!q.op=OR}" + "owning_collection:(" + StringUtils.join(owning_collections, ' ') + ")");			
+		}
+		
+	}
+	
 
 	/*
 	 * The results of the query are about sequences, use facet to access the collections of those results
 	 */
-	protected DiscoverResult getCollectionResultFromFacet(int resourceType, Context context, Request searchRequest) throws SearchServiceException {
+	protected DiscoverResult TODEL_getCollectionResultFromFacet(int resourceType, Context context, Request searchRequest) throws SearchServiceException {
 
         // 1. Prepare the query
         DiscoverQuery query = new DiscoverQuery();
@@ -784,7 +808,7 @@ public abstract class Resource
                 queryResults.setTotalSearchResults(facetIndex);
             } else { 
             	// do another search to get count of collections
-            	DiscoverResult collections = getCollectionResultAsJoin(org.dspace.core.Constants.COLLECTION, context, searchRequest);
+            	DiscoverResult collections = TODEL_getCollectionResultAsJoin(org.dspace.core.Constants.COLLECTION, context, searchRequest);
             	searchRequest.setLimit(0); // Do not get results detail only their count
             	queryResults.setTotalSearchResults(collections.getTotalSearchResults());
             }
@@ -795,7 +819,7 @@ public abstract class Resource
 	}
 
 	
-	protected DiscoverResult getCollectionResultAsJoin(int resourceType, Context context, Request searchRequest) throws SearchServiceException {
+	protected DiscoverResult TODEL_getCollectionResultAsJoin(int resourceType, Context context, Request searchRequest) throws SearchServiceException {
 		// 1. Prepare the query
         DiscoverQuery query = new DiscoverQuery();
         
@@ -891,7 +915,7 @@ public abstract class Resource
 	}
 
 	
-	protected DiscoverResult getSerieResultAsJoin(int resourceType, Context context, Request searchRequest) throws SearchServiceException {
+	protected DiscoverResult TODEL_getSerieResultAsJoin(int resourceType, Context context, Request searchRequest) throws SearchServiceException {
 		// 1. Prepare the query
         DiscoverQuery query = new DiscoverQuery();
         

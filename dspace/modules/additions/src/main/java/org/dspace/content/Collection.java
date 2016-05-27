@@ -476,7 +476,7 @@ public class Collection extends DSpaceObject
 		        + "    , c2i.rank"
 		        + "    FROM collection2item c2i"
 		        + "    WHERE c2i.collection_id= ? "
-		        + "    ORDER BY mindatediff, c2i.rank, c2i.item_id"
+		        + "    ORDER BY mindatediff NULLS LAST, c2i.rank, c2i.item_id"
 		        + " ) t, item"
 		        + " WHERE item.item_id = t.item_id";  
         
@@ -496,7 +496,7 @@ public class Collection extends DSpaceObject
 				+ "    , c2i.rank"
 				+ "    FROM collection2item c2i"
 				+ "    WHERE c2i.collection_id= ? "
-				+ "    ORDER BY mindatediff, c2i.rank, c2i.item_id"
+				+ "    ORDER BY mindatediff NULLS LAST, c2i.rank, c2i.item_id"
 				+ " ) t, item"
 				+ " WHERE item.item_id = t.item_id"
                 );

@@ -76,8 +76,8 @@ public class SearchResponseParts {
 		                    
 		                    // 18.04.2016 Lan : if queryResults from Solr return an dup item, then replace somme metadata in the default sequence
 		                    SearchDocument doc = queryResults.getSearchDocument(result).get(0);
-		                    String docId = doc.getSearchFieldValues("doc_uniqueid").get(0);
-		                    if (!(docId.equals(String.valueOf(resultType) +"-"+ result.getID()))) { // is dup item
+		                    String dupid = doc.getSearchFieldValues("dup_uniqueid").get(0);
+		                    if (!(dupid.equals( result.getType() +"-"+ result.getID()))) { // is dup item
 		                    	sequence.setupFromSearchDocument(Constants.SEARCH_RESULT_VIEW, doc, Constants.SEARCH_SEQUENCE_EXPAND_OPTIONS, context);
 	                    	}
 		                    

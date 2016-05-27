@@ -41,7 +41,7 @@ public class RTBObject {
     private String handle;
     private String type;
     private MetadataEntry title;
-    private String docId;
+    private String dupid;
 
     // SEARCH_RESULT_VIEW results basic elements
     //
@@ -172,12 +172,12 @@ public class RTBObject {
     }
 
 	@XmlAttribute
-    public String getDocId() {
-        return docId;
+    public String getDupid() {
+        return dupid;
     }
 
-    public void setDocId(String docId) {
-        this.docId = docId;
+    public void setDupid(String dupid) {
+        this.dupid = dupid;
     }
 
     public String getType() {

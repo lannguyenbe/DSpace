@@ -42,7 +42,7 @@ public class Sequence extends RTBObject{
     public Sequence(int viewType, org.dspace.content.Item item, String expand, Context context
     		, String fromIndexValue) throws SQLException, WebApplicationException {
     	this(viewType, item);
-    	setupDocId(viewType, item, expand, context, fromIndexValue);
+    	setupDupid(viewType, item, expand, context, fromIndexValue);
     	
     }
 
@@ -141,7 +141,7 @@ public class Sequence extends RTBObject{
         
     }
     
-    private void setupDocId(int viewType, org.dspace.content.Item item, String expand, Context context, String fromIndexValue) throws SQLException {
+    private void setupDupid(int viewType, org.dspace.content.Item item, String expand, Context context, String fromIndexValue) throws SQLException {
         DiscoverResult queryResults;
   
     	// 1. Setup from DB metadata
@@ -149,30 +149,30 @@ public class Sequence extends RTBObject{
     	
     	// 2. then retouch some metadata with Solr document metatada
     	try {
-    		queryResults = searchDocId(context, item.getHandle(), fromIndexValue);
+    		queryResults = searchDupid(context, item.getHandle(), fromIndexValue);
 			if (queryResults != null && queryResults.getSearchDocument(item).size() > 0) {
 				SearchDocument doc = queryResults.getSearchDocument(item).get(0);
-				String docId = doc.getSearchFieldValues("doc_uniqueid").get(0);
-                if (!(docId.equals(item.getType() +"-"+ item.getID()))) { // is dup item
+				String dupid = doc.getSearchFieldValues("dup_uniqueid").get(0);
+                if (!(dupid.equals(item.getType() +"-"+ item.getID()))) { // is dup item
     				this.setupFromSearchDocument(viewType, doc, expand, context);
             	}
 			}
     	} catch (SearchServiceException e) {
-			log.error("Unable to setupDocId : "+ e.getMessage());
+			log.error("Unable to setupDupid : "+ e.getMessage());
 		}    	    	
     }
     
     public void setupFromSearchDocument(int viewType, SearchDocument doc, String expand, Context context) throws SQLException {
     	
     	// The doc_ metadata is set in SorlServiceImpl.retrieveResult()
-    	this.setDocId(doc.getSearchFieldValues("doc_uniqueid").get(0));
+    	this.setDupid(doc.getSearchFieldValues("dup_uniqueid").get(0));
     	
     	int innerViewType = 0;
     	
     	switch(viewType) {
     	case Constants.SEARCH_RESULT_VIEW:
-        	this.setDateIssued(new MetadataEntry(Constants.DATE_ISSUED, doc.getSearchFieldValues("doc_date_issued").get(0), null));
-        	this.setChannelIssued(new MetadataEntry(Constants.CHANNEL_ISSUED, doc.getSearchFieldValues("doc_channel_issued").get(0), null));
+        	this.setDateIssued(new MetadataEntry(Constants.DATE_ISSUED, doc.getSearchFieldValues("dup_date_issued").get(0), null));
+        	this.setChannelIssued(new MetadataEntry(Constants.CHANNEL_ISSUED, doc.getSearchFieldValues("dup_channel_issued").get(0), null));
     		innerViewType = Constants.MIN_VIEW;
     		break;
     	case Constants.STANDARD_VIEW:
@@ -182,7 +182,7 @@ public class Sequence extends RTBObject{
     		innerViewType = viewType;
     	}
     	
-        Integer collectionId = Integer.parseInt(doc.getSearchFieldValues("doc_owning_collection").get(0).replaceFirst(String.valueOf(Constants.COLLECTION) + '-', ""));
+        Integer collectionId = Integer.parseInt(doc.getSearchFieldValues("dup_owning_collection").get(0).replaceFirst(String.valueOf(Constants.COLLECTION) + '-', ""));
 
         if(expand.contains("owningParentList")) {
             List<RTBObject> entries = new ArrayList<RTBObject>();
@@ -240,7 +240,7 @@ public class Sequence extends RTBObject{
     	}
     }
     
-    private DiscoverResult searchDocId(Context context, String handle, String fromIndexValue) throws SearchServiceException, SQLException {
+    private DiscoverResult searchDupid(Context context, String handle, String fromIndexValue) throws SearchServiceException, SQLException {
 
     	DiscoverQuery query = new DiscoverQuery();
         
@@ -255,8 +255,6 @@ public class Sequence extends RTBObject{
         	query.addFilterQueries("search.uniqueid:"+fromIndexValue);    	    		
     	} else if (fromIndexValue.startsWith(org.dspace.core.Constants.COLLECTION+"-")) {
     		query.addFilterQueries("owning_collection:"+fromIndexValue);    	    		    		
-    	} else {
-    		query.addFilterQueries("sub_handle:"+fromIndexValue);    	    		    		
     	}
         
         return (getSearchService().search(context, query));

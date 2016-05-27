@@ -113,7 +113,7 @@ public class HandleResource {
             if(dso == null) {
                 throw new WebApplicationException(Response.Status.NOT_FOUND);
             }
-            log.info("DSO Lookup by handle: [" + prefix + "] / [" + suffix + "] / [" + owningHandle + "] got result of: " + dso.getTypeText() + "_" + dso.getID());
+            log.info("DSO Lookup by handle: [" + prefix + "] / [" + suffix + "] / [" + owningHandle + "] got result of: " + dso.getTypeText() + "-" + dso.getID());
             org.dspace.content.DSpaceObject owning_dso = HandleManager.resolveToObject(context, prefix + "/" + owningHandle);
 
             switch(dso.getType()) {
@@ -137,52 +137,6 @@ public class HandleResource {
         }
     }
 
-    @GET
-    @Path("/{prefix}/{suffix}/{sudHandlePart1}/{subHandlePart2}")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public org.dspace.rtbf.rest.common.RTBObject getObjectBySubHandle(@PathParam("prefix") String prefix, @PathParam("suffix") String suffix
-    			, @PathParam("subHandlePart1") String subHPart1, @PathParam("subHandlePart2") String subHPart2
-    			, @QueryParam("expand") String expand
-        		, @QueryParam("omitExpand") @DefaultValue("true") boolean omitExpand
-        		, @Context UriInfo info
-        		, @QueryParam("userIP") String user_ip, @QueryParam("userAgent") String user_agent, @QueryParam("xforwardedfor") String xforwardedfor
-                , @Context HttpHeaders headers, @Context HttpServletRequest request)
-                throws WebApplicationException
-    {
-
-    	int viewType = Constants.MIN_VIEW;
-
-    	if (!omitExpand) { viewType = Constants.EXPANDELEM_VIEW; }
-
-    	try {
-            if(context == null || !context.isValid() ) {
-                context = new org.dspace.core.Context();
-                context.getDBConnection();
-            }
-
-            org.dspace.content.DSpaceObject dso = HandleManager.resolveToObject(context, prefix + "/" + suffix);
-            if(dso == null) {
-                throw new WebApplicationException(Response.Status.NOT_FOUND);
-            }
-            log.info("DSO Lookup by handle: [" + prefix + "] / [" + suffix + "] / [" + subHPart1 + "/" + subHPart2 + "] got result of: " + dso.getTypeText() + "_" + dso.getID());
-
-            switch(dso.getType()) {
-            case Constants.COMMUNITY:
-            	return new Serie(viewType, (org.dspace.content.Community) dso, expand+","+Constants.SERIE_EXPAND_OPTIONS, context);
-            case Constants.COLLECTION:
-            	return new Episode(viewType, (org.dspace.content.Collection) dso, expand+","+Constants.EPISODE_EXPAND_OPTIONS, context);
-            case Constants.ITEM:
-            	// STANDARD_VIEW is MIN_VIEW + all linkedDocuments from solr
-            	return new Sequence(Constants.STANDARD_VIEW, (org.dspace.content.Item) dso, expand+","+Constants.SEQUENCE_EXPAND_OPTIONS, context, subHPart1+"/"+subHPart2);
-            default:
-            	return new RTBObject(dso);
-            }
-            
-        } catch (SQLException e) {
-            log.error(e.getMessage());
-            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
-        }
-    }
     
     @GET
     @Path("/admin/clearCache")

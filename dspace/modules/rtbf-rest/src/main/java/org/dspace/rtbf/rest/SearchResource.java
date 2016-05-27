@@ -266,7 +266,7 @@ public class SearchResource extends Resource {
 
     // TODO: TODEL 
 
-    protected SearchResponse getCollectionsSearchResponse_old(SearchParameters params)
+    protected SearchResponse TODEL_getCollectionsSearchResponse_old(SearchParameters params)
     {
         Request searchRequest = (Request) params;
         
@@ -290,10 +290,10 @@ public class SearchResource extends Resource {
             if (qterms != null && qterms.length() > 0) { expand += ",results"; }
             
             if (orderBy != null && orderBy.length() > 0) {
-	            queryResults = getCollectionResultAsJoin(org.dspace.core.Constants.COLLECTION, context, searchRequest);
+	            queryResults = TODEL_getCollectionResultAsJoin(org.dspace.core.Constants.COLLECTION, context, searchRequest);
 	            response = new EpisodesSearchResponse(queryResults, expand, context, limit, offset);
             } else { /* default order is count of sequences that matched the query */
-	            queryResults = getCollectionResultFromFacet(org.dspace.core.Constants.ITEM, context, searchRequest);
+	            queryResults = TODEL_getCollectionResultFromFacet(org.dspace.core.Constants.ITEM, context, searchRequest);
 	            response = new EpisodesSearchResponse(queryResults, expand, context, limit, offset);
             }
 
@@ -308,7 +308,7 @@ public class SearchResource extends Resource {
         return response;
     }
     
-    protected SearchResponse getSeriesSearchResponse_old(SearchParameters params)
+    protected SearchResponse TODEL_getSeriesSearchResponse_old(SearchParameters params)
     {
         Request searchRequest = (Request) params;
         
@@ -330,7 +330,7 @@ public class SearchResource extends Resource {
             // expand the results if there is a query
             if (qterms != null && qterms.length() > 0) { expand += ",results"; }
             
-	        queryResults = getSerieResultAsJoin(org.dspace.core.Constants.COMMUNITY, context, searchRequest);
+	        queryResults = TODEL_getSerieResultAsJoin(org.dspace.core.Constants.COMMUNITY, context, searchRequest);
 	        response = new SeriesSearchResponse(queryResults, expand, context, limit, offset);
 
             context.complete();

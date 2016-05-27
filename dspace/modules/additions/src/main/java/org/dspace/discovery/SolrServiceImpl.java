@@ -2199,6 +2199,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         ItemAdd.DiffusionItem[] dItems = ItemAdd.DiffusionItem.findByItem(context, item.getID());
         
         for (DiffusionItem dit : dItems) { /* TODO: remove hard code */
+
             doc.setField("search.uniqueid", dit.getDiffusion_path());
             doc.setField("owning_community", Constants.COMMUNITY+"-"+dit.getCommunity_id());
             doc.setField("owning_collection", Constants.COLLECTION+"-"+dit.getCollection_id());
@@ -2660,10 +2661,10 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 resultDoc.addSearchField("handle", (String) doc.getFieldValue("handle"));
 
                 //18.04.2016 Lan : fiels that are different among dup items
-                resultDoc.addSearchField("doc_uniqueid", (String) doc.getFieldValue("search.uniqueid"));
-                resultDoc.addSearchField("doc_owning_collection", (String) doc.getFieldValue("owning_collection"));                
-                resultDoc.addSearchField("doc_date_issued", (doc.getFieldValue("date_issued_dt") == null) ? null : DateFormatUtils.formatUTC((Date) doc.getFieldValue("date_issued_dt"),"yyyy-MM-dd'T'HH:mm:ss'Z'"));
-                resultDoc.addSearchField("doc_channel_issued", (String) doc.getFieldValue("rtbf.channel_issued"));
+                resultDoc.addSearchField("dup_uniqueid", (String) doc.getFieldValue("search.uniqueid"));
+                resultDoc.addSearchField("dup_owning_collection", (String) doc.getFieldValue("owning_collection"));                
+                resultDoc.addSearchField("dup_date_issued", (doc.getFieldValue("date_issued_dt") == null) ? null : DateFormatUtils.formatUTC((Date) doc.getFieldValue("date_issued_dt"),"yyyy-MM-dd'T'HH:mm:ss'Z'"));
+                resultDoc.addSearchField("dup_channel_issued", (String) doc.getFieldValue("rtbf.channel_issued"));
 
                 //Add information about our search fields
                 for (String field : searchFields)

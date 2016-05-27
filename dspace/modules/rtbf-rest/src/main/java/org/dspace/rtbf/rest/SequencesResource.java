@@ -86,10 +86,10 @@ public class SequencesResource extends Resource
     }
 
     @GET
-    @Path("/{item_id}/{docId}")
+    @Path("/{item_id}/{dupid}")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    public Sequence getSequenceByDocId(@PathParam("item_id") Integer itemId
-			, @PathParam("docId") String docId
+    public Sequence getSequenceByDupid(@PathParam("item_id") Integer itemId
+			, @PathParam("dupid") String dupid
 			, @QueryParam("expand") String expand
     		, @QueryParam("omitExpand") @DefaultValue("true") boolean omitExpand
             , @QueryParam("userIP") String user_ip, @QueryParam("userAgent") String user_agent
@@ -101,7 +101,7 @@ public class SequencesResource extends Resource
     	
     	if (!omitExpand) { viewType = Constants.EXPANDELEM_VIEW; }
 
-    	log.info("Reading item(id=" + itemId+"/"+docId + ") metadata.");
+    	log.info("Reading item(id=" + itemId+"/"+dupid + ") metadata.");
         Sequence sequence = null;
 
         try
@@ -111,7 +111,7 @@ public class SequencesResource extends Resource
 
             org.dspace.content.Item dspaceItem = findItem(context, itemId, org.dspace.core.Constants.READ);
 
-            sequence = new org.dspace.rtbf.rest.common.Sequence(viewType, dspaceItem, expand+","+Constants.SEQUENCE_EXPAND_OPTIONS, context, docId);
+            sequence = new org.dspace.rtbf.rest.common.Sequence(viewType, dspaceItem, expand+","+Constants.SEQUENCE_EXPAND_OPTIONS, context, dupid);
             context.complete();
         }
         catch (SQLException e)
@@ -123,7 +123,7 @@ public class SequencesResource extends Resource
             processFinally(context);
         }
 
-        log.trace("Item(id=" + itemId+"/"+docId + ") was successfully read.");
+        log.trace("Item(id=" + itemId+"/"+dupid + ") was successfully read.");
         return sequence;
     }
 
