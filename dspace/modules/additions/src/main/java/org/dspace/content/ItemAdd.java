@@ -18,9 +18,9 @@ public class ItemAdd extends Item {
 	private static Logger log = Logger.getLogger(ItemAdd.class);
 
     
-    ItemAdd(Context context, TableRow row) throws SQLException
+    public ItemAdd(Item item) throws SQLException
     {
-        super(context, row);
+        super(item.ourContext, item.getItemRow());
     }
     
     public static ItemIterator findAllUnfiltered(Context context) throws SQLException
@@ -142,6 +142,42 @@ public class ItemAdd extends Item {
         return new ItemIterator(context, rows);
     }
     
+    public List<String> findChannelsIssuedById()
+            throws SQLException
+    {
+    	int item_id = this.getID();
+    	String myQuery = "SELECT distinct diff.channel"
+        	+ " from"
+        	+ " (SELECT d.resource_type_id, d.resource_id, d.diffusion_path"
+        	+ " FROM t_diffusion d"
+        	+ " WHERE d.resource_type_id = " + Constants.ITEM
+        	+ " AND d.resource_id = " + item_id
+        	+ " AND d.is_premdiff = 1) premdiff"
+        	+ " , t_diffusion diff"
+        	+ " WHERE diff.resource_type_id = premdiff.resource_type_id"
+        	+ " AND diff.resource_id = premdiff.resource_id"
+        	+ " AND diff.diffusion_path = premdiff.diffusion_path"
+        	+ " ORDER BY diff.channel";
+    	
+    	        	
+    	TableRowIterator tri =  null;
+    	List<String> channels = new ArrayList<String> ();
+    	    	
+    	try {
+			tri =  DatabaseAccess.query(this.ourContext, myQuery);
+			while (tri.hasNext()) {
+				TableRow row = tri.next();
+				channels.add( row.getStringColumn("channel"));
+			}
+		} finally {
+			if (tri != null) { tri.close(); }
+		}
+    	
+    	if (channels.isEmpty()) { return null; }
+
+    	return channels;
+    }
+     
 
     public static class DiffusionItem {
     	
@@ -163,7 +199,7 @@ public class ItemAdd extends Item {
     		this.channel_event = channel_event;
     	}
     	
-        public static DiffusionItem[] findByItem(Context context, int item_id)
+        public static DiffusionItem[] findById(Context context, int item_id)
                 throws SQLException
         {
         	String myQuery = "SELECT t.diffusion_path, c2c.community_id, t.collection_id, t.resource_id item_id"
@@ -213,7 +249,7 @@ public class ItemAdd extends Item {
         	
         }
 
-		public String getDiffusion_path() {
+        public String getDiffusion_path() {
 			return diffusion_path;
 		}
 

@@ -2196,7 +2196,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
         
         // duplicate the item as many as diffusion_path
-        ItemAdd.DiffusionItem[] dItems = ItemAdd.DiffusionItem.findByItem(context, item.getID());
+        ItemAdd.DiffusionItem[] dItems = ItemAdd.DiffusionItem.findById(context, item.getID());
         
         for (DiffusionItem dit : dItems) { /* TODO: remove hard code */
 

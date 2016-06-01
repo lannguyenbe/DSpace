@@ -2,6 +2,8 @@ package org.dspace.rtbf.rest.common;
 
 import org.apache.log4j.Logger;
 import org.dspace.content.Collection;
+import org.dspace.content.ItemAdd;
+import org.dspace.content.ItemAdd.DiffusionItem;
 import org.dspace.content.Metadatum;
 import org.dspace.core.Context;
 import org.dspace.discovery.DiscoverExpandedItems;
@@ -55,6 +57,8 @@ public class Sequence extends RTBObject{
     		this.setDateIssued(getMetadataEntry(Constants.DATE_ISSUED,item));
     		this.setChannelIssued(getMetadataEntry(Constants.CHANNEL_ISSUED,item));
         	// this.setCountSupports(getCountAllSupports(item));
+    		org.dspace.content.ItemAdd itemA = new org.dspace.content.ItemAdd(item);
+    		this.setChannelIssuedList(itemA.findChannelsIssuedById());
     		innerViewType = Constants.MIN_VIEW;
     		break;
     	case Constants.STANDARD_VIEW:
@@ -135,6 +139,33 @@ public class Sequence extends RTBObject{
      		this.addExpand("metadata");
      	}
     	
+        if(expandFields.contains("diffusionList") || expandFields.contains("all")) {
+        	List<RTBObjectParts.Diffusion> diffusionList = new ArrayList<RTBObjectParts.Diffusion>();
+            ItemAdd.DiffusionItem[] diffs = ItemAdd.DiffusionItem.findById(context, item.getID());
+            for (DiffusionItem diff : diffs) {
+            	// creer le fil d'Ariane owningParentList pour chaque diff
+            	List<RTBObject> entries = new ArrayList<RTBObject>();
+	            // collection level
+	            org.dspace.content.Collection owningCollection = item.getOwningCollection();            
+	            entries.add(new Episode(innerViewType, owningCollection, null, context));
+	            // serie level
+	            org.dspace.content.Community parentCommunity = (org.dspace.content.Community) owningCollection.getParentObject();
+	            entries.add(new Serie(innerViewType, parentCommunity, null, context));
+	            // repository level
+	            org.dspace.content.Community topparentCommunity = parentCommunity.getParentCommunity();
+	            if (topparentCommunity != null) { // already at top for orphan item
+	            	entries.add(new Serie(innerViewType, topparentCommunity, null, context));
+	            }
+	            this.setOwningParentList(entries);
+	            	
+	            // diffusions.add(new RTBObjectParts.Diffusion(diff.getChannel_event(), diff.getDate_diffusion(), diff.));
+            }
+            
+            this.setDiffusionList(diffusionList);
+     	} else {
+     		this.addExpand("metadata");
+     	}
+
         if(!expandFields.contains("all")) {
             this.addExpand("all");
         }

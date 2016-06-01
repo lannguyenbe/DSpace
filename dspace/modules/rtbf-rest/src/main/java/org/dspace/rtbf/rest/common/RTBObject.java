@@ -9,8 +9,11 @@ package org.dspace.rtbf.rest.common;
 
 import org.apache.log4j.Logger;
 import org.atteo.evo.inflector.English;
+import org.dspace.content.ItemAdd;
 import org.dspace.content.Metadatum;
 import org.dspace.rtbf.rest.common.Constants;
+import org.dspace.rtbf.rest.common.RTBObjectParts.Diffusion;
+
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,6 +24,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +65,8 @@ public class RTBObject {
     private MetadataEntry dateIssued;
     @JsonProperty("rtbf.channel_issued")
     private MetadataEntry channelIssued;
+    @JsonProperty("channel_issued")
+    private List<String> channelIssuedList;
 	//
     // Calculated elements
     protected Integer countSubSeries;
@@ -84,7 +90,7 @@ public class RTBObject {
     @JsonIgnore
     protected MetadataWrapper metadata; // use by Jaxb, not by Jackson
     protected List<RTBObject> linkedDocuments;
-    // TODO List<Diffusion> diffusions;
+    protected List<RTBObjectParts.Diffusion> diffusionList;
     // TODO List<Support> supports;
     
     // highlight
@@ -161,6 +167,7 @@ public class RTBObject {
 	protected int getCountAllSupports(org.dspace.content.DSpaceObject dso) {
 		return(dso.getMetadataByMetadataString(Constants.CODE_ORIGINE).length);
 	}
+
 
 	@XmlAttribute
     public Integer getId() {
@@ -360,13 +367,25 @@ public class RTBObject {
 		this.dateIssued = dateIssued;
 	}
 
-	@XmlAnyElement
-	public MetadataEntry getChannelIssued() {
+	@JsonIgnore
+	@XmlTransient
+	// @XmlAnyElement
+	public MetadataEntry getChannelIssued() {// not by Jackson, nor by Jaxb
 		return channelIssued;
 	}
 
 	public void setChannelIssued(MetadataEntry channelIssued) {
 		this.channelIssued = channelIssued;
+	}
+
+	@XmlElementWrapper( name = "channel_issued")
+	@XmlElement( name = "channel")
+	public List<String> getChannelIssuedList() {
+		return channelIssuedList;
+	}
+
+	public void setChannelIssuedList(List<String> l) {
+		this.channelIssuedList = l;
 	}
 
 	public Integer getCountSupports() {
@@ -455,6 +474,14 @@ public class RTBObject {
 
 	public void setHighlight(HighlightWrapper highlight) {
 		this.highlight = highlight;
+	}
+
+	public List<RTBObjectParts.Diffusion> getDiffusionList() {
+		return diffusionList;
+	}
+
+	public void setDiffusionList(List<RTBObjectParts.Diffusion> diffusions) {
+		this.diffusionList = diffusions;
 	}
 
 	
