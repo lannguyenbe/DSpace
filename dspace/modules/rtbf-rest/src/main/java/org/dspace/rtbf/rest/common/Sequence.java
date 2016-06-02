@@ -58,7 +58,7 @@ public class Sequence extends RTBObject{
     		this.setChannelIssued(getMetadataEntry(Constants.CHANNEL_ISSUED,item));
         	// this.setCountSupports(getCountAllSupports(item));
     		org.dspace.content.ItemAdd itemA = new org.dspace.content.ItemAdd(item);
-    		this.setChannelIssuedList(itemA.findChannelsIssuedById());
+    		this.setChannelIssuedList(findChannelsIssued(item));
     		innerViewType = Constants.MIN_VIEW;
     		break;
     	case Constants.STANDARD_VIEW:
@@ -156,9 +156,8 @@ public class Sequence extends RTBObject{
 	            if (topparentCommunity != null) { // already at top for orphan item
 	            	entries.add(new Serie(innerViewType, topparentCommunity, null, context));
 	            }
-	            this.setOwningParentList(entries);
 	            	
-	            // diffusions.add(new RTBObjectParts.Diffusion(diff.getChannel_event(), diff.getDate_diffusion(), diff.));
+	            diffusionList.add(new RTBObjectParts.Diffusion(diff.getChannel_event(), diff.getDate_diffusion(), entries));
             }
             
             this.setDiffusionList(diffusionList);
@@ -301,6 +300,19 @@ public class Sequence extends RTBObject{
         return manager.getServiceByName(SearchService.class.getName(),SearchService.class);
     }
 
-    
+    private List<String> findChannelsIssued(org.dspace.content.Item item) throws SQLException {
+		org.dspace.content.ItemAdd itemA = new org.dspace.content.ItemAdd(item);
+		List<String> channels = itemA.findChannelsIssuedById();		
+
+		if (channels == null) { // no row in SEGMENT_DIFFUSION for the sequence
+			MetadataEntry inMetadatavalueTable = getMetadataEntry(Constants.CHANNEL_ISSUED,item);
+			if (inMetadatavalueTable != null) { // get the value from METADATAVALUE table
+				channels = new ArrayList<String>();
+				channels.add(inMetadatavalueTable.value);
+			}
+		}
+
+		return channels;    	
+    }
     		                    
 }

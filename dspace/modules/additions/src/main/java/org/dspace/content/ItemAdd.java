@@ -189,17 +189,58 @@ public class ItemAdd extends Item {
     	private String date_diffusion = null;
     	private String channel_event = null;
     	
-    	public DiffusionItem(String diffusion_path, int community_id, int collection_id, int item_id, String date_event, String date_diffusion, String channel_event) {
+    	public DiffusionItem(String diffusion_path, int community_id, int collection_id, int item_id, String date_event, String date_diffusion, String channel) {
     		this.diffusion_path = diffusion_path;
     		this.community_id = community_id;
     		this.collection_id = collection_id;
     		this.item_id = item_id;
     		this.date_event = date_event;
     		this.date_diffusion = date_diffusion;
-    		this.channel_event = channel_event;
+    		this.channel_event = channel;
     	}
     	
         public static DiffusionItem[] findById(Context context, int item_id)
+                throws SQLException
+        {
+        	String myQuery = "SELECT t.diffusion_path, c2c.community_id, t.collection_id, t.resource_id item_id"
+    	    	+ " , to_char(t.event_date,'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') date_event"
+    	    	+ " , to_char(t.diffusion_datetime,'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') date_diffusion"
+    	    	+ " , t.channel"
+    	    	+ " FROM t_diffusion t"
+    	    	+ " , community2collection c2c"
+     	    	+ " WHERE resource_type_id = " + Constants.ITEM
+    	    	+ " AND resource_id = " + item_id
+    	    	+ " AND c2c.collection_id = t.collection_id"    	
+    	        + " ORDER BY t.diffusion_datetime";
+        	
+        	TableRowIterator tri =  null;
+        	List<DiffusionItem> items = new ArrayList<DiffusionItem> ();
+        	
+        	
+        	try {
+				tri =  DatabaseAccess.query(context, myQuery);
+				while (tri.hasNext()) {
+					TableRow row = tri.next();
+					items.add(new DiffusionItem(
+							row.getStringColumn("diffusion_path")
+							, row.getIntColumn("community_id")
+							, row.getIntColumn("collection_id")
+							, row.getIntColumn("item_id")
+							, row.getStringColumn("date_event")
+							, row.getStringColumn("date_diffusion")
+							, row.getStringColumn("channel")
+					));
+				}
+			} finally {
+				if (tri != null) { tri.close(); }
+			}
+        	
+        	DiffusionItem[] dit = new DiffusionItem[items.size()];
+        	return items.toArray(dit);
+        	
+        }
+
+        public static DiffusionItem[] findDupById(Context context, int item_id)
                 throws SQLException
         {
         	String myQuery = "SELECT t.diffusion_path, c2c.community_id, t.collection_id, t.resource_id item_id"
