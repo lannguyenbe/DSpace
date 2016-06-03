@@ -179,24 +179,16 @@ public class ItemAdd extends Item {
     }
      
 
-    public static class DiffusionItem {
-    	
-    	private String diffusion_path = null;
-        private int community_id = -1;
-        private int collection_id = -1;
-        private int item_id = -1;
-    	private String date_event = null;
-    	private String date_diffusion = null;
-    	private String channel_event = null;
-    	
+    public static class DiffusionItem extends Diffusion {
+
     	public DiffusionItem(String diffusion_path, int community_id, int collection_id, int item_id, String date_event, String date_diffusion, String channel) {
-    		this.diffusion_path = diffusion_path;
     		this.community_id = community_id;
     		this.collection_id = collection_id;
     		this.item_id = item_id;
+    		this.diffusion_path = diffusion_path;
     		this.date_event = date_event;
     		this.date_diffusion = date_diffusion;
-    		this.channel_event = channel;
+    		this.channel = channel;
     	}
     	
         public static DiffusionItem[] findById(Context context, int item_id)
@@ -246,12 +238,12 @@ public class ItemAdd extends Item {
         	String myQuery = "SELECT t.diffusion_path, c2c.community_id, t.collection_id, t.resource_id item_id"
     	    	+ " , to_char(t.event_date,'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') date_event"
     	    	+ " , to_char(t.diffusion_dt,'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') date_diffusion"
-    	    	+ " , t.channel_event"
+    	    	+ " , t.min_channel channel"
     	    	+ " FROM"
     	    	+ " (SELECT diffusion_path, resource_id, collection_id, event_date"
     	    	+ "  , min(diffusion_datetime) diffusion_dt"
     	    	+ "  , sum(is_premdiff) premdiff"
-    	    	+ "  , min(channel) keep (dense_rank first order by diffusion_datetime) channel_event"
+    	    	+ "  , min(channel) keep (dense_rank first order by diffusion_datetime) min_channel"
     	    	+ " FROM t_diffusion"
     	    	+ " WHERE resource_type_id = " + Constants.ITEM
     	    	+ " and resource_id = " + item_id
@@ -278,7 +270,7 @@ public class ItemAdd extends Item {
 							, row.getIntColumn("item_id")
 							, row.getStringColumn("date_event")
 							, row.getStringColumn("date_diffusion")
-							, row.getStringColumn("channel_event")
+							, row.getStringColumn("channel")
 					));
 				}
 			} finally {
@@ -290,33 +282,6 @@ public class ItemAdd extends Item {
         	
         }
 
-        public String getDiffusion_path() {
-			return diffusion_path;
-		}
-
-		public int getCommunity_id() {
-			return community_id;
-		}
-
-		public int getCollection_id() {
-			return collection_id;
-		}
-
-		public int getItem_id() {
-			return item_id;
-		}
-
-		public String getDate_event() {
-			return date_event;
-		}
-
-		public String getDate_diffusion() {
-			return date_diffusion;
-		}
-
-		public String getChannel_event() {
-			return channel_event;
-		}
-    }
+   }
     
 }

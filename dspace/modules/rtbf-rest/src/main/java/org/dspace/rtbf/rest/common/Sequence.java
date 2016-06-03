@@ -93,19 +93,7 @@ public class Sequence extends RTBObject{
         }
     	
         if(expandFields.contains("owningParentList") || expandFields.contains("all")) {
-            List<RTBObject> entries = new ArrayList<RTBObject>();
-            // collection level
-            org.dspace.content.Collection owningCollection = item.getOwningCollection();            
-            entries.add(new Episode(innerViewType, owningCollection, null, context));
-            // serie level
-            org.dspace.content.Community parentCommunity = (org.dspace.content.Community) owningCollection.getParentObject();
-            entries.add(new Serie(innerViewType, parentCommunity, null, context));
-            // repository level
-            org.dspace.content.Community topparentCommunity = parentCommunity.getParentCommunity();
-            if (topparentCommunity != null) { // already at top for orphan item
-            	entries.add(new Serie(innerViewType, topparentCommunity, null, context));
-            }
-            this.setOwningParentList(entries);
+            this.setOwningParentList(findOwningParentList(context, item.getOwningCollection()));
         } else {
             this.addExpand("owningParentList");
         }
@@ -139,28 +127,17 @@ public class Sequence extends RTBObject{
      		this.addExpand("metadata");
      	}
     	
-        if(expandFields.contains("diffusionList") || expandFields.contains("all")) {
+        if(expandFields.contains("diffusions") || expandFields.contains("all")) {
         	List<RTBObjectParts.Diffusion> diffusionList = new ArrayList<RTBObjectParts.Diffusion>();
-            ItemAdd.DiffusionItem[] diffs = ItemAdd.DiffusionItem.findById(context, item.getID());
-            for (DiffusionItem diff : diffs) {
-            	// creer le fil d'Ariane owningParentList pour chaque diff
-            	List<RTBObject> entries = new ArrayList<RTBObject>();
-	            // collection level
-	            org.dspace.content.Collection owningCollection = item.getOwningCollection();            
-	            entries.add(new Episode(innerViewType, owningCollection, null, context));
-	            // serie level
-	            org.dspace.content.Community parentCommunity = (org.dspace.content.Community) owningCollection.getParentObject();
-	            entries.add(new Serie(innerViewType, parentCommunity, null, context));
-	            // repository level
-	            org.dspace.content.Community topparentCommunity = parentCommunity.getParentCommunity();
-	            if (topparentCommunity != null) { // already at top for orphan item
-	            	entries.add(new Serie(innerViewType, topparentCommunity, null, context));
-	            }
-	            	
-	            diffusionList.add(new RTBObjectParts.Diffusion(diff.getChannel_event(), diff.getDate_diffusion(), entries));
+        	org.dspace.content.Diffusion[] diffs = ItemAdd.DiffusionItem.findById(context, item.getID());
+        	for (org.dspace.content.Diffusion diff : diffs) {
+
+        		org.dspace.content.Collection owningCollection = Collection.find(context, diff.getCollection_id());            
+        		diffusionList.add(new RTBObjectParts.Diffusion(diff.getChannel(), diff.getDate_diffusion()
+        				, findOwningParentList(context, owningCollection)));
             }
             
-            this.setDiffusionList(diffusionList);
+            this.setDiffusions(diffusionList);
      	} else {
      		this.addExpand("metadata");
      	}
@@ -215,19 +192,8 @@ public class Sequence extends RTBObject{
         Integer collectionId = Integer.parseInt(doc.getSearchFieldValues("dup_owning_collection").get(0).replaceFirst(String.valueOf(Constants.COLLECTION) + '-', ""));
 
         if(expand.contains("owningParentList")) {
-            List<RTBObject> entries = new ArrayList<RTBObject>();
-            // collection level
             org.dspace.content.Collection owningCollection = Collection.find(context, collectionId);
-            entries.add(new Episode(innerViewType, owningCollection, null, context));
-            // serie level
-            org.dspace.content.Community parentCommunity = (org.dspace.content.Community) owningCollection.getParentObject();
-            entries.add(new Serie(innerViewType, parentCommunity, null, context));
-            // repository level
-            org.dspace.content.Community topparentCommunity = parentCommunity.getParentCommunity();
-            if (topparentCommunity != null) { // already at top for orphan item
-            	entries.add(new Serie(innerViewType, topparentCommunity, null, context));
-            }
-            this.setOwningParentList(entries);
+            this.setOwningParentList(findOwningParentList(context, owningCollection));
         }
     	
         if(expand.contains("owningEpisode")) {
@@ -313,6 +279,22 @@ public class Sequence extends RTBObject{
 		}
 
 		return channels;    	
+    }
+    
+    private List<RTBObject> findOwningParentList(Context context, org.dspace.content.Collection owningCollection) throws WebApplicationException, SQLException{
+    	int innerViewType = Constants.MIN_VIEW;
+        List<RTBObject> entries = new ArrayList<RTBObject>();
+        // collection level
+        entries.add(new Episode(innerViewType, owningCollection, null, context));
+        // serie level
+        org.dspace.content.Community parentCommunity = (org.dspace.content.Community) owningCollection.getParentObject();
+        entries.add(new Serie(innerViewType, parentCommunity, null, context));
+        // repository level
+        org.dspace.content.Community topparentCommunity = parentCommunity.getParentCommunity();
+        if (topparentCommunity != null) { // is not orphan
+        	entries.add(new Serie(innerViewType, topparentCommunity, null, context));
+        }
+		return entries;   	
     }
     		                    
 }

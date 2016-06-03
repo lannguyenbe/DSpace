@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.dspace.authorize.AuthorizeException;
+import org.dspace.content.ItemAdd.DiffusionItem;
 import org.dspace.content.authority.ChoiceAuthorityManager;
 import org.dspace.content.authority.Choices;
 import org.dspace.content.authority.MetadataAuthorityManager;
@@ -34,56 +35,46 @@ import org.dspace.utils.DSpace;
 /**
  * Abstract base class for DSpace objects
  */
-public /* abstract */ class Diffusion
+public abstract class Diffusion
 {
     /** log4j category */
     private static final Logger log = Logger.getLogger(Diffusion.class);
 
+    protected int community_id;
+    protected int collection_id;
+    protected int item_id;
+	protected String diffusion_path;
+	protected String date_event;
+	protected String date_diffusion;
+	protected String channel;
 
-	private String channel;
-	private String event_date;
-    private String diffusion_datetime;
-    private DSpaceObject dso;
-    	
+	
+	public int getCommunity_id() {
+		return community_id;
+	}
 
-    public Diffusion(DSpaceObject dso, String event_date, String diffusion_date, String channel) {
-    	this.channel = channel;
-    	this.event_date = event_date;
-    	this.diffusion_datetime = diffusion_date;
-    	this.dso = dso;
-   	
-    }
+	public int getCollection_id() {
+		return collection_id;
+	}
+
+	public int getItem_id() {
+		return item_id;
+	}
+
+	public String getDiffusion_path() {
+		return diffusion_path;
+	}
+
+	public String getDate_event() {
+		return date_event;
+	}
+
+	public String getDate_diffusion() {
+		return date_diffusion;
+	}
 
 	public String getChannel() {
 		return channel;
 	}
-
-	public void setChannel(String channel) {
-		this.channel = channel;
-	}
-
-	public String getEvent_date() {
-		return event_date;
-	}
-
-	public void setEvent_date(String event_date) {
-		this.event_date = event_date;
-	}
-
-	public String getDiffusion_datetime() {
-		return diffusion_datetime;
-	}
-
-	public void setDiffusion_datetime(String diffusion_date) {
-		this.diffusion_datetime = diffusion_date;
-	}
-
-	public DSpaceObject getDso() {
-		return dso;
-	}
-
-	public void setDso(DSpaceObject dso) {
-		this.dso = dso;
-	}
-
+	
 }

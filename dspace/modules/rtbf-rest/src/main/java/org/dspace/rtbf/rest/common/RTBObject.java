@@ -90,7 +90,7 @@ public class RTBObject {
     @JsonIgnore
     protected MetadataWrapper metadata; // use by Jaxb, not by Jackson
     protected List<RTBObject> linkedDocuments;
-    protected List<RTBObjectParts.Diffusion> diffusionList;
+    protected List<RTBObjectParts.Diffusion> diffusions;
     // TODO List<Support> supports;
     
     // highlight
@@ -476,12 +476,12 @@ public class RTBObject {
 		this.highlight = highlight;
 	}
 
-	public List<RTBObjectParts.Diffusion> getDiffusionList() {
-		return diffusionList;
+	public List<RTBObjectParts.Diffusion> getDiffusions() {
+		return diffusions;
 	}
 
-	public void setDiffusionList(List<RTBObjectParts.Diffusion> diffusions) {
-		this.diffusionList = diffusions;
+	public void setDiffusions(List<RTBObjectParts.Diffusion> diffusions) {
+		this.diffusions = diffusions;
 	}
 
 	

@@ -13,14 +13,14 @@ public class RTBObjectParts {
 		public static class Diffusion {
 		
 			private String channel;
-			private String diffusion_datetime;
+			private String date_diffusion;
 		    protected List<RTBObject> owningParentList;
 		    
 		    public Diffusion() {}
 		    
 		    public Diffusion(String channel, String dt, List<RTBObject> list) {
 		    	setChannel(channel);
-		    	setDiffusion_datetime(dt);
+		    	setDate_diffusion(dt);
 		    	setOwningParentList(list);
 		    }
 		    
@@ -30,11 +30,11 @@ public class RTBObjectParts {
 			public void setChannel(String channel) {
 				this.channel = channel;
 			}
-			public String getDiffusion_datetime() {
-				return diffusion_datetime;
+			public String getDate_diffusion() {
+				return date_diffusion;
 			}
-			public void setDiffusion_datetime(String diffusion_datetime) {
-				this.diffusion_datetime = diffusion_datetime;
+			public void setDate_diffusion(String date_diffusion) {
+				this.date_diffusion = date_diffusion;
 			}
 	
 			@XmlElementWrapper( name = "owningParentList")

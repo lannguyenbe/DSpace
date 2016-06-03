@@ -2203,7 +2203,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
             doc.setField("search.uniqueid", dit.getDiffusion_path());
             doc.setField("owning_community", Constants.COMMUNITY+"-"+dit.getCommunity_id());
             doc.setField("owning_collection", Constants.COLLECTION+"-"+dit.getCollection_id());
-            doc.setField("rtbf.channel_issued", dit.getChannel_event());
+            doc.setField("rtbf.channel_issued", dit.getChannel());
             
             String field = "dc.date.issued";
             String value = dit.getDate_diffusion();
