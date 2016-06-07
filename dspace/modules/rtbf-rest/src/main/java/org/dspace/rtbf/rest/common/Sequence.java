@@ -55,7 +55,7 @@ public class Sequence extends RTBObject{
     	case Constants.PLAYLIST_VIEW:
     	case Constants.SEARCH_RESULT_VIEW:
     		this.setDateIssued(getMetadataEntry(Constants.DATE_ISSUED,item));
-    		this.setChannelIssued(getMetadataEntry(Constants.CHANNEL_ISSUED,item));
+    		this.setChannelIssued(getMetadataEntries(Constants.CHANNEL_ISSUED,item));
         	// this.setCountSupports(getCountAllSupports(item));
     		org.dspace.content.ItemAdd itemA = new org.dspace.content.ItemAdd(item);
     		this.setChannelIssuedList(findChannelsIssued(item));
@@ -191,7 +191,11 @@ public class Sequence extends RTBObject{
     	switch(viewType) {
     	case Constants.SEARCH_RESULT_VIEW:
         	this.setDateIssued(new MetadataEntry(Constants.DATE_ISSUED, doc.getSearchFieldValues("dup_date_issued").get(0), null));
-        	this.setChannelIssued(new MetadataEntry(Constants.CHANNEL_ISSUED, doc.getSearchFieldValues("dup_channel_issued").get(0), null));
+        	List<MetadataEntry> entries = new ArrayList<MetadataEntry>();
+        	for (int i=0, len=doc.getSearchFieldValues("dup_channel_issued").size(); i < len; i++) {
+        		entries.add(new MetadataEntry(Constants.CHANNEL_ISSUED, doc.getSearchFieldValues("dup_channel_issued").get(i), null));
+        	}
+    		this.setChannelIssued(entries);
     		innerViewType = Constants.MIN_VIEW;
     		break;
     	case Constants.STANDARD_VIEW:
@@ -282,12 +286,12 @@ public class Sequence extends RTBObject{
 		org.dspace.content.ItemAdd itemA = new org.dspace.content.ItemAdd(item);
 		List<String> channels = itemA.findChannelsIssuedById();		
 
-		if (channels == null) { // no row in SEGMENT_DIFFUSION for the sequence
-			MetadataEntry inMetadatavalueTable = getMetadataEntry(Constants.CHANNEL_ISSUED,item);
-			if (inMetadatavalueTable != null) { // get the value from METADATAVALUE table
-				channels = new ArrayList<String>();
-				channels.add(inMetadatavalueTable.value);
-			}
+		if (channels == null) { // no row in SEGMENT_DIFFUSION for the sequence, look in Metadatavalue Table that has value(s) inherited from Episode
+			channels = new ArrayList<String>();
+    		List<MetadataEntry> channelsInMetadatavalueTable = getMetadataEntries(Constants.CHANNEL_ISSUED,item);
+    		for (MetadataEntry ch : channelsInMetadatavalueTable) {
+				channels.add(ch.value);
+			}    		
 		}
 
 		return channels;    	
@@ -308,5 +312,5 @@ public class Sequence extends RTBObject{
         }
 		return entries;   	
     }
-    		                    
+        		                    
 }

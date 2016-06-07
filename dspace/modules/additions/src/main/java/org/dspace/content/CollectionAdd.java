@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dspace.content.ItemAdd.DiffusionItem;
+import org.dspace.content.ItemAdd.SupportItem;
 import org.dspace.core.Constants;
 import org.dspace.core.Context;
 import org.dspace.storage.rdbms.DatabaseAccess;
@@ -115,7 +116,51 @@ public class CollectionAdd extends Collection {
         	return collections.toArray(dct);
         	
         }
+    }
 
-   }
+    public static class SupportCollection extends Support {
+
+    	public SupportCollection(TableRow row) {
+    		super(row);
+    	}
+
+    	public static SupportCollection[] findById(Context context, int item_id)
+    			throws SQLException
+    			{
+    		String myQuery = "SELECT "
+    				+ " t.code_origine"
+    				+ " , t.support_type"
+    				+ " , t.set_of_support_type"
+    				+ " , t.support_place"
+    				+ " , t.key_frame_offset"
+    				+ " , t.tc_in, t.tc_out, t.htc_in, t.htc_out, t.duration"
+    				+ " , t.tc_in_string, t.tc_out_string, t.htc_in_string, t.htc_out_string, t.duration_string"
+    				+ " , t.origine"
+    				+ " , t.category"
+    				+ " FROM t_support2resource t"
+    				+ " WHERE resource_type_id = " + Constants.COLLECTION
+    				+ " AND resource_id = " + item_id
+        	        + " ORDER BY t.set_of_support_type";
+
+    		TableRowIterator tri =  null;
+    		List<SupportCollection> supports = new ArrayList<SupportCollection> ();
+
+
+    		try {
+    			tri =  DatabaseAccess.query(context, myQuery);
+    			while (tri.hasNext()) {
+    				supports.add(new SupportCollection(tri.next()));
+    			}
+    		} finally {
+    			if (tri != null) { tri.close(); }
+    		}
+
+    		SupportCollection[] arr = new SupportCollection[supports.size()];
+    		return supports.toArray(arr);
+
+    	}
+    }
+
+
 
 }

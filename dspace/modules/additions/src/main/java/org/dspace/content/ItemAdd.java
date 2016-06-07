@@ -299,14 +299,14 @@ public class ItemAdd extends Item {
     				+ " , t.set_of_support_type"
     				+ " , t.support_place"
     				+ " , t.key_frame_offset"
-    				+ " , t.tc_in, t.tc_out, t.duration"
-    				+ " , t.tc_in_string, t.tc_out_string, t.duration_string"
+    				+ " , t.tc_in, t.tc_out, t.htc_in, t.htc_out, t.duration"
+    				+ " , t.tc_in_string, t.tc_out_string, t.htc_in_string, t.htc_out_string, t.duration_string"
     				+ " , t.origine"
     				+ " , t.category"
     				+ " FROM t_support2resource t"
     				+ " WHERE resource_type_id = " + Constants.ITEM
     				+ " AND resource_id = " + item_id
-    		;
+        	        + " ORDER BY t.set_of_support_type";
 
     		TableRowIterator tri =  null;
     		List<SupportItem> supports = new ArrayList<SupportItem> ();

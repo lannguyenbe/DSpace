@@ -60,6 +60,8 @@ public class RTBObjectParts {
 		    private String key_frame_offset;
 		    private String tc_in;
 		    private String tc_out;
+		    private String htc_in;
+		    private String htc_out;
 		    private String duration;
 		    private String origine;
 		    private String category;
@@ -74,6 +76,8 @@ public class RTBObjectParts {
 		    	this.key_frame_offset = support.getKey_frame_offset();
 		    	this.tc_in = support.getTc_in_string();
 		    	this.tc_out = support.getTc_out_string();
+		    	this.htc_in = support.getHtc_in_string();
+		    	this.htc_out = support.getHtc_out_string();
 		    	this.duration = support.getDuration_string();
 		    	this.origine = support.getOrigine();
 		    	this.category = support.getCategory();
@@ -157,6 +161,22 @@ public class RTBObjectParts {
 
 			public void setCategory(String category) {
 				this.category = category;
+			}
+
+			public String getHtc_in() {
+				return htc_in;
+			}
+
+			public String getHtc_out() {
+				return htc_out;
+			}
+
+			public void setHtc_in(String htc_in) {
+				this.htc_in = htc_in;
+			}
+
+			public void setHtc_out(String htc_out) {
+				this.htc_out = htc_out;
 			}
 
 		}

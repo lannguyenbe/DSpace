@@ -48,8 +48,7 @@ public class Episode extends RTBObject {
     	
     	switch (viewType) {
     	case Constants.SEARCH_RESULT_VIEW:
-    		this.setDateIssued(getMetadataEntry(Constants.DATE_ISSUED,collection));
-    		this.setChannelIssued(getMetadataEntry(Constants.CHANNEL_ISSUED,collection));
+    		this.setChannelIssued(getMetadataEntries(Constants.CHANNEL_ISSUED,collection));
             // this.setCountSupports(getCountAllSupports(collection));
             this.setCountSequences(collection.countItems());
     		innerViewType = Constants.MIN_VIEW;
@@ -72,17 +71,6 @@ public class Episode extends RTBObject {
         }
 
         if(expandFields.contains("owningParentList") || expandFields.contains("all")) {
-/*
-        	List<RTBObject> entries = new ArrayList<RTBObject>();
-            // serie level
-            org.dspace.content.Community parentCommunity = (org.dspace.content.Community) collection.getParentObject();
-            entries.add(new Serie(innerViewType, parentCommunity, null, context));
-            // repository level
-            org.dspace.content.Community topparentCommunity = parentCommunity.getParentCommunity();
-            if (topparentCommunity != null) { // already at top for orphan episode
-            	entries.add(new Serie(innerViewType, topparentCommunity, null, context));
-            }
-*/
             this.setOwningParentList(findOwningParentList(context, collection));
         } else {
             this.addExpand("owningParentList");
@@ -135,6 +123,18 @@ public class Episode extends RTBObject {
             this.setDiffusions(diffusionList);
      	} else {
      		this.addExpand("metadata");
+     	}
+
+        if(expandFields.contains("supports") || expandFields.contains("all")) {
+        	List<RTBObjectParts.Support> supportList = new ArrayList<RTBObjectParts.Support>();
+        	org.dspace.content.Support[] supports = CollectionAdd.SupportCollection.findById(context, collection.getID());
+        	for (org.dspace.content.Support supp : supports) {
+        		supportList.add(new RTBObjectParts.Support(supp));
+            }
+            
+            this.setSupports(supportList);
+     	} else {
+     		this.addExpand("supports");
      	}
 
         if(!expandFields.contains("all")) {

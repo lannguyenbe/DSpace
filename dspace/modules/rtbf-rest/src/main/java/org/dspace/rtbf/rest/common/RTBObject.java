@@ -64,9 +64,9 @@ public class RTBObject {
     @JsonProperty("dc.date.issued")
     private MetadataEntry dateIssued;
     @JsonProperty("rtbf.channel_issued")
-    private MetadataEntry channelIssued;
+    private List<MetadataEntry> channelIssued; // TODO after REIMPORT : this channel_issued should be used in place of channelIssuedList
     @JsonProperty("channel_issued")
-    private List<String> channelIssuedList;
+    private List<String> channelIssuedList; // channel issued get from t_diffusion in waiting for REIMPORT
 	//
     // Calculated elements
     protected Integer countSubSeries;
@@ -153,6 +153,17 @@ public class RTBObject {
             return new MetadataEntry(dcv[0].getField(), dcv[0].value, dcv[0].language);
         }
         return null;
+    }
+    
+    protected static List<MetadataEntry> getMetadataEntries(String value, org.dspace.content.DSpaceObject dso){
+    	List<MetadataEntry> mylist = new ArrayList<MetadataEntry>();
+        Metadatum[] dcv = dso.getMetadataByMetadataString(value);
+        
+        for (int i=0, len=dcv.length; i < len; i++) {
+        	mylist.add(new MetadataEntry(dcv[0].getField(), dcv[0].value, dcv[0].language));
+        }
+
+        return mylist;
     }
     
     protected Metadatum[] getAllMetadata(org.dspace.content.DSpaceObject dso){
@@ -367,17 +378,18 @@ public class RTBObject {
 		this.dateIssued = dateIssued;
 	}
 
-	@JsonIgnore
-	@XmlTransient
+	// TODO after REIMPORT : this channel_issued should be used in place of channelIssuedList
+	@JsonIgnore   // ignore on json output
+	@XmlTransient // ignore on xml ourput
 	// @XmlAnyElement
-	public MetadataEntry getChannelIssued() {// not by Jackson, nor by Jaxb
+	public List<MetadataEntry> getChannelIssued() {// not by Jackson, nor by Jaxb
 		return channelIssued;
 	}
 
-	public void setChannelIssued(MetadataEntry channelIssued) {
+	public void setChannelIssued(List<MetadataEntry> channelIssued) {
 		this.channelIssued = channelIssued;
 	}
-
+	
 	@XmlElementWrapper( name = "channel_issued")
 	@XmlElement( name = "channel")
 	public List<String> getChannelIssuedList() {

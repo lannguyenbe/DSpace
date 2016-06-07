@@ -15,9 +15,13 @@ public abstract class Support {
     protected String key_frame_offset;
     protected double tc_in;
     protected double tc_out;
+    protected double htc_in;
+    protected double htc_out;
     protected double duration;
     protected String tc_in_string;
     protected String tc_out_string;
+    protected String htc_in_string;
+    protected String htc_out_string;
     protected String duration_string;
     protected String origine;
     protected String category;
@@ -30,11 +34,15 @@ public abstract class Support {
     	this.set = row.getStringColumn("set_of_support_type");
     	this.place = row.getStringColumn("support_place");
     	this.key_frame_offset = row.getStringColumn("key_frame_offset");
-    	this.tc_in = row.getDoubleColumn("tc_in");
-    	this.tc_out = row.getDoubleColumn("tc_out");
-    	this.duration = row.getDoubleColumn("duration");
+    	this.tc_in = row.getLongColumn("tc_in");
+    	this.tc_out = row.getLongColumn("tc_out");
+    	this.tc_in = row.getLongColumn("htc_in");
+    	this.tc_out = row.getLongColumn("htc_out");
+    	this.duration = row.getLongColumn("duration");
     	this.tc_in_string = row.getStringColumn("tc_in_string");
     	this.tc_out_string = row.getStringColumn("tc_out_string");
+    	this.htc_in_string = row.getStringColumn("htc_in_string");
+    	this.htc_out_string = row.getStringColumn("htc_out_string");
     	this.duration_string = row.getStringColumn("duration_string");
     	this.origine = row.getStringColumn("origine");
     	this.category = row.getStringColumn("category");
@@ -78,6 +86,18 @@ public abstract class Support {
 	}
 	public String getCategory() {
 		return category;
+	}
+	public double getHtc_in() {
+		return htc_in;
+	}
+	public double getHtc_out() {
+		return htc_out;
+	}
+	public String getHtc_in_string() {
+		return htc_in_string;
+	}
+	public String getHtc_out_string() {
+		return htc_out_string;
 	}
 
 }
