@@ -9,8 +9,8 @@ import org.dspace.storage.rdbms.TableRowIterator;
 
 public class CommunityAdd extends Community {
 
-    public CommunityAdd(Context context, TableRow row) throws SQLException {
-        super(context, row);
+    public CommunityAdd(Community community) throws SQLException {
+        super(community.ourContext, community.getCommunityRow());
     }
     
     public static CommunityIterator findAllCursor(Context context) throws SQLException

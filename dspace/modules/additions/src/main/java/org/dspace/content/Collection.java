@@ -1958,4 +1958,13 @@ public class Collection extends DSpaceObject
         }
         return collections.toArray(new Collection[0]);
     }
+    
+    /* Lan 03.06.2016 : add getCollectionRow() in protected
+     * to be able to contruct instance of subclass CollectionAdd from Collection instance; then casting to Collection to access Collection method
+     * inspired by ItemAdd and Item
+     */
+    protected TableRow getCollectionRow() {
+    	return(this.collectionRow);
+    }
+
 }

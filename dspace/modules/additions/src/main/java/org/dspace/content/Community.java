@@ -1679,4 +1679,12 @@ public class Community extends DSpaceObject
         ourContext.addEvent(new Event(Event.MODIFY, Constants.COMMUNITY, 
                 getID(), null, getIdentifiers(ourContext)));
     }
+
+    /* Lan 03.06.2016 : add getCommunityRow() in protected
+     * to be able to contruct instance of subclass CommunityAdd from Community instance; then casting to ommunity to access Community method
+     * inspired by ItemAdd an Item
+     */
+    protected TableRow getCommunityRow() {
+    	return(this.communityRow);
+    }
 }

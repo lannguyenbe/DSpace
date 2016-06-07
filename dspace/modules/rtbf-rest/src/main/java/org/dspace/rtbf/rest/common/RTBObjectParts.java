@@ -1,9 +1,12 @@
 package org.dspace.rtbf.rest.common;
 
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
+
 import org.apache.log4j.Logger;
+import org.dspace.content.Support;
 import org.dspace.rtbf.rest.common.RTBObject;
 
 public class RTBObjectParts {
@@ -47,6 +50,119 @@ public class RTBObjectParts {
 				this.owningParentList = owningParentList;
 			}
 		}
+		
+		public static class Support {
+
+		    private String code_origine;
+		    private String type;
+		    private String set;
+		    private String place;
+		    private String key_frame_offset;
+		    private String tc_in;
+		    private String tc_out;
+		    private String duration;
+		    private String origine;
+		    private String category;
+		    
+		    public Support() {}
+		    
+		    public Support(org.dspace.content.Support support) {
+		    	this.code_origine = support.getCode_origine();
+		    	this.type = support.getType();
+		    	this.set = support.getSet();
+		    	this.place = support.getPlace();
+		    	this.key_frame_offset = support.getKey_frame_offset();
+		    	this.tc_in = support.getTc_in_string();
+		    	this.tc_out = support.getTc_out_string();
+		    	this.duration = support.getDuration_string();
+		    	this.origine = support.getOrigine();
+		    	this.category = support.getCategory();
+		    }
+
+			public String getCode_origine() {
+				return code_origine;
+			}
+
+			public String getType() {
+				return type;
+			}
+
+			public String getSet() {
+				return set;
+			}
+
+			public String getPlace() {
+				return place;
+			}
+
+			public String getKey_frame_offset() {
+				return key_frame_offset;
+			}
+
+			public String getTc_in() {
+				return tc_in;
+			}
+
+			public String getTc_out() {
+				return tc_out;
+			}
+
+			public String getDuration() {
+				return duration;
+			}
+
+			public String getOrigine() {
+				return origine;
+			}
+
+			public String getCategory() {
+				return category;
+			}
+
+			public void setCode_origine(String code_origine) {
+				this.code_origine = code_origine;
+			}
+
+			public void setType(String type) {
+				this.type = type;
+			}
+
+			public void setSet(String set) {
+				this.set = set;
+			}
+
+			public void setPlace(String place) {
+				this.place = place;
+			}
+
+			public void setKey_frame_offset(String key_frame_offset) {
+				this.key_frame_offset = key_frame_offset;
+			}
+
+			public void setTc_in(String tc_in) {
+				this.tc_in = tc_in;
+			}
+
+			public void setTc_out(String tc_out) {
+				this.tc_out = tc_out;
+			}
+
+			public void setDuration(String duration) {
+				this.duration = duration;
+			}
+
+			public void setOrigine(String origine) {
+				this.origine = origine;
+			}
+
+			public void setCategory(String category) {
+				this.category = category;
+			}
+
+		}
+	
+	
+		
 		
 		
 }

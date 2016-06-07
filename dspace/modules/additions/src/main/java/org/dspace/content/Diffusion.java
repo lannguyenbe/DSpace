@@ -7,30 +7,7 @@
  */
 package org.dspace.content;
 
-import java.sql.SQLException;
-import java.util.*;
-
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.dspace.authorize.AuthorizeException;
-import org.dspace.content.ItemAdd.DiffusionItem;
-import org.dspace.content.authority.ChoiceAuthorityManager;
-import org.dspace.content.authority.Choices;
-import org.dspace.content.authority.MetadataAuthorityManager;
-import org.dspace.core.Constants;
-import org.dspace.core.Context;
-import org.dspace.core.LogManager;
-import org.dspace.eperson.EPerson;
-import org.dspace.eperson.Group;
-import org.dspace.event.Event;
-import org.dspace.storage.rdbms.DatabaseManager;
-import org.dspace.storage.rdbms.TableRow;
-import org.dspace.storage.rdbms.TableRowIterator;
-import org.dspace.handle.HandleManager;
-import org.dspace.identifier.IdentifierService;
-import org.dspace.utils.DSpace;
 
 /**
  * Abstract base class for DSpace objects

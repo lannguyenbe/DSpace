@@ -8,6 +8,10 @@
 package org.dspace.rtbf.rest.common;
 
 import org.apache.log4j.Logger;
+import org.dspace.content.Collection;
+import org.dspace.content.CollectionAdd;
+import org.dspace.content.Community;
+import org.dspace.content.ItemAdd;
 import org.dspace.content.ItemIterator;
 import org.dspace.content.Metadatum;
 import org.dspace.core.Context;
@@ -68,7 +72,8 @@ public class Episode extends RTBObject {
         }
 
         if(expandFields.contains("owningParentList") || expandFields.contains("all")) {
-            List<RTBObject> entries = new ArrayList<RTBObject>();
+/*
+        	List<RTBObject> entries = new ArrayList<RTBObject>();
             // serie level
             org.dspace.content.Community parentCommunity = (org.dspace.content.Community) collection.getParentObject();
             entries.add(new Serie(innerViewType, parentCommunity, null, context));
@@ -77,7 +82,8 @@ public class Episode extends RTBObject {
             if (topparentCommunity != null) { // already at top for orphan episode
             	entries.add(new Serie(innerViewType, topparentCommunity, null, context));
             }
-            this.setOwningParentList(entries);
+*/
+            this.setOwningParentList(findOwningParentList(context, collection));
         } else {
             this.addExpand("owningParentList");
         }
@@ -118,11 +124,39 @@ public class Episode extends RTBObject {
      		this.addExpand("metadata");
      	}
 
+        if(expandFields.contains("diffusions") || expandFields.contains("all")) {
+        	List<RTBObjectParts.Diffusion> diffusionList = new ArrayList<RTBObjectParts.Diffusion>();
+        	org.dspace.content.Diffusion[] diffs = CollectionAdd.DiffusionCollection.findById(context, collection.getID());
+        	for (org.dspace.content.Diffusion diff : diffs) {
+        		diffusionList.add(new RTBObjectParts.Diffusion(diff.getChannel(), diff.getDate_diffusion()
+        				, findOwningParentList(context, collection)));
+            }
+            
+            this.setDiffusions(diffusionList);
+     	} else {
+     		this.addExpand("metadata");
+     	}
+
         if(!expandFields.contains("all")) {
             this.addExpand("all");
         }
     }
 
+    private List<RTBObject> findOwningParentList(Context context, org.dspace.content.Collection owningCollection) throws WebApplicationException, SQLException{
+    	int innerViewType = Constants.MIN_VIEW;
+        List<RTBObject> entries = new ArrayList<RTBObject>();
+       // serie level
+        org.dspace.content.Community parentCommunity = (org.dspace.content.Community) owningCollection.getParentObject();
+        entries.add(new Serie(innerViewType, parentCommunity, null, context));
+        // repository level
+        org.dspace.content.Community topparentCommunity = parentCommunity.getParentCommunity();
+        if (topparentCommunity != null) { // is not orphan
+        	entries.add(new Serie(innerViewType, topparentCommunity, null, context));
+        }
+		return entries;   	
+    }
+    		                    
+    
 
 }
 

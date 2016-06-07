@@ -139,7 +139,19 @@ public class Sequence extends RTBObject{
             
             this.setDiffusions(diffusionList);
      	} else {
-     		this.addExpand("metadata");
+     		this.addExpand("diffusions");
+     	}
+
+        if(expandFields.contains("supports") || expandFields.contains("all")) {
+        	List<RTBObjectParts.Support> supportList = new ArrayList<RTBObjectParts.Support>();
+        	org.dspace.content.Support[] supports = ItemAdd.SupportItem.findById(context, item.getID());
+        	for (org.dspace.content.Support supp : supports) {
+        		supportList.add(new RTBObjectParts.Support(supp));
+            }
+            
+            this.setSupports(supportList);
+     	} else {
+     		this.addExpand("supports");
      	}
 
         if(!expandFields.contains("all")) {
