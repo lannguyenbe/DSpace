@@ -2664,7 +2664,11 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 resultDoc.addSearchField("dup_uniqueid", (String) doc.getFieldValue("search.uniqueid"));
                 resultDoc.addSearchField("dup_owning_collection", (String) doc.getFieldValue("owning_collection"));                
                 resultDoc.addSearchField("dup_date_issued", (doc.getFieldValue("date_issued_dt") == null) ? null : DateFormatUtils.formatUTC((Date) doc.getFieldValue("date_issued_dt"),"yyyy-MM-dd'T'HH:mm:ss'Z'"));
-                resultDoc.addSearchField("dup_channel_issued", (String) doc.getFieldValue("rtbf.channel_issued"));
+                // resultDoc.addSearchField("dup_channel_issued", (String) doc.getFieldValue("rtbf.channel_issued")); // singlevalue
+                java.util.Collection<Object> manyValues = doc.getFieldValues("rtbf.channel_issued");
+                if (manyValues != null) {
+                	resultDoc.addSearchField("dup_channel_issued", manyValues.toArray(new String[manyValues.size()])); // multivalued
+                }
 
                 //Add information about our search fields
                 for (String field : searchFields)

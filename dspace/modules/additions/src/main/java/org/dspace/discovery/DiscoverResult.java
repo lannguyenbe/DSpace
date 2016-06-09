@@ -239,7 +239,7 @@ public class DiscoverResult {
             this.searchFields = new LinkedHashMap<String, List<String>>();
         }
 
-        public void addSearchField(String field, String ...values){
+        public void addSearchField(String field, String... values){
             List<String>searchFieldValues = searchFields.get(field);
             if(searchFieldValues == null){
                 searchFieldValues = new ArrayList<String>();

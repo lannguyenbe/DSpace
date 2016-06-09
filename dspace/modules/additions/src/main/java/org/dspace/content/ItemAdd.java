@@ -243,7 +243,7 @@ public class ItemAdd extends Item {
     	    	+ " (SELECT diffusion_path, resource_id, collection_id, event_date"
     	    	+ "  , min(diffusion_datetime) diffusion_dt"
     	    	+ "  , sum(is_premdiff) premdiff"
-    	    	+ "  , min(channel) keep (dense_rank first order by diffusion_datetime) min_channel"
+    	    	+ "  , min(channel) keep (dense_rank first order by diffusion_datetime) min_channel" // TODO compute all channels for this diffusion_path, not only the min
     	    	+ " FROM t_diffusion"
     	    	+ " WHERE resource_type_id = " + Constants.ITEM
     	    	+ " and resource_id = " + item_id
