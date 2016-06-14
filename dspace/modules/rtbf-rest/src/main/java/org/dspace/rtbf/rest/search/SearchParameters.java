@@ -17,7 +17,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @XmlRootElement(name = "searchparameters")
 public class SearchParameters implements Request {
-//public class SearchParameters {
 
 	private String scope;
 	private String[] scopes;

@@ -1,4 +1,4 @@
-package org.dspace.rtbf.rest;
+package org.dspace.rtbf.rest.lov;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +13,8 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.log4j.Logger;
 import org.dspace.rtbf.rest.common.Constants;
@@ -37,20 +39,41 @@ public class LOVPlaces extends Resource {
     @Path("places/names")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public List<SimpleNode> getNames(
-    		@QueryParam("pt") @DefaultValue(Constants.LOV_ALL) String pt,
-            @Context HttpHeaders headers, @Context HttpServletRequest request)
+    		@QueryParam("pt") @DefaultValue(Constants.LOV_ALL) String pt
+    		, @Context UriInfo info, @Context HttpHeaders headers, @Context HttpServletRequest request)
     throws WebApplicationException
     {
+    	LOVParameters params = new LOVParameters(info.getQueryParameters());
+
         String partialTerms = pt.trim();
         if (partialTerms.isEmpty()) {
         	return(new ArrayList<SimpleNode>());
         } else if (partialTerms.equals(Constants.LOV_ALL)) {
-        	partialTerms = "";
-        }
+    		log.info("Reading all places.");
+            return(getAllSimpleNodes(FACETFIELD, ELEMENT, params));
+        } 
         
         log.info("Reading places.(pt=" + partialTerms + ").");
-
-        return(getSimpleNodes(FACETFIELD, ELEMENT, partialTerms, headers, request));
+        return(getSimpleNodes(FACETFIELD, ELEMENT, partialTerms, params));
     }
     
+    @GET
+    @Path("places/roles")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public List<SimpleNode> getRoles(
+            @QueryParam("pt") @DefaultValue(Constants.LOV_ALL) String pt
+    		, @Context UriInfo info, @Context HttpHeaders headers, @Context HttpServletRequest request)
+    throws WebApplicationException
+    {
+    	LOVParameters params = new LOVParameters(info.getQueryParameters());
+
+        String partialTerms = pt.trim();
+        if (partialTerms.isEmpty()) {
+        	return(new ArrayList<SimpleNode>());
+        } else { // results are always the same list; arg pt= is ignored
+    		log.info("Reading all places roles.");
+            return(getAllSimpleNodes("role_place", SimpleNode.Attribute.KEY, params));
+        }
+        
+    }
 }

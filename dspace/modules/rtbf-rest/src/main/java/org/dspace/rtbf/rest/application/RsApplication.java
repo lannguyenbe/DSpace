@@ -6,6 +6,16 @@ import java.util.Set;
 import javax.ws.rs.core.Application;
 
 import org.dspace.rtbf.rest.*;
+import org.dspace.rtbf.rest.lov.LOVAuthors;
+import org.dspace.rtbf.rest.lov.LOVChannels;
+import org.dspace.rtbf.rest.lov.LOVCodeOrigines;
+import org.dspace.rtbf.rest.lov.LOVEvents;
+import org.dspace.rtbf.rest.lov.LOVIsPartOfTitles;
+import org.dspace.rtbf.rest.lov.LOVPlaces;
+import org.dspace.rtbf.rest.lov.LOVProductionTypes;
+import org.dspace.rtbf.rest.lov.LOVPublishers;
+import org.dspace.rtbf.rest.lov.LOVRoyaltyCodes;
+import org.dspace.rtbf.rest.lov.LOVSubjects;
 
 public class RsApplication extends Application {
 
@@ -35,6 +45,10 @@ public class RsApplication extends Application {
         set.add(LOVIsPartOfTitles.class);
         set.add(LOVCodeOrigines.class);
         set.add(LOVPublishers.class);
+        set.add(LOVProductionTypes.class);
+        set.add(LOVRoyaltyCodes.class);
+        set.add(LOVEvents.class);
+        set.add(LOVChannels.class);
         return set;
 	}
 

@@ -771,9 +771,9 @@
     <field name="date_issued_dt" type="tdate" indexed="true" stored="true" multiValued="false" omitNorms="true" sortMissingLast="true" docValues="true"/>
     <!-- 10.03.2016 Lan : dc.date.issued_sort as sort field with nulls last - use only by xmlui-->
     <field name="dc.date.issued_sort" type="lowerCaseSort" indexed="true" stored="true" multiValued="false" omitNorms="true" sortMissingLast="true"/>
+    <!-- 08.06.2016 Lan : rtbf.channel_issued becomes multivalue, not sortable anymore -->
     <!-- 01.12.2015 Lan : rtbf.channel_issued as sort field with nulls last -->
-    <field name="rtbf.channel_issued" type="lowerCaseSort" indexed="true" stored="true" multiValued="false" omitNorms="true"/>
-    <field name="rtbf.royalty_code" type="lowerCaseSort" indexed="true" stored="true" multiValued="false" omitNorms="true"/>
+    <!-- field name="rtbf.channel_issued" type="lowerCaseSort" indexed="true" stored="true" multiValued="false" omitNorms="true"/-->
     <!-- 02.12.2015 Lan : add owning_collection from table item.owning_collection -->
     <field name="owning_collection" type="string" indexed="true" stored="true" multiValued="false" omitNorms="true" />
     <field name="owning_community" type="string" indexed="true" stored="true" multiValued="false" omitNorms="true" />

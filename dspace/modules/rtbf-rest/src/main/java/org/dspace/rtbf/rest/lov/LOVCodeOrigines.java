@@ -1,4 +1,4 @@
-package org.dspace.rtbf.rest;
+package org.dspace.rtbf.rest.lov;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +13,8 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.log4j.Logger;
 import org.dspace.rtbf.rest.common.Constants;
@@ -37,38 +39,41 @@ public class LOVCodeOrigines extends Resource {
     @Path("code_origines")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public List<SimpleNode> getCodeOrigines(
-            @QueryParam("pt") @DefaultValue(Constants.LOV_ALL) String pt,
-            @Context HttpHeaders headers, @Context HttpServletRequest request)
+    		@QueryParam("pt") @DefaultValue(Constants.LOV_ALL) String pt
+    		, @Context UriInfo info, @Context HttpHeaders headers, @Context HttpServletRequest request)
     throws WebApplicationException
     {
-        String partialTerms = pt.trim();
+    	LOVParameters params = new LOVParameters(info.getQueryParameters());
+
+    	String partialTerms = pt.trim();
         if (partialTerms.isEmpty()) {
         	return(new ArrayList<SimpleNode>());
         } else if (partialTerms.equals(Constants.LOV_ALL)) {
-        	partialTerms = "";
-        }
-        log.info("Reading supports code_origines.(pt=" + partialTerms + ").");
+    		log.info("Reading all supports code_origines.");
+            return(getAllSimpleNodes(FACETFIELD, ELEMENT, params));
+        } 
 
-        return(getSimpleNodes(FACETFIELD, ELEMENT, partialTerms, headers, request));
+        log.info("Reading supports code_origines.(pt=" + partialTerms + ").");
+        return(getSimpleNodes(FACETFIELD, ELEMENT, partialTerms, params));
     }
     
     @GET
     @Path("sets")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public List<SimpleNode> getSets(
-            @QueryParam("pt") @DefaultValue(Constants.LOV_ALL) String pt,
-            @Context HttpHeaders headers, @Context HttpServletRequest request)
+    		@QueryParam("pt") @DefaultValue(Constants.LOV_ALL) String pt
+    		, @Context UriInfo info, @Context HttpHeaders headers, @Context HttpServletRequest request)
     throws WebApplicationException
     {
-        String partialTerms = pt.trim();
+    	LOVParameters params = new LOVParameters(info.getQueryParameters());
+
+    	String partialTerms = pt.trim();
         if (partialTerms.isEmpty()) {
         	return(new ArrayList<SimpleNode>());
-        }
-
-        partialTerms = ""; // results are always the same list; arg pt= is ignored
-        log.info("Reading support sets.(pt=" + partialTerms + ").");
-
-        return(getSimpleNodes("set", SimpleNode.Attribute.KEY, partialTerms, headers, request));
+        } else { // results are always the same list; arg pt= is ignored
+    		log.info("Reading all support sets.");
+            return(getAllSimpleNodes("set", SimpleNode.Attribute.KEY, params));
+        } 
     }
 
 }

@@ -1,4 +1,4 @@
-package org.dspace.rtbf.rest;
+package org.dspace.rtbf.rest.lov;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,18 +13,20 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.log4j.Logger;
 import org.dspace.rtbf.rest.common.Constants;
 import org.dspace.rtbf.rest.common.SimpleNode;
 import org.dspace.rtbf.rest.search.Resource;
 
-@Path("/publishers")
-public class LOVPublishers extends Resource {
-    private static Logger log = Logger.getLogger(LOVPublishers.class);
+@Path("/channels")
+public class LOVChannels extends Resource {
+    private static Logger log = Logger.getLogger(LOVChannels.class);
     
-    public static final String FACETFIELD = "publisher";
-    public static final SimpleNode.Attribute ELEMENT = SimpleNode.Attribute.KEY;
+    public static final String FACETFIELD = "channel";
+    public static final SimpleNode.Attribute ELEMENT = SimpleNode.Attribute.NAME;
 
     
     /**
@@ -36,20 +38,22 @@ public class LOVPublishers extends Resource {
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public List<SimpleNode> getNames(
-    		@QueryParam("pt") @DefaultValue(Constants.LOV_ALL) String pt,
-            @Context HttpHeaders headers, @Context HttpServletRequest request)
+    		@QueryParam("pt") @DefaultValue(Constants.LOV_ALL) String pt
+    		, @Context UriInfo info, @Context HttpHeaders headers, @Context HttpServletRequest request)
     throws WebApplicationException
     {
-        String partialTerms = pt.trim();
+    	LOVParameters params = new LOVParameters(info.getQueryParameters());
+
+    	String partialTerms = pt.trim();
         if (partialTerms.isEmpty()) {
         	return(new ArrayList<SimpleNode>());
         } else if (partialTerms.equals(Constants.LOV_ALL)) {
-        	partialTerms = "";
-        }
+    		log.info("Reading all channels.");
+            return(getAllSimpleNodes(FACETFIELD, ELEMENT, params));
+        } 
         
-        log.info("Reading publishers.(pt=" + partialTerms + ").");
-
-        return(getSimpleNodes(FACETFIELD, ELEMENT, partialTerms, headers, request));
+        log.info("Reading channels.(pt=" + partialTerms + ").");
+        return(getSimpleNodes(FACETFIELD, ELEMENT, partialTerms, params));
     }
     
 }

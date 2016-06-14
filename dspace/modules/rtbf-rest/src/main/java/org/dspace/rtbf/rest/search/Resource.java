@@ -21,7 +21,9 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -39,6 +41,7 @@ import org.dspace.discovery.configuration.DiscoveryConfigurationParameters;
 import org.dspace.discovery.configuration.DiscoveryHitHighlightFieldConfiguration;
 import org.dspace.handle.HandleManager;
 import org.dspace.rtbf.rest.common.SimpleNode;
+import org.dspace.rtbf.rest.lov.LOVParameters;
 import org.dspace.rtbf.rest.util.RsConfigurationManager;
 import org.dspace.rtbf.rest.util.RsDiscoveryConfiguration;
 import org.dspace.sort.OrderFormat;
@@ -135,12 +138,66 @@ public abstract class Resource
     }
     
 
-    public List<SimpleNode> getSimpleNodes(
+    public List<SimpleNode> TODEL_getAllSimpleNodes(
             String facetField, SimpleNode.Attribute name,
-            String pTerms,
-            HttpHeaders headers, HttpServletRequest request)
-            throws WebApplicationException
+            Integer limit, Integer offset
+           ) throws WebApplicationException
     {
+    	if (limit == null) { limit = org.dspace.rtbf.rest.common.Constants.DEFAULT_LOV_RPP;}
+    	if (offset == null) { offset = 0;}
+
+		ArrayList<SimpleNode> results = null;
+        org.dspace.core.Context context = null;
+        DiscoverResult queryResults = null;
+                
+        DiscoverQuery query = new DiscoverQuery();
+
+	    DiscoverFacetField dff = new DiscoverFacetField("{!key="+facetField+"}"+facetField+"_keyword",
+                DiscoveryConfigurationParameters.TYPE_STANDARD,
+                org.dspace.rtbf.rest.common.Constants.LIMITMAX,
+                DiscoveryConfigurationParameters.SORT.VALUE);
+
+        query.addFacetField(dff);
+        query.setFacetMinCount(1);
+        query.setMaxResults(0);
+                       
+        try {
+           context = new org.dspace.core.Context();
+
+           queryResults = getSearchService().search(context, query);
+
+           context.complete();
+        } catch (Exception e) {
+          processException("Could not process getSimpleNodes. Message:"+e.getMessage(), context);
+        } finally {
+          processFinally(context);            
+        }
+        
+        if (queryResults != null) {
+            List<FacetResult> facets = queryResults.getFacetResult(facetField);
+            
+            results = new ArrayList<SimpleNode>();
+            for (int i=0, len=facets.size(), iOffset=offset*limit; i < iOffset+limit && i < len; i++) {
+            	if (i < iOffset) { continue; }
+                results.add(new SimpleNode().setAttribute(name, facets.get(i).getDisplayedValue()));
+            	
+            }
+
+            return results;
+            
+        }
+
+        return (new ArrayList<SimpleNode>());
+    }
+    
+
+    public List<SimpleNode> TODEL_getSimpleNodes(
+            String facetField, SimpleNode.Attribute name,
+            String pTerms, Integer limit
+           ) throws WebApplicationException
+    {
+    	
+    	if (limit == null) { limit = org.dspace.rtbf.rest.common.Constants.DEFAULT_LOV_RPP;}
 
         ArrayList<SimpleNode> results = null;
         org.dspace.core.Context context = null;
@@ -191,7 +248,7 @@ public abstract class Resource
             results = new ArrayList<SimpleNode>();          
             for (FacetResult facet : facets) {
                 results.add(new SimpleNode().setAttribute(name, facet.getDisplayedValue()));
-                if (results.size() > org.dspace.rtbf.rest.common.Constants.DEFAULT_LOV_RPP)
+                if (results.size() >= limit)
                     break;
             }
             return results;
@@ -200,8 +257,92 @@ public abstract class Resource
 
         return (new ArrayList<SimpleNode>());
     }
-    
 
+    public List<SimpleNode> getAllSimpleNodes(
+            String facetField, SimpleNode.Attribute attr
+            , Request params
+           ) throws WebApplicationException
+    {
+    	int limit = params.getLimit();
+    	if (limit < 0) {params.setLimit(org.dspace.rtbf.rest.common.Constants.LIMITMAX);}
+        return (getSimpleNodes(facetField, attr, null, params));
+    }
+    
+    public List<SimpleNode> getSimpleNodes(
+            String facetField, SimpleNode.Attribute attr
+            , String pTerms
+            , Request params
+           ) throws WebApplicationException
+    {
+    	
+    	int limit = params.getLimit();
+    	if (limit < 0) {limit = org.dspace.rtbf.rest.common.Constants.DEFAULT_LOV_RPP;}
+    	int offset = params.getOffset();
+
+        ArrayList<SimpleNode> results = null;
+        org.dspace.core.Context context = null;
+        DiscoverResult queryResults = null;
+                
+        DiscoverQuery query = new DiscoverQuery();
+
+	    DiscoverFacetField dff = new DiscoverFacetField("{!key="+facetField+"}"+facetField+"_keyword",
+                DiscoveryConfigurationParameters.TYPE_STANDARD,
+                org.dspace.rtbf.rest.common.Constants.LIMITMAX,
+                DiscoveryConfigurationParameters.SORT.VALUE);
+
+        query.addFacetField(dff);
+        query.setFacetMinCount(1);
+        query.setMaxResults(0);
+               
+        // limit the search to partial terms
+        String qterms = null;
+        String partialTerms = (pTerms == null) ? null : pTerms.trim();
+        if (partialTerms != null && !partialTerms.isEmpty()) {
+            // Remove diacritic + escape all but alphanum
+            qterms = OrderFormat.makeSortString(partialTerms, null, OrderFormat.TEXT)
+                        .replaceAll("([^\\p{Alnum}\\s])", "\\\\$1");
+            query.addFilterQueries("{!q.op=AND}" + facetField + "_partial:(" + qterms + ")");
+
+            log.debug("Solr filter query terms.(qterms=" + qterms + ").");
+        }
+        
+    	try {
+           context = new org.dspace.core.Context();
+           
+           // limit the search within community/collection
+           String scope = params.getScope();
+           if (scope != null) {
+        	   addScope(scope, query, context);
+           }
+           queryResults = getSearchService().search(context, query);
+
+           context.complete();
+        } catch (Exception e) {
+          processException("Could not process getSimpleNodes. Message:"+e.getMessage(), context);
+        } finally {
+          processFinally(context);            
+        }
+        
+        if (queryResults != null) {
+            List<FacetResult> facets = queryResults.getFacetResult(facetField);
+            
+            // Filter results is mandatory when facet.field is multivalue
+            if (qterms != null && !qterms.isEmpty()) {
+                filterFacetResults(facets, qterms);
+            }
+
+            results = new ArrayList<SimpleNode>();          
+            for (int i=0, len=facets.size(), iOffset=offset*limit; i < iOffset+limit && i < len; i++) {
+            	if (i < iOffset) { continue; }
+                results.add(new SimpleNode().setAttribute(attr, facets.get(i).getDisplayedValue()));
+            }
+            return results;
+            
+        }
+
+        return (new ArrayList<SimpleNode>());
+    }
+    
     // actually get sequences results
     protected DiscoverResult getQueryResult(int resourceType, Context context, Request searchRequest) throws SearchServiceException {
 		// 1. Prepare the query

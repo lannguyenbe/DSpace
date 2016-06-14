@@ -2274,7 +2274,7 @@
         <!--str name="fieldName">identifier_origin_count</str-->
         <str name="value">1000</str>
     </processor>
-    <!-- Add field role only -->
+    <!-- Add field role of contributor only -->
     <processor class="solr.CloneFieldUpdateProcessorFactory">
         <str name="source">rtbf.contributor_plus_role</str>
         <str name="dest">role_keyword</str>
@@ -2287,7 +2287,20 @@
         <bool name="literalReplacement">false</bool>
     </processor>
     <!-- -->
-    <!-- Add field role only -->
+    <!-- Add field role of place only -->
+    <processor class="solr.CloneFieldUpdateProcessorFactory">
+        <str name="source">rtbf.place_plus_role</str>
+        <str name="dest">role_place_keyword</str>
+    </processor>
+    <processor class="solr.RegexReplaceProcessorFactory">
+        <str name="fieldName">role_place_keyword</str>
+        <!-- str name="pattern">(.+)/(.+)</str -->
+        <str name="pattern">^(.*)/([^/]+)$</str>
+        <str name="replacement">$2</str>
+        <bool name="literalReplacement">false</bool>
+    </processor>
+    <!-- -->
+    <!-- Add field set only -->
     <processor class="solr.CloneFieldUpdateProcessorFactory">
         <str name="source">rtbf.type_plus_set</str>
         <str name="dest">set_keyword</str>
