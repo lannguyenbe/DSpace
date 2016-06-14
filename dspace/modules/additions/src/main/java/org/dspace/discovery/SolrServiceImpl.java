@@ -1228,6 +1228,20 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         return locations;
     }
     
+    protected List<String> getCommunityLocations(Community target) throws SQLException {
+        List<String> communities = new Vector<String>();
+
+        // build list of community ids
+        Community parentCommunity = target.getParentCommunity();
+
+        // now put those into strings
+        if (parentCommunity != null) {
+        	communities.add("m" + parentCommunity.getID());
+        }
+                
+        return communities;
+    }
+
     /**
      * Write the document to the index under the appropriate handle.
      *
@@ -1328,9 +1342,11 @@ public class SolrServiceImpl implements SearchService, IndexingService {
 
     protected void buildDocument(Context context, Community community)
     throws SQLException, IOException {
+        List<String> locations = getCommunityLocations(community);
+
         // Create Document
         SolrInputDocument doc = buildDocument(Constants.COMMUNITY, community.getID(),
-                community.getHandle(), null);
+                community.getHandle(), locations);
 
         List<String> toIgnoreMetadataFields = SearchUtils.getIgnoredMetadataFields(community.getType());
         Metadatum[] mydc = community.getMetadata(Item.ANY, Item.ANY, Item.ANY, Item.ANY);
@@ -1362,13 +1378,13 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 doc.addField(field, value);
                 doc.addField(field + "_sort", value);
                 // Lan 04.05.2016 : for "notequals" and "notcontains" search on serie title
-                doc.addField("title", value);
+                doc.addField("serie_title", value);
                 // Lan 28.04.2016 : for "equals" search on serie title
-                doc.addField("title_keyword", value);
+                doc.addField("serie_title_keyword", value);
                 // Lan 28.04.2016 : for "contains" search on serie title
-                doc.addField("title_contain", value);
+                doc.addField("serie_title_contain", value);
                 // Lan 02.05.2016 : for LOV on serie title
-                doc.addField("title_partial", value);
+                doc.addField("serie_title_partial", value);
                 break;
             case "rtbf.identifier.attributor":
             case "rtbf.royalty_code":

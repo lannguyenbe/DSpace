@@ -10,7 +10,7 @@ import org.dspace.rtbf.rest.lov.LOVAuthors;
 import org.dspace.rtbf.rest.lov.LOVChannels;
 import org.dspace.rtbf.rest.lov.LOVCodeOrigines;
 import org.dspace.rtbf.rest.lov.LOVEvents;
-import org.dspace.rtbf.rest.lov.LOVIsPartOfTitles;
+import org.dspace.rtbf.rest.lov.LOVSerieTitles;
 import org.dspace.rtbf.rest.lov.LOVPlaces;
 import org.dspace.rtbf.rest.lov.LOVProductionTypes;
 import org.dspace.rtbf.rest.lov.LOVPublishers;
@@ -42,7 +42,7 @@ public class RsApplication extends Application {
         set.add(LOVAuthors.class);
         set.add(LOVSubjects.class);
         set.add(LOVPlaces.class);
-        set.add(LOVIsPartOfTitles.class);
+        set.add(LOVSerieTitles.class);
         set.add(LOVCodeOrigines.class);
         set.add(LOVPublishers.class);
         set.add(LOVProductionTypes.class);

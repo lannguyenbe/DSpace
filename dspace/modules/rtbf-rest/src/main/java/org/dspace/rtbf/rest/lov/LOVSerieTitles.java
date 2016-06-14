@@ -21,16 +21,15 @@ import org.dspace.rtbf.rest.common.Constants;
 import org.dspace.rtbf.rest.common.SimpleNode;
 import org.dspace.rtbf.rest.search.Resource;
 
-@Path("/ispartof_titles")
-public class LOVIsPartOfTitles extends Resource {
-    private static Logger log = Logger.getLogger(LOVIsPartOfTitles.class);
+@Path("{alternatePaths: serie_titles|ispartof_titles}")public class LOVSerieTitles extends Resource {
+    private static Logger log = Logger.getLogger(LOVSerieTitles.class);
     
     // public static final String FACETFIELD = "ispartof_title";
     /*
      *  Lan 02.05.2015 : now is list of title of all communitites even if there is no child sequence
      *  title_keyword only exists for document of resource_type_id=4
      */
-    public static final String FACETFIELD = "title";
+    public static final String FACETFIELD = "serie_title";
     public static final SimpleNode.Attribute ELEMENT = SimpleNode.Attribute.TITLE;
 
     
