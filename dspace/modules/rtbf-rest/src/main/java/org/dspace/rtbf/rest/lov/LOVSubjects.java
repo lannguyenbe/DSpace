@@ -50,11 +50,11 @@ public class LOVSubjects extends Resource {
         	return(new ArrayList<SimpleNode>());
         } else if (partialTerms.equals(Constants.LOV_ALL)) {
     		log.info("Reading all subjects");
-            return(getAllSimpleNodes(FACETFIELD, ELEMENT, params));
+            return(getAllACNodes(FACETFIELD, ELEMENT, params));
         } 
         
         log.info("Reading subjects.(pt=" + partialTerms + ").");
-        return(getSimpleNodes(FACETFIELD, ELEMENT, partialTerms, params));
+        return(getACNodes(FACETFIELD, ELEMENT, partialTerms, params));
     }
     
 }

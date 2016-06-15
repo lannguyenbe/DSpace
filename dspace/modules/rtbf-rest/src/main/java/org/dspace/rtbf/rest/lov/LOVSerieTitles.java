@@ -53,11 +53,11 @@ import org.dspace.rtbf.rest.search.Resource;
         	return(new ArrayList<SimpleNode>());
         } else if (partialTerms.equals(Constants.LOV_ALL)) {
     		log.info("Reading all series titles.");
-            return(getAllSimpleNodes(FACETFIELD, ELEMENT, params));
+            return(getAllACNodes(FACETFIELD, ELEMENT, params));
         } 
 
         log.info("Reading series titles.(pt=" + partialTerms + ").");
-        return(getSimpleNodes(FACETFIELD, ELEMENT, partialTerms, params));
+        return(getACNodes(FACETFIELD, ELEMENT, partialTerms, params));
     }
     
 }

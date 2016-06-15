@@ -49,11 +49,11 @@ public class LOVAuthors extends Resource {
         	return(new ArrayList<SimpleNode>());
         } else if (partialTerms.equals(Constants.LOV_ALL)) {
     		log.info("Reading all contributor name.");
-            return(getAllSimpleNodes(FACETFIELD, ELEMENT, params));
+            return(getAllACNodes(FACETFIELD, ELEMENT, params));
         } 
         
         log.info("Reading contributor name.(pt=" + partialTerms + ").");
-        return(getSimpleNodes(FACETFIELD, ELEMENT, partialTerms, params));
+        return(getACNodes(FACETFIELD, ELEMENT, partialTerms, params));
     }
     
     @GET
@@ -71,7 +71,7 @@ public class LOVAuthors extends Resource {
         	return(new ArrayList<SimpleNode>());
         } else { // results are always the same list; arg pt= is ignored
     		log.info("Reading all contributor roles.");
-            return(getAllSimpleNodes("role", SimpleNode.Attribute.KEY, params));
+            return(getAllACNodes("role", SimpleNode.Attribute.KEY, params));
         }
     }
     
@@ -86,6 +86,6 @@ public class LOVAuthors extends Resource {
 
     	String partialTerms = name + " /"; // get name followed by /<role>
 		log.info("Reading roles of.(pt=" + name + ").");
-        return(getSimpleNodes("contributor", SimpleNode.Attribute.NAME, partialTerms, params));
+        return(getACNodes("contributor", SimpleNode.Attribute.NAME, partialTerms, params));
     }
 }

@@ -48,7 +48,7 @@ public class LOVProductionTypes extends Resource {
         	return(new ArrayList<SimpleNode>());
         } else {// results are always the same list; arg pt= is ignored
     		log.info("Reading all productions types.");
-            return(getAllSimpleNodes(FACETFIELD, ELEMENT, params));
+            return(getAllACNodes(FACETFIELD, ELEMENT, params));
         } 
         
     }

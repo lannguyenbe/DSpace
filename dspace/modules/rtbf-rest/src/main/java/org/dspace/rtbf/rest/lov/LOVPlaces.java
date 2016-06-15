@@ -50,11 +50,11 @@ public class LOVPlaces extends Resource {
         	return(new ArrayList<SimpleNode>());
         } else if (partialTerms.equals(Constants.LOV_ALL)) {
     		log.info("Reading all places.");
-            return(getAllSimpleNodes(FACETFIELD, ELEMENT, params));
+            return(getAllACNodes(FACETFIELD, ELEMENT, params));
         } 
         
         log.info("Reading places.(pt=" + partialTerms + ").");
-        return(getSimpleNodes(FACETFIELD, ELEMENT, partialTerms, params));
+        return(getACNodes(FACETFIELD, ELEMENT, partialTerms, params));
     }
     
     @GET
@@ -72,7 +72,7 @@ public class LOVPlaces extends Resource {
         	return(new ArrayList<SimpleNode>());
         } else { // results are always the same list; arg pt= is ignored
     		log.info("Reading all places roles.");
-            return(getAllSimpleNodes("role_place", SimpleNode.Attribute.KEY, params));
+            return(getAllACNodes("role_place", SimpleNode.Attribute.KEY, params));
         }
         
     }

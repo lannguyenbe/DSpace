@@ -50,11 +50,11 @@ public class LOVCodeOrigines extends Resource {
         	return(new ArrayList<SimpleNode>());
         } else if (partialTerms.equals(Constants.LOV_ALL)) {
     		log.info("Reading all supports code_origines.");
-            return(getAllSimpleNodes(FACETFIELD, ELEMENT, params));
+            return(getAllACNodes(FACETFIELD, ELEMENT, params));
         } 
 
         log.info("Reading supports code_origines.(pt=" + partialTerms + ").");
-        return(getSimpleNodes(FACETFIELD, ELEMENT, partialTerms, params));
+        return(getACNodes(FACETFIELD, ELEMENT, partialTerms, params));
     }
     
     @GET
@@ -72,7 +72,7 @@ public class LOVCodeOrigines extends Resource {
         	return(new ArrayList<SimpleNode>());
         } else { // results are always the same list; arg pt= is ignored
     		log.info("Reading all support sets.");
-            return(getAllSimpleNodes("set", SimpleNode.Attribute.KEY, params));
+            return(getAllACNodes("set", SimpleNode.Attribute.KEY, params));
         } 
     }
 
