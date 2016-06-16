@@ -127,7 +127,7 @@ public class CollectionAdd extends Collection {
     	public static SupportCollection[] findById(Context context, int item_id)
     			throws SQLException
     			{
-    		String myQuery = "SELECT "
+    		String myQuery = "SELECT distinct"
     				+ " t.code_origine"
     				+ " , t.support_type"
     				+ " , t.set_of_support_type"
