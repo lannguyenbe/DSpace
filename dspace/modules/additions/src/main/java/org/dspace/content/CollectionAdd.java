@@ -124,7 +124,7 @@ public class CollectionAdd extends Collection {
     		super(row);
     	}
 
-    	public static SupportCollection[] findById(Context context, int item_id)
+    	public static SupportCollection[] findById(Context context, int collection_id)
     			throws SQLException
     			{
     		String myQuery = "SELECT distinct"
@@ -139,7 +139,7 @@ public class CollectionAdd extends Collection {
     				+ " , t.category"
     				+ " FROM t_support2resource t"
     				+ " WHERE resource_type_id = " + Constants.COLLECTION
-    				+ " AND resource_id = " + item_id
+    				+ " AND resource_id = " + collection_id
         	        + " ORDER BY t.set_of_support_type";
 
     		TableRowIterator tri =  null;
@@ -160,6 +160,48 @@ public class CollectionAdd extends Collection {
 
     	}
     }
+    
+    public static class CodeOrigineCollection extends CodeOrigine {
+
+    	public CodeOrigineCollection(TableRow row) {
+    		super(row);
+    	}
+
+    	public static CodeOrigineCollection[] findById(Context context, int collection_id)
+    			throws SQLException
+    			{
+    		String myQuery = "SELECT distinct co.id, co.code_origine, co.topcommunity_id"
+		    		+ " FROM t_codeorigine co, t_support2resource s2r"
+		    		+ " WHERE s2r.resource_type_id = " + Constants.COLLECTION
+		    		+ " AND s2r.resource_id = "+ collection_id
+		    		+ " AND co.code_origine = s2r.code_origine"
+		    		+ " AND co.topcommunity_id = ("
+		    		+ "    SELECT top.topcommunity_id"
+		    		+ "    FROM v_topcommunity top"
+		    		+ "    WHERE top.resource_type_id = s2r.resource_type_id"
+		    		+ "    AND top.resource_id = s2r.resource_id"
+		    		+ " )"
+		    		;    		
+    		
+    		TableRowIterator tri =  null;
+    		List<CodeOrigineCollection> codes = new ArrayList<CodeOrigineCollection> ();
+
+
+    		try {
+    			tri =  DatabaseAccess.query(context, myQuery);
+    			while (tri.hasNext()) {
+    				codes.add(new CodeOrigineCollection(tri.next()));
+    			}
+    		} finally {
+    			if (tri != null) { tri.close(); }
+    		}
+
+    		CodeOrigineCollection[] arr = new CodeOrigineCollection[codes.size()];
+    		return codes.toArray(arr);
+
+    	}
+    }
+    
 
 
 

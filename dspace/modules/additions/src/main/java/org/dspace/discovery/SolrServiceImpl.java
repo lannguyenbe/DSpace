@@ -65,6 +65,7 @@ import org.apache.solr.common.util.NamedList;
 import org.apache.solr.handler.extraction.ExtractingParams;
 import org.dspace.content.Bitstream;
 import org.dspace.content.Bundle;
+import org.dspace.content.CodeOrigine;
 import org.dspace.content.Collection;
 import org.dspace.content.CollectionAdd;
 import org.dspace.content.CollectionIterator;
@@ -1242,6 +1243,14 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         return communities;
     }
 
+    protected List<String> getCodeOrigineLocations(CodeOrigine target) throws SQLException {
+        List<String> locations = new Vector<String>();
+        
+        locations.add("m" + target.getTopCommunityID());
+        
+        return locations;
+    }
+
     /**
      * Write the document to the index under the appropriate handle.
      *
@@ -1548,6 +1557,23 @@ public class SolrServiceImpl implements SearchService, IndexingService {
             }
         }
 
+
+        // index related supports too
+
+        try {
+        	CodeOrigine[] codeOrigines = CollectionAdd.CodeOrigineCollection.findById(context, collection.getID());
+        	for (CodeOrigine codeOrigine : codeOrigines) {
+        		buildDocument(context, codeOrigine);
+                log.info("Wrote CodeOrigine: " + codeOrigine.getCode() + " to Index");
+			}
+
+        	log.debug("  Index all code_origine of collection " + collection.getID());
+        } catch (RuntimeException e)
+        {
+            log.error(e.getMessage(), e);
+        }
+        
+        
         //Do any additional indexing, depends on the plugins
         List<SolrServiceIndexPlugin> solrServiceIndexPlugins = new DSpace().getServiceManager().getServicesByType(SolrServiceIndexPlugin.class);
         for (SolrServiceIndexPlugin solrServiceIndexPlugin : solrServiceIndexPlugins)
@@ -1558,6 +1584,27 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         writeDocument(doc, null);
     }
 
+    protected void buildDocument(Context context, CodeOrigine codeOrigine)
+    throws SQLException, IOException {
+        List<String> locations = getCodeOrigineLocations(codeOrigine);
+
+        // Create Lucene Document
+        SolrInputDocument doc = buildDocument(CodeOrigine.RESOURCE_ID, codeOrigine.getID(), null, locations);
+
+        // TODO remove hardcode
+        String indexFieldName = CodeOrigine.INDEX_FIELD_NAME;
+        String value = codeOrigine.getCode();
+        doc.addField(indexFieldName, value);
+        doc.addField(indexFieldName + "_sort", value);
+    	doc.addField(indexFieldName + "_partial", value);
+    	doc.addField(indexFieldName + "_keyword", value);
+    	doc.addField(indexFieldName + "_contain", value);
+        
+
+        writeDocument(doc, null);
+    }
+
+    
     /**
      * Add the metadata value of the community/collection to the solr document
      * IF needed highlighting is added !

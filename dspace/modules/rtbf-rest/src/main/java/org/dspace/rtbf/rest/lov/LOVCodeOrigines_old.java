@@ -22,8 +22,8 @@ import org.dspace.rtbf.rest.common.SimpleNode;
 import org.dspace.rtbf.rest.search.Resource;
 
 @Path("/")
-public class LOVCodeOrigines extends Resource {
-    private static Logger log = Logger.getLogger(LOVCodeOrigines.class);
+public class LOVCodeOrigines_old extends Resource {
+    private static Logger log = Logger.getLogger(LOVCodeOrigines_old.class);
     
     public static final String FACETFIELD = "code_origine";
     public static final SimpleNode.Attribute ELEMENT = SimpleNode.Attribute.KEY;
@@ -50,11 +50,11 @@ public class LOVCodeOrigines extends Resource {
         	return(new ArrayList<SimpleNode>());
         } else if (partialTerms.equals(Constants.LOV_ALL)) {
     		log.info("Reading all supports code_origines.");
-            return(getAllACNodes(FACETFIELD, ELEMENT, params, "/selectCodeOrigine"));
+            return(getAllACNodes(FACETFIELD, ELEMENT, params));
         } 
 
         log.info("Reading supports code_origines.(pt=" + partialTerms + ").");
-        return(getACNodes(FACETFIELD, ELEMENT, partialTerms, params, "/selectCodeOrigine"));
+        return(getACNodes(FACETFIELD, ELEMENT, partialTerms, params));
     }
     
     @GET

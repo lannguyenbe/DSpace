@@ -265,13 +265,34 @@ public abstract class Resource
     {
     	int limit = params.getLimit();
     	if (limit < 0) {params.setLimit(org.dspace.rtbf.rest.common.Constants.LIMITMAX);}
-        return (getACNodes(facetField, attr, null, params));
+        return (getACNodes(facetField, attr, null, params, null));
     }
     
+    public List<SimpleNode> getAllACNodes(
+            String facetField, SimpleNode.Attribute attr
+            , Request params
+            , String handler
+           ) throws WebApplicationException
+    {
+    	int limit = params.getLimit();
+    	if (limit < 0) {params.setLimit(org.dspace.rtbf.rest.common.Constants.LIMITMAX);}
+        return (getACNodes(facetField, attr, null, params, handler));
+    }
+
     public List<SimpleNode> getACNodes(
             String facetField, SimpleNode.Attribute attr
             , String pTerms
             , Request params
+           ) throws WebApplicationException
+    {
+		return getACNodes(facetField, attr, pTerms, params, null);
+    }
+
+    public List<SimpleNode> getACNodes(
+            String facetField, SimpleNode.Attribute attr
+            , String pTerms
+            , Request params
+            , String handler
            ) throws WebApplicationException
     {
     	
@@ -287,6 +308,10 @@ public abstract class Resource
         DiscoverResult queryResults = null;
                 
         DiscoverQuery query = new DiscoverQuery();
+        
+        if (handler != null) {
+	        query.addProperty("qt", handler);        	
+        }
 
 	    DiscoverFacetField dff = new DiscoverFacetField("{!key="+facetField+"}"+facetField+"_keyword",
                 DiscoveryConfigurationParameters.TYPE_STANDARD,
