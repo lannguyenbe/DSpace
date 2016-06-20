@@ -1558,8 +1558,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
 
 
-        // index related supports too
-
+        // index related code_origine of supports
         try {
         	CodeOrigine[] codeOrigines = CollectionAdd.CodeOrigineCollection.findById(context, collection.getID());
         	for (CodeOrigine codeOrigine : codeOrigines) {
@@ -2241,6 +2240,21 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         {
             log.error(e.getMessage(), e);
         }
+        
+        // Lan 20.06.2016 : index related code_origine of supports
+        try {
+        	CodeOrigine[] codeOrigines = ItemAdd.CodeOrigineItem.findById(context, item.getID());
+        	for (CodeOrigine codeOrigine : codeOrigines) {
+        		buildDocument(context, codeOrigine);
+                log.info("Wrote CodeOrigine: " + codeOrigine.getCode() + " to Index");
+			}
+
+        	log.debug("  Index all code_origine of item " + item.getID());
+        } catch (RuntimeException e)
+        {
+            log.error(e.getMessage(), e);
+        }
+
 
         //Do any additional indexing, depends on the plugins
         List<SolrServiceIndexPlugin> solrServiceIndexPlugins = new DSpace().getServiceManager().getServicesByType(SolrServiceIndexPlugin.class);

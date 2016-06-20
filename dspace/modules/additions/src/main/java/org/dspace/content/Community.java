@@ -1039,12 +1039,16 @@ public class Community extends DSpaceObject
      */
     public Community[] getAllParents() throws SQLException
     {
+        int childId = this.getID();
         List<Community> parentList = new ArrayList<Community>();
         Community parent = getParentCommunity();
 
         while (parent != null)
-        {
-            parentList.add(parent);
+        {            
+        	parentList.add(parent);
+            // Lan 20.06.2016 : avoid endlest loop when community is parent of itself, as community_id 999 does
+            if (childId == parent.getID()) { break; }
+        	childId = parent.getID();
             parent = parent.getParentCommunity();
         }
 

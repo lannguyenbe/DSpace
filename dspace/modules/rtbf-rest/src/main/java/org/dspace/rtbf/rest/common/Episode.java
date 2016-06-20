@@ -150,9 +150,7 @@ public class Episode extends RTBObject {
         entries.add(new Serie(innerViewType, parentCommunity, null, context));
         // repository level
         org.dspace.content.Community topparentCommunity = parentCommunity.getParentCommunity();
-        if (topparentCommunity != null) { // is not orphan
-        	entries.add(new Serie(innerViewType, topparentCommunity, null, context));
-        }
+        entries.add(new Serie(innerViewType, topparentCommunity, null, context));
 		return entries;   	
     }
     		                    

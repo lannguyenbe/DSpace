@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.dspace.content.CollectionAdd.CodeOrigineCollection;
 import org.dspace.core.Constants;
 import org.dspace.core.Context;
 import org.dspace.storage.rdbms.DatabaseManager;
@@ -327,5 +328,45 @@ public class ItemAdd extends Item {
     	}
     }
 
+    public static class CodeOrigineItem extends CodeOrigine {
+
+    	public CodeOrigineItem(TableRow row) {
+    		super(row);
+    	}
+
+    	public static CodeOrigineItem[] findById(Context context, int item_id)
+    			throws SQLException
+    			{
+    		String myQuery = "SELECT distinct co.id, co.code_origine, co.topcommunity_id"
+		    		+ " FROM t_codeorigine co, t_support2resource s2r"
+		    		+ " WHERE s2r.resource_type_id = " + Constants.ITEM
+		    		+ " AND s2r.resource_id = "+ item_id
+		    		+ " AND co.code_origine = s2r.code_origine"
+		    		+ " AND co.topcommunity_id = ("
+		    		+ "    SELECT top.topcommunity_id"
+		    		+ "    FROM v_topcommunity top"
+		    		+ "    WHERE top.resource_type_id = s2r.resource_type_id"
+		    		+ "    AND top.resource_id = s2r.resource_id"
+		    		+ " )"
+		    		;    		
+    		
+    		TableRowIterator tri =  null;
+    		List<CodeOrigineItem> codes = new ArrayList<CodeOrigineItem> ();
+
+
+    		try {
+    			tri =  DatabaseAccess.query(context, myQuery);
+    			while (tri.hasNext()) {
+    				codes.add(new CodeOrigineItem(tri.next()));
+    			}
+    		} finally {
+    			if (tri != null) { tri.close(); }
+    		}
+
+    		CodeOrigineItem[] arr = new CodeOrigineItem[codes.size()];
+    		return codes.toArray(arr);
+
+    	}
+    }
     
 }
