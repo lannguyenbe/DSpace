@@ -1014,6 +1014,19 @@
 
     </requestHandler>
     
+    <!-- Return documents of resourcetypeid = 1001 -->
+    <!-- 17.06.2016 Lan : for LOV code origine -->
+    <requestHandler name="/selectCodeOrigine" class="solr.SearchHandler">
+     <lst name="defaults">
+       <str name="echoParams">explicit</str>
+       <int name="rows">10</int>
+       <str name="df">search_text</str>
+     </lst>
+     <lst name="appends">
+       <str name="fq">search.resourcetype:1001</str>
+     </lst>
+    </requestHandler>
+
     <!-- Return documents of resourcetypeid = 2 -->
     <!-- 10.03.2016 Lan : select item with subquery on collection and community -->
     <!-- raw paramaters are :
