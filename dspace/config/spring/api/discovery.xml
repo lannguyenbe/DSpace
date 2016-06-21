@@ -110,7 +110,7 @@
         <property name="searchFilters">
             <list>
                 <ref bean="searchFilterIdAttributor" />
-                <ref bean="searchFilterTitle" />
+                <ref bean="searchFilterSerieTitle" />
             </list>
         </property>
         <property name="searchSortConfiguration">
@@ -524,6 +524,17 @@
 
     <bean id="searchFilterTitle" class="org.dspace.discovery.configuration.DiscoverySearchFilter">
         <property name="indexFieldName" value="title"/>
+        <property name="metadataFields">
+            <list>
+                <value>dc.title</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- Lan 21.06.2016 - add this filter for serie_title rtbf_rest filter -->
+    <!-- th index field resir_title is actually hard code index field for resource_type_id 4 only in SolrServiceImple.java -->
+    <bean id="searchFilterSerieTitle" class="org.dspace.discovery.configuration.DiscoverySearchFilter">
+        <property name="indexFieldName" value="serie_title"/>
         <property name="metadataFields">
             <list>
                 <value>dc.title</value>
