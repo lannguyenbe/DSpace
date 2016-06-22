@@ -87,7 +87,11 @@ public class Sequence extends RTBObject{
 
     	if(expandFields.contains("owningSerie") || expandFields.contains("all")) {
             org.dspace.content.Community parentCommunity = (org.dspace.content.Community) item.getOwningCollection().getParentObject();
-            this.setOwningSerie(new Serie(innerViewType, parentCommunity, null, context));
+            /* 
+             * Lan 22.06.2016 : return more metadata of the owningSerie - see Constants.OWNING_SERIE_EXPAND_OPTIONS
+             * this.setOwningSerie(new Serie(innerViewType, parentCommunity, null, context));
+             */
+            this.setOwningSerie(new Serie(innerViewType, parentCommunity, Constants.OWNING_SERIE_EXPAND_OPTIONS, context));
         } else {
             this.addExpand("owningSerie");
         }
@@ -99,7 +103,11 @@ public class Sequence extends RTBObject{
         }
 
         if(expandFields.contains("owningEpisode") || expandFields.contains("all")) {
-        	this.setOwningEpisode(new Episode(innerViewType, item.getOwningCollection(), null, context));
+            /* 
+             * Lan 22.06.2016 : return more metadata of the owningEpisode - see Constants.OWNING_EPISODE_EXPAND_OPTIONS
+        	 * this.setOwningEpisode(new Episode(innerViewType, item.getOwningCollection(), null, context));
+        	 */
+        	 this.setOwningEpisode(new Episode(innerViewType, item.getOwningCollection(), Constants.OWNING_EPISODE_EXPAND_OPTIONS, context));
         } else {
             this.addExpand("owningEpisode");
         }
