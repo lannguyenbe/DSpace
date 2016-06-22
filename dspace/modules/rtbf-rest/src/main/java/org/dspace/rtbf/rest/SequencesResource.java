@@ -111,7 +111,7 @@ public class SequencesResource extends Resource
 
             org.dspace.content.Item dspaceItem = findItem(context, itemId, org.dspace.core.Constants.READ);
 
-            sequence = new org.dspace.rtbf.rest.common.Sequence(viewType, dspaceItem, expand+","+Constants.SEQUENCE_EXPAND_OPTIONS, context, dupid);
+            sequence = new org.dspace.rtbf.rest.common.Sequence(viewType, dspaceItem, expand+","+Constants.SEQUENCE_EXPAND_OPTIONS, context, Constants.COLLECTION+"-"+dupid);
             context.complete();
         }
         catch (SQLException e)

@@ -221,13 +221,21 @@ public class Sequence extends RTBObject{
         }
     	
         if(expand.contains("owningEpisode")) {
-        	this.setOwningEpisode(new Episode(innerViewType, Collection.find(context, collectionId), null, context));
+            /* 
+             * Lan 22.06.2016 : return more metadata of the owningEpisode - see Constants.OWNING_EPISODE_EXPAND_OPTIONS
+        	 * this.setOwningEpisode(new Episode(innerViewType, Collection.find(context, collectionId), null, context));
+        	 */
+        	this.setOwningEpisode(new Episode(innerViewType, Collection.find(context, collectionId), Constants.OWNING_EPISODE_EXPAND_OPTIONS, context));
         }
         
     	if(expand.contains("owningSerie")) {
             org.dspace.content.Collection owningCollection = Collection.find(context, collectionId);
             org.dspace.content.Community parentCommunity = (org.dspace.content.Community) owningCollection.getParentObject();
-            this.setOwningSerie(new Serie(innerViewType, parentCommunity, null, context));
+            /* 
+             * Lan 22.06.2016 : return more metadata of the owningSerie - see Constants.OWNING_SERIE_EXPAND_OPTIONS
+             * this.setOwningSerie(new Serie(innerViewType, parentCommunity, null, context));
+        	 */
+            this.setOwningSerie(new Serie(innerViewType, parentCommunity, Constants.OWNING_SERIE_EXPAND_OPTIONS, context));
         }
     }
         
