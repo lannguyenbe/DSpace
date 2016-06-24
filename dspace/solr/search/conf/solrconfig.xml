@@ -79,6 +79,9 @@
        The examples below can be used to load some solr-contribs along 
        with their external dependencies.
     -->
+  <lib dir="../lib/" />    
+  <lib dir="../../../solr-4.9.0/dist/" regex="solr-dataimporthandler-.*\.jar" />
+
   <lib dir="../../../solr-4.9.0/contrib/extraction/lib" regex=".*\.jar" />
   <lib dir="../../../solr-4.9.0/dist/" regex="solr-cell-\d.*\.jar" />
 
@@ -801,6 +804,16 @@
        not be initialized until the first request that uses it.
 
     -->
+  <requestHandler name="/dataimport" class="solr.DataImportHandler">
+    <lst name="defaults">
+      <str name="config">db-data-config-codeorigine.xml</str>
+      <!--str name="update.chain">rtbf_custom</str-->
+    </lst>
+    <lst name="invariants">
+      <str name="clean">false</str>
+    </lst>
+
+  </requestHandler>
   <!-- SearchHandler
 
        http://wiki.apache.org/solr/SearchHandler
@@ -2256,7 +2269,13 @@
 
     --> 
 
-  <!-- 07.10.2015 Lan : rename to rtbf_custom-->
+  <!-- 24.06.2016 Lan : default-->
+  <updateRequestProcessorChain name="defaultchain">
+    <processor class="solr.LogUpdateProcessorFactory" />  
+    <processor class="solr.RunUpdateProcessorFactory" />  
+  </updateRequestProcessorChain>
+  
+  <!-- 07.10.2015 Lan : rtbf_custom-->
   <updateRequestProcessorChain name="rtbf_custom">
     <!-- 28.07.2015 Lan : add field identifier_origin -->
     <!-- To guaranty the concat order use 2 separate processors for CloneField -->
@@ -2272,19 +2291,16 @@
     <processor class="solr.processor.LastFieldValueUpdateProcessorFactory">
         <str name="fieldName">identifier_origin</str>
     </processor>
-    <!-- Add field identifier_origin_count -->
+    <!-- Add field identifier_weight -->
     <processor class="solr.CloneFieldUpdateProcessorFactory">
         <str name="source">owl.sameAs</str>
         <str name="dest">identifier_weight</str>
-        <!--str name="dest">identifier_origin_count</str-->
     </processor>
     <processor class="solr.processor.CountFieldValuesUpdateProcessorFactory">
         <str name="fieldName">identifier_weight</str>
-        <!--str name="fieldName">identifier_origin_count</str-->
     </processor>
     <processor class="solr.processor.DefaultValueUpdateProcessorFactory">
         <str name="fieldName">identifier_weight</str>
-        <!--str name="fieldName">identifier_origin_count</str-->
         <str name="value">1000</str>
     </processor>
     <!-- Add field role of contributor only -->

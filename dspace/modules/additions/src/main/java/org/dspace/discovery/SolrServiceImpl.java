@@ -54,6 +54,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.request.AbstractUpdateRequest;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
+import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -1301,6 +1302,30 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
     }
 
+
+    /* 24.06.2016 Lan : write document using update.chain=UCstr */
+    protected void writeDocumentUC(SolrInputDocument doc) throws IOException {
+    	writeDocumentUC(doc, null);
+    }
+
+    protected void writeDocumentUC(SolrInputDocument doc, String UCstr) throws IOException {
+
+        try {
+            if(getSolr() != null)
+            {
+            	String updateChain = (UCstr == null || UCstr.isEmpty()) ? "defaultchain" : UCstr;
+            	UpdateRequest req = new UpdateRequest();
+            	req.setCommitWithin(-1);  
+            	req.setParam("update.chain", updateChain);  
+            	req.add(doc);
+            	req.process(getSolr());
+           }
+        } catch (SolrServerException e)
+        {
+            log.error(e.getMessage(), e);
+        }
+    }
+
     /**
      * Build a solr document for a DSpace Community.
      *
@@ -1600,7 +1625,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
     	doc.addField(indexFieldName + "_contain", value);
         
 
-        writeDocument(doc, null);
+        writeDocumentUC(doc);
     }
 
     
