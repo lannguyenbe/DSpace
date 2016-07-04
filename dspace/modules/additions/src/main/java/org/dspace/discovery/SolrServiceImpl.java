@@ -698,16 +698,15 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
     }
     
-    public void updateIndexCC(Context context, boolean force)
+    public void updateIndexCC(Context contextRO, boolean force)
     {
         try {
             CommunityIterator communities = null;
             try {
-                for (communities = CommunityAdd.findAllCursor(context); communities.hasNext();)
+                for (communities = CommunityAdd.findAllCursor(contextRO); communities.hasNext();)
                 {
                     Community community = communities.next();
-                    indexContent(context, community, force);
-                    context.removeCached(community, community.getID());
+                    indexContent(contextRO, community, force);
                 }
             } finally {
                 if (communities != null)
@@ -718,11 +717,10 @@ public class SolrServiceImpl implements SearchService, IndexingService {
 
             CollectionIterator collections = null;
             try {
-                for (collections = CollectionAdd.findAllCursor(context); collections.hasNext();)
+                for (collections = CollectionAdd.findAllCursor(contextRO); collections.hasNext();)
                 {
                     Collection collection = collections.next();
-                    indexContent(context, collection, force);
-                    context.removeCached(collection, collection.getID());
+                    indexContent(contextRO, collection, force);
                 }
             } finally {
                 if (collections != null)
@@ -742,7 +740,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
     }
 
-    public void updateIndexCC(Context context, int commId, boolean force)
+    public void updateIndexCC(Context contextRO, int commId, boolean force)
     {
         try {
             CommunityIterator communities = null;
@@ -750,8 +748,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 for (communities = CommunityAdd.findSubcommunities(context, commId); communities.hasNext();)
                 {
                     Community community = communities.next();
-                    indexContent(context, community, force);
-                    context.removeCached(community, community.getID());
+                    indexContent(contextRO, community, force);
                     
                 }
             } finally {
@@ -763,11 +760,10 @@ public class SolrServiceImpl implements SearchService, IndexingService {
 
             CollectionIterator collections = null;
             try {
-                for (collections = CollectionAdd.findAllByCommunity(context, commId); collections.hasNext();)
+                for (collections = CollectionAdd.findAllByCommunity(contextRO, commId); collections.hasNext();)
                 {
                     Collection collection = collections.next();
-                    indexContent(context, collection, force);
-                    context.removeCached(collection, collection.getID());
+                    indexContent(contextRO, collection, force);
                 }
             } finally {
                 if (collections != null)
@@ -945,12 +941,12 @@ public class SolrServiceImpl implements SearchService, IndexingService {
     }    
         
     
-    public void updateIndexC(Context context, int id, boolean force)
+    public void updateIndexC(Context contextRO, int id, boolean force)
     {
         try {
-            Community community = Community.find(context, id);
+            Community community = Community.find(contextRO, id);
             
-            indexCommunity(context, community, force);
+            indexCommunity(contextRO, community, force);
             
             if(getSolr() != null)
             {

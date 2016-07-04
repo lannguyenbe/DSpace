@@ -194,10 +194,10 @@ public class IndexClient {
             if (line.hasOption("C")) {
             	int communityId = Integer.parseInt(line.getOptionValue("C"));
             	log.info("(Re)building index for communities and collections of the community id " + communityId);
-                indexer2.updateIndexCC(context, communityId, true);
+                indexer2.updateIndexCC(contextRO, communityId, true);
             } else {
                 log.info("(Re)building index for communities and collections.");            
-            	indexer2.updateIndexCC(context, true);
+            	indexer2.updateIndexCC(contextRO, true);
             }
             checkRebuildSpellCheck(line, indexer2);
         } else if (line.hasOption("I")) { /* Lan 21.11.2014 */
@@ -235,7 +235,7 @@ public class IndexClient {
         } else if (line.hasOption("C")) { /* Lan 21.11.2014 */
             log.info("(Re)building index for the community id.");
         	int communityId = Integer.parseInt(line.getOptionValue("C"));
-            indexer2.updateIndexC(context, communityId, true);
+            indexer2.updateIndexC(contextRO, communityId, true);
             checkRebuildSpellCheck(line, indexer2);
         } else if (line.hasOption("o")) {
             log.info("Optimizing search core.");
