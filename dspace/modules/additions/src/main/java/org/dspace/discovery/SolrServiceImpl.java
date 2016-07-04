@@ -745,7 +745,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         try {
             CommunityIterator communities = null;
             try {
-                for (communities = CommunityAdd.findSubcommunities(context, commId); communities.hasNext();)
+                for (communities = CommunityAdd.findSubcommunities(contextRO, commId); communities.hasNext();)
                 {
                     Community community = communities.next();
                     indexContent(contextRO, community, force);
