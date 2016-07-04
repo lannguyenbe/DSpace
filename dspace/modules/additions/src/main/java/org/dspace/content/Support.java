@@ -36,8 +36,8 @@ public abstract class Support {
     	this.key_frame_offset = row.getStringColumn("key_frame_offset");
     	this.tc_in = row.getLongColumn("tc_in");
     	this.tc_out = row.getLongColumn("tc_out");
-    	this.tc_in = row.getLongColumn("htc_in");
-    	this.tc_out = row.getLongColumn("htc_out");
+    	this.htc_in = row.getLongColumn("htc_in");
+    	this.htc_out = row.getLongColumn("htc_out");
     	this.duration = row.getLongColumn("duration");
     	this.tc_in_string = row.getStringColumn("tc_in_string");
     	this.tc_out_string = row.getStringColumn("tc_out_string");

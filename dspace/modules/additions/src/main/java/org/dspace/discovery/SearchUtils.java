@@ -40,6 +40,21 @@ public class SearchUtils {
         return searchService;
     }
 
+    // Lan 02.05.2016 : use in builDocument by type (community, collection, item)
+    public static DiscoveryConfiguration getDiscoveryConfiguration(int dsoType){
+        DiscoveryConfigurationService configurationService = getConfigurationService();
+
+        DiscoveryConfiguration result = null;
+        
+        result = configurationService.getMap().get(Constants.typeText[dsoType]);
+
+        if(result == null){
+            result = getDiscoveryConfiguration(null);
+        }
+
+        return result;
+    }
+    
     public static DiscoveryConfiguration getDiscoveryConfiguration(){
         return getDiscoveryConfiguration(null);
     }
@@ -68,7 +83,7 @@ public class SearchUtils {
 
         return result;
     }
-
+    
     public static DiscoveryConfigurationService getConfigurationService() {
         DSpace dspace  = new DSpace();
         ServiceManager manager = dspace.getServiceManager();

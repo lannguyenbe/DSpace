@@ -1382,6 +1382,46 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         SolrInputDocument doc = buildDocument(Constants.COMMUNITY, community.getID(),
                 community.getHandle(), locations);
 
+        //Keep a list of our sort values which we added, sort values can only be added once
+        List<String> sortFieldsAdded = new ArrayList<String>();
+
+        List<DiscoveryConfiguration> discoveryConfigurations = Arrays.asList(SearchUtils.getDiscoveryConfiguration(Constants.COMMUNITY));
+
+        //A map used to save each sidebarFacet config by the metadata fields
+        Map<String, List<DiscoverySearchFilter>> searchFilters = new HashMap<String, List<DiscoverySearchFilter>>();
+        Map<String, DiscoverySortFieldConfiguration> sortFields = new HashMap<String, DiscoverySortFieldConfiguration>();
+
+        for (DiscoveryConfiguration discoveryConfiguration : discoveryConfigurations) {
+        	for (int i = 0; i < discoveryConfiguration.getSearchFilters().size(); i++)
+        	{
+        		DiscoverySearchFilter discoverySearchFilter = discoveryConfiguration.getSearchFilters().get(i);
+        		for (int j = 0; j < discoverySearchFilter.getMetadataFields().size(); j++)
+        		{
+        			String metadataField = discoverySearchFilter.getMetadataFields().get(j);
+        			List<DiscoverySearchFilter> resultingList;
+        			if(searchFilters.get(metadataField) != null)
+        			{
+        				resultingList = searchFilters.get(metadataField);
+        			}else{
+        				//New metadata field, create a new list for it
+        				resultingList = new ArrayList<DiscoverySearchFilter>();
+        			}
+        			resultingList.add(discoverySearchFilter);
+
+        			searchFilters.put(metadataField, resultingList);
+        		}
+        	}
+
+        	DiscoverySortConfiguration sortConfiguration = discoveryConfiguration.getSearchSortConfiguration();
+        	if(sortConfiguration != null)
+        	{
+        		for (DiscoverySortFieldConfiguration discoverySortConfiguration : sortConfiguration.getSortFields())
+        		{
+        			sortFields.put(discoverySortConfiguration.getMetadataField(), discoverySortConfiguration);
+        		}
+        	}
+        }
+
         List<String> toIgnoreMetadataFields = SearchUtils.getIgnoredMetadataFields(community.getType());
         Metadatum[] mydc = community.getMetadata(Item.ANY, Item.ANY, Item.ANY, Item.ANY);
         for (Metadatum meta : mydc)
@@ -1391,6 +1431,8 @@ public class SolrServiceImpl implements SearchService, IndexingService {
 
             String value = meta.value;
             Date value_dt = null;
+            
+            String indexFieldName;
 
             if (value == null) { continue; }
 
@@ -1401,6 +1443,157 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 continue;
             }
                        
+            if ((searchFilters.get(field) != null || searchFilters.get(unqualifiedField + "." + Item.ANY) != null))
+            {
+                List<DiscoverySearchFilter> searchFilterConfigs = searchFilters.get(field);
+                if(searchFilterConfigs == null)
+                {
+                    searchFilterConfigs = searchFilters.get(unqualifiedField + "." + Item.ANY);
+                }
+
+                for (DiscoverySearchFilter searchFilter : searchFilterConfigs)
+                {
+                    String separator = new DSpace().getConfigurationService().getProperty("discovery.solr.facets.split.char");
+                    if(separator == null)
+                    {
+                        separator = FILTER_SEPARATOR;
+                    }
+                    if(searchFilter.getType().equals(DiscoveryConfigurationParameters.TYPE_DATE))
+                    {
+                        //For our search filters that are dates we format them properly
+                        value_dt = MultiFormatDateParser.parse(value);
+                        if(value_dt != null)
+                        {
+                            //TODO: make this date format configurable !
+                            value = DateFormatUtils.formatUTC(value_dt, "yyyy-MM-dd");
+                            // 09.03.2015 Lan : add _dt that contains date AND time, not only date
+                        	doc.addField(searchFilter.getIndexFieldName() + "_dt", value_dt);
+                        }else{
+                        	log.warn("Error while indexing search date field, community: " + community.getHandle() + " metadata field: " + field + " date value: " + value);
+                        }
+                    }
+                    
+
+                    doc.addField(searchFilter.getIndexFieldName(), value);
+                    doc.addField(searchFilter.getIndexFieldName() + "_keyword", value);
+                    // Lan add those following solr fields
+                    doc.addField(searchFilter.getIndexFieldName() + "_contain", value);
+                    if(!(searchFilter.getType().equals(DiscoveryConfigurationParameters.TYPE_DATE)))
+                    {
+                    	doc.addField(searchFilter.getIndexFieldName() + "_partial", value);
+                    }
+
+
+                    if(searchFilter.getFilterType().equals(DiscoverySearchFilterFacet.FILTER_TYPE_FACET))
+                    {
+                        if(searchFilter.getType().equals(DiscoveryConfigurationParameters.TYPE_TEXT)) 
+                        {
+                           	doc.addField(searchFilter.getIndexFieldName() + "_filter", 
+                           			OrderFormat.makeSortString(value, null, OrderFormat.TEXT) // Remove diacritic + lower case
+                           			+ separator + value);
+                        } else if(searchFilter.getType().equals(DiscoveryConfigurationParameters.TYPE_DATE)) {
+                        	if(value_dt != null)
+                        	{
+                        		String indexField = searchFilter.getIndexFieldName() + ".year";
+                        		String yearUTC = DateFormatUtils.formatUTC(value_dt, "yyyy");
+                        		doc.addField(searchFilter.getIndexFieldName() + "_keyword", yearUTC);
+                        		// add the year to the autocomplete index
+                        		doc.addField(searchFilter.getIndexFieldName() + "_ac", yearUTC);
+                        		doc.addField(indexField, yearUTC);
+
+                        		if (yearUTC.startsWith("0"))
+                        		{
+                        			doc.addField(
+                        					searchFilter.getIndexFieldName()
+                        					+ "_keyword",
+                        					yearUTC.replaceFirst("0*", ""));
+                        			// add date without starting zeros for autocomplete e filtering
+                        			doc.addField(
+                        					searchFilter.getIndexFieldName()
+                        					+ "_ac",
+                        					yearUTC.replaceFirst("0*", ""));
+                        			doc.addField(
+                        					searchFilter.getIndexFieldName()
+                        					+ "_ac",
+                        					value.replaceFirst("0*", ""));
+                        			doc.addField(
+                        					searchFilter.getIndexFieldName()
+                        					+ "_keyword",
+                        					value.replaceFirst("0*", ""));
+                        		}
+
+                        		//Also save a sort value of this year, this is required for determining the upper & lower bound year of our facet
+                        		if(doc.getField(indexField + "_sort") == null)
+                        		{
+                        			//We can only add one year so take the first one
+                        			doc.addField(indexField + "_sort", yearUTC);
+                        		}
+                        	}
+                        } else if(searchFilter.getType().equals(DiscoveryConfigurationParameters.TYPE_HIERARCHICAL)) {
+                            HierarchicalSidebarFacetConfiguration hierarchicalSidebarFacetConfiguration = (HierarchicalSidebarFacetConfiguration) searchFilter;
+                            String[] subValues = value.split(hierarchicalSidebarFacetConfiguration.getSplitter());
+                            // Lan 24.02.2015 : skip first node even the following node is null
+                            // if(hierarchicalSidebarFacetConfiguration.isSkipFirstNodeLevel() && 1 < subValues.length)
+                            if(hierarchicalSidebarFacetConfiguration.isSkipFirstNodeLevel() && 1 <= subValues.length)
+                            {
+                                //Remove the first element of our array
+                                subValues = (String[]) ArrayUtils.subarray(subValues, 1, subValues.length);
+                            }
+                            for (int i = 0; i < subValues.length; i++)
+                            {
+                                StringBuilder valueBuilder = new StringBuilder();
+                                for(int j = 0; j <= i; j++)
+                                {
+                                    valueBuilder.append(subValues[j]);
+                                    if(j < i)
+                                    {
+                                        valueBuilder.append(hierarchicalSidebarFacetConfiguration.getSplitter());
+                                    }
+                                }
+
+                                String indexValue = valueBuilder.toString().trim();
+                                doc.addField(searchFilter.getIndexFieldName() + "_tax_" + i + "_filter", indexValue.toLowerCase() + separator + indexValue);
+                                //We add the field x times that it has occurred
+                                for(int j = i; j < subValues.length; j++)
+                                {
+                                    doc.addField(searchFilter.getIndexFieldName() + "_filter", indexValue.toLowerCase() + separator + indexValue);
+                                    doc.addField(searchFilter.getIndexFieldName() + "_keyword", indexValue);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if (sortFields.get(field) != null  && !sortFieldsAdded.contains(field))
+            {
+                //Only add sort value once
+                String type;
+                type = sortFields.get(field).getType();
+
+                // 09.03.2015 Lan : <field>_sort for date contains date AND time, not only date
+                if(type.equals(DiscoveryConfigurationParameters.TYPE_DATE))
+                {
+                	if (value_dt == null) {
+                		value_dt = MultiFormatDateParser.parse(value);
+                	}
+                    if(value_dt != null)
+                    {
+                    	String sort_dt = DateFormatUtils.ISO_DATETIME_FORMAT.format(value_dt);
+                        doc.addField(field + "_sort", sort_dt);
+                    }else{
+                        log.warn("Error while indexing sort date field, community: " + community.getHandle() + " metadata field: " + field + " date value: " + value);
+                    }
+                }else{
+                    doc.addField(field + "_sort", value);
+                }
+                sortFieldsAdded.add(field);
+            }
+            
+            doc.addField(field, value);
+                       
+if (false) {
+	
             switch (field) {
             case "dc.description":
             case "dc.description.abstract":
@@ -1427,6 +1620,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
             default: 
             	break;
             }
+}
         }
 
         //Do any additional indexing, depends on the plugins
@@ -1495,7 +1689,360 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         writeDocument(doc, null);
     }
 
+    /**
+     * @param context
+     * @param collection
+     * @throws SQLException
+     * @throws IOException
+     */
     protected void buildDocument(Context context, Collection collection)
+    throws SQLException, IOException {
+        List<String> locations = getCollectionLocations(collection);
+
+        // Create Lucene Document
+        SolrInputDocument doc = buildDocument(Constants.COLLECTION, collection.getID(),
+                collection.getHandle(), locations);
+        
+        //Keep a list of our sort values which we added, sort values can only be added once
+        List<String> sortFieldsAdded = new ArrayList<String>();
+
+        List<DiscoveryConfiguration> discoveryConfigurations = Arrays.asList(SearchUtils.getDiscoveryConfiguration(Constants.COLLECTION));
+
+        //A map used to save each sidebarFacet config by the metadata fields
+        Map<String, List<DiscoverySearchFilter>> searchFilters = new HashMap<String, List<DiscoverySearchFilter>>();
+        Map<String, DiscoverySortFieldConfiguration> sortFields = new HashMap<String, DiscoverySortFieldConfiguration>();
+
+        for (DiscoveryConfiguration discoveryConfiguration : discoveryConfigurations) {
+        	for (int i = 0; i < discoveryConfiguration.getSearchFilters().size(); i++)
+        	{
+        		DiscoverySearchFilter discoverySearchFilter = discoveryConfiguration.getSearchFilters().get(i);
+        		for (int j = 0; j < discoverySearchFilter.getMetadataFields().size(); j++)
+        		{
+        			String metadataField = discoverySearchFilter.getMetadataFields().get(j);
+        			List<DiscoverySearchFilter> resultingList;
+        			if(searchFilters.get(metadataField) != null)
+        			{
+        				resultingList = searchFilters.get(metadataField);
+        			}else{
+        				//New metadata field, create a new list for it
+        				resultingList = new ArrayList<DiscoverySearchFilter>();
+        			}
+        			resultingList.add(discoverySearchFilter);
+
+        			searchFilters.put(metadataField, resultingList);
+        		}
+        	}
+
+        	DiscoverySortConfiguration sortConfiguration = discoveryConfiguration.getSearchSortConfiguration();
+        	if(sortConfiguration != null)
+        	{
+        		for (DiscoverySortFieldConfiguration discoverySortConfiguration : sortConfiguration.getSortFields())
+        		{
+        			sortFields.put(discoverySortConfiguration.getMetadataField(), discoverySortConfiguration);
+        		}
+        	}
+        }
+
+        List<String> toIgnoreMetadataFields = SearchUtils.getIgnoredMetadataFields(collection.getType());
+        Metadatum[] mydc = collection.getMetadata(Item.ANY, Item.ANY, Item.ANY, Item.ANY);
+        for (Metadatum meta : mydc)
+        {
+            String field = meta.schema + "." + meta.element;
+            String unqualifiedField = field;
+
+            String value = meta.value;
+            Date value_dt = null;
+            
+            String indexFieldName;
+
+            if (value == null) { continue; }
+
+            if (meta.qualifier != null && !meta.qualifier.trim().equals("")) { field += "." + meta.qualifier; }
+            
+            if (toIgnoreMetadataFields != null	&& (toIgnoreMetadataFields.contains(field) || toIgnoreMetadataFields.contains(unqualifiedField + "." + Item.ANY)))
+            {
+                continue;
+            }
+                       
+            if ((searchFilters.get(field) != null || searchFilters.get(unqualifiedField + "." + Item.ANY) != null))
+            {
+                List<DiscoverySearchFilter> searchFilterConfigs = searchFilters.get(field);
+                if(searchFilterConfigs == null)
+                {
+                    searchFilterConfigs = searchFilters.get(unqualifiedField + "." + Item.ANY);
+                }
+
+                for (DiscoverySearchFilter searchFilter : searchFilterConfigs)
+                {
+                    String separator = new DSpace().getConfigurationService().getProperty("discovery.solr.facets.split.char");
+                    if(separator == null)
+                    {
+                        separator = FILTER_SEPARATOR;
+                    }
+                    if(searchFilter.getType().equals(DiscoveryConfigurationParameters.TYPE_DATE))
+                    {
+                        //For our search filters that are dates we format them properly
+                        value_dt = MultiFormatDateParser.parse(value);
+                        if(value_dt != null)
+                        {
+                            //TODO: make this date format configurable !
+                            value = DateFormatUtils.formatUTC(value_dt, "yyyy-MM-dd");
+                            // 09.03.2015 Lan : add _dt that contains date AND time, not only date
+                        	doc.addField(searchFilter.getIndexFieldName() + "_dt", value_dt);
+                        }else{
+                        	log.warn("Error while indexing search date field, collection: " + collection.getHandle() + " metadata field: " + field + " date value: " + value);
+                        }
+                    }
+                    
+
+                    /* Lan  extract code_origine from support hardcode ! ******************************************/
+                    if (field.equals("rtbf.support")) {
+                    	/* isolate code_origine part */
+                    	String value_p1 = value.replaceAll("^(((?!::).)+)::(((?!::).)+)(::)?(.*)?$", "$3").replaceAll("^(((?!\\\\\\\\).)+)(.*)$", "$1");
+                        doc.addField(searchFilter.getIndexFieldName(), value_p1);
+                        doc.addField(searchFilter.getIndexFieldName() + "_keyword", value_p1);
+                        doc.addField(searchFilter.getIndexFieldName() + "_contain", value_p1);
+                        doc.addField(searchFilter.getIndexFieldName() + "_partial", value_p1);
+                    	
+                    	/* isolate place part */
+                    	String value_p2 = value.replaceAll("^Fichier Sonuma.*$", "").replaceAll("^(((?!::).)+)::(((?!::).)+)(::)?(.*)?$", "$6");
+                    	if (!value_p2.isEmpty()) {
+                    		doc.addField(searchFilter.getIndexFieldName(), value_p2);
+                    		doc.addField(searchFilter.getIndexFieldName() + "_keyword", value_p2);
+                            doc.addField(searchFilter.getIndexFieldName() + "_contain", value_p2);
+                    		doc.addField(searchFilter.getIndexFieldName() + "_partial", value_p2);
+                    	}
+                    	
+                    	continue;
+                    }
+                    /* Lan code_origine hardcode ! ******************************************/
+
+                    /* Lan rtbf.contributor_plus_role hardcode ! ******************************************/
+                    /* create role_contributor_filter solr field for prefix facetting */
+                    if (field.equals("rtbf.contributor_plus_role")) {
+                    	/* permute role before contributor */
+                    	String value_p1 = value.replaceAll("^(.+)/(.+)$", "$2/$1");
+                        // Remove diacritic + lower case
+                        String value_p2 = OrderFormat.makeSortString(value_p1, null, OrderFormat.TEXT);
+                    	doc.addField("role_"+searchFilter.getIndexFieldName() + "_filter", value_p2 + separator + value);
+
+                    }
+                    /* Lan rtbf.contributor_plus_role hardcode ! ******************************************/
+
+                    doc.addField(searchFilter.getIndexFieldName(), value);
+                    doc.addField(searchFilter.getIndexFieldName() + "_keyword", value);
+                    // Lan add those following solr fields
+                    doc.addField(searchFilter.getIndexFieldName() + "_contain", value);
+                    if(!(searchFilter.getType().equals(DiscoveryConfigurationParameters.TYPE_DATE)))
+                    {
+                    	doc.addField(searchFilter.getIndexFieldName() + "_partial", value);
+                    }
+
+
+                    if(searchFilter.getFilterType().equals(DiscoverySearchFilterFacet.FILTER_TYPE_FACET))
+                    {
+                        if(searchFilter.getType().equals(DiscoveryConfigurationParameters.TYPE_TEXT)) 
+                        {
+                           	doc.addField(searchFilter.getIndexFieldName() + "_filter", 
+                           			OrderFormat.makeSortString(value, null, OrderFormat.TEXT) // Remove diacritic + lower case
+                           			+ separator + value);
+                        } else if(searchFilter.getType().equals(DiscoveryConfigurationParameters.TYPE_DATE)) {
+                        	if(value_dt != null)
+                        	{
+                        		String indexField = searchFilter.getIndexFieldName() + ".year";
+                        		String yearUTC = DateFormatUtils.formatUTC(value_dt, "yyyy");
+                        		doc.addField(searchFilter.getIndexFieldName() + "_keyword", yearUTC);
+                        		// add the year to the autocomplete index
+                        		doc.addField(searchFilter.getIndexFieldName() + "_ac", yearUTC);
+                        		doc.addField(indexField, yearUTC);
+
+                        		if (yearUTC.startsWith("0"))
+                        		{
+                        			doc.addField(
+                        					searchFilter.getIndexFieldName()
+                        					+ "_keyword",
+                        					yearUTC.replaceFirst("0*", ""));
+                        			// add date without starting zeros for autocomplete e filtering
+                        			doc.addField(
+                        					searchFilter.getIndexFieldName()
+                        					+ "_ac",
+                        					yearUTC.replaceFirst("0*", ""));
+                        			doc.addField(
+                        					searchFilter.getIndexFieldName()
+                        					+ "_ac",
+                        					value.replaceFirst("0*", ""));
+                        			doc.addField(
+                        					searchFilter.getIndexFieldName()
+                        					+ "_keyword",
+                        					value.replaceFirst("0*", ""));
+                        		}
+
+                        		//Also save a sort value of this year, this is required for determining the upper & lower bound year of our facet
+                        		if(doc.getField(indexField + "_sort") == null)
+                        		{
+                        			//We can only add one year so take the first one
+                        			doc.addField(indexField + "_sort", yearUTC);
+                        		}
+                        	}
+                        } else if(searchFilter.getType().equals(DiscoveryConfigurationParameters.TYPE_HIERARCHICAL)) {
+                            HierarchicalSidebarFacetConfiguration hierarchicalSidebarFacetConfiguration = (HierarchicalSidebarFacetConfiguration) searchFilter;
+                            String[] subValues = value.split(hierarchicalSidebarFacetConfiguration.getSplitter());
+                            // Lan 24.02.2015 : skip first node even the following node is null
+                            // if(hierarchicalSidebarFacetConfiguration.isSkipFirstNodeLevel() && 1 < subValues.length)
+                            if(hierarchicalSidebarFacetConfiguration.isSkipFirstNodeLevel() && 1 <= subValues.length)
+                            {
+                                //Remove the first element of our array
+                                subValues = (String[]) ArrayUtils.subarray(subValues, 1, subValues.length);
+                            }
+                            for (int i = 0; i < subValues.length; i++)
+                            {
+                                StringBuilder valueBuilder = new StringBuilder();
+                                for(int j = 0; j <= i; j++)
+                                {
+                                    valueBuilder.append(subValues[j]);
+                                    if(j < i)
+                                    {
+                                        valueBuilder.append(hierarchicalSidebarFacetConfiguration.getSplitter());
+                                    }
+                                }
+
+                                String indexValue = valueBuilder.toString().trim();
+                                doc.addField(searchFilter.getIndexFieldName() + "_tax_" + i + "_filter", indexValue.toLowerCase() + separator + indexValue);
+                                //We add the field x times that it has occurred
+                                for(int j = i; j < subValues.length; j++)
+                                {
+                                    doc.addField(searchFilter.getIndexFieldName() + "_filter", indexValue.toLowerCase() + separator + indexValue);
+                                    doc.addField(searchFilter.getIndexFieldName() + "_keyword", indexValue);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if (sortFields.get(field) != null  && !sortFieldsAdded.contains(field))
+            {
+                //Only add sort value once
+                String type;
+                type = sortFields.get(field).getType();
+
+                // 09.03.2015 Lan : <field>_sort for date contains date AND time, not only date
+                if(type.equals(DiscoveryConfigurationParameters.TYPE_DATE))
+                {
+                	if (value_dt == null) {
+                		value_dt = MultiFormatDateParser.parse(value);
+                	}
+                    if(value_dt != null)
+                    {
+                    	String sort_dt = DateFormatUtils.ISO_DATETIME_FORMAT.format(value_dt);
+                        doc.addField(field + "_sort", sort_dt);
+                    }else{
+                        log.warn("Error while indexing sort date field, collection: " + collection.getHandle() + " metadata field: " + field + " date value: " + value);
+                    }
+                }else{
+                    doc.addField(field + "_sort", value);
+                }
+                sortFieldsAdded.add(field);
+            }
+            
+            doc.addField(field, value);
+
+            
+if (false) {
+	
+            
+            String yearUTC;
+            String sort_dt;
+            
+            switch (field) {
+            case "dc.description":
+            case "dc.description.abstract":
+            case "dc.description.tableofcontents":
+            case "dc.provenance":
+            case "dc.rights":
+            case "dc.rights.license":
+                doc.addField(field, value);
+                break;
+            case "dc.title":
+                doc.addField(field, value);
+                doc.addField(field + "_sort", value);
+                break;
+            case "dc.date.issued": // TODO: remove hardcode
+                value_dt = MultiFormatDateParser.parse(value);
+                value = DateFormatUtils.formatUTC(value_dt, "yyyy-MM-dd");
+                /* searchFilter of this name exists in discovery.conf */
+                indexFieldName = "date_issued";
+            	doc.addField(indexFieldName + "_dt", value_dt);
+            	doc.addField(indexFieldName + "_keyword", value);
+                yearUTC = DateFormatUtils.formatUTC(value_dt, "yyyy");
+            	doc.addField(indexFieldName + "_keyword", yearUTC);
+            	doc.addField(indexFieldName + "_contain", value);
+            	doc.addField(indexFieldName, value);
+                /* sortFieldConfig of this name exists in discovery.conf */
+            	sort_dt = DateFormatUtils.ISO_DATETIME_FORMAT.format(value_dt);
+            	/* field index */
+            	doc.addField(field + "_sort", sort_dt);
+                doc.addField(field, value);
+            	break;
+/*
+            case "rtbf.date_diffusion.version": // TODO: remove hardcode
+                value_dt = MultiFormatDateParser.parse(value);
+                value = DateFormatUtils.formatUTC(value_dt, "yyyy-MM-dd");
+                 searchFilter of this name exists in discovery.conf 
+                indexFieldName = "date_diffusion";
+            	doc.addField(indexFieldName + "_dt", value_dt);
+            	doc.addField(indexFieldName + "_keyword", value);
+                yearUTC = DateFormatUtils.formatUTC(value_dt, "yyyy");
+            	doc.addField(indexFieldName + "_keyword", yearUTC);
+            	doc.addField(indexFieldName + "_contain", value);
+            	doc.addField(indexFieldName, value);
+                 sortFieldConfig of this name exists in discovery.conf 
+            	sort_dt = DateFormatUtils.ISO_DATETIME_FORMAT.format(value_dt);
+            	 field index 
+                doc.addField(field, value);
+            	break;
+*/
+            case "rtbf.channel_issued":
+            case "rtbf.identifier.attributor":
+            case "rtbf.royalty_code":
+                doc.addField(field, value);
+                break;
+            default: 
+            	break;
+            }
+            
+}
+            
+            
+        }
+
+
+        // index related code_origine of supports
+        try {
+        	CodeOrigine[] codeOrigines = CollectionAdd.CodeOrigineCollection.findById(context, collection.getID());
+        	for (CodeOrigine codeOrigine : codeOrigines) {
+        		buildDocument(context, codeOrigine);
+                log.info("Wrote CodeOrigine: " + codeOrigine.getCode() + " to Index");
+			}
+
+        	log.debug("  Index all code_origine of collection " + collection.getID());
+        } catch (RuntimeException e)
+        {
+            log.error(e.getMessage(), e);
+        }
+        
+        
+        //Do any additional indexing, depends on the plugins
+        List<SolrServiceIndexPlugin> solrServiceIndexPlugins = new DSpace().getServiceManager().getServicesByType(SolrServiceIndexPlugin.class);
+        for (SolrServiceIndexPlugin solrServiceIndexPlugin : solrServiceIndexPlugins)
+        {
+            solrServiceIndexPlugin.additionalIndex(context, collection, doc);
+        }
+
+        writeDocument(doc, null);
+    }
+
+    protected void buildDocument_old2(Context context, Collection collection)
     throws SQLException, IOException {
         List<String> locations = getCollectionLocations(collection);
 
@@ -1556,10 +2103,11 @@ public class SolrServiceImpl implements SearchService, IndexingService {
             	doc.addField(field + "_sort", sort_dt);
                 doc.addField(field, value);
             	break;
+/*
             case "rtbf.date_diffusion.version": // TODO: remove hardcode
                 value_dt = MultiFormatDateParser.parse(value);
                 value = DateFormatUtils.formatUTC(value_dt, "yyyy-MM-dd");
-                /* searchFilter of this name exists in discovery.conf */
+                 searchFilter of this name exists in discovery.conf 
                 indexFieldName = "date_diffusion";
             	doc.addField(indexFieldName + "_dt", value_dt);
             	doc.addField(indexFieldName + "_keyword", value);
@@ -1567,11 +2115,12 @@ public class SolrServiceImpl implements SearchService, IndexingService {
             	doc.addField(indexFieldName + "_keyword", yearUTC);
             	doc.addField(indexFieldName + "_contain", value);
             	doc.addField(indexFieldName, value);
-                /* sortFieldConfig of this name exists in discovery.conf */
+                 sortFieldConfig of this name exists in discovery.conf 
             	sort_dt = DateFormatUtils.ISO_DATETIME_FORMAT.format(value_dt);
-            	/* field index */
+            	 field index 
                 doc.addField(field, value);
             	break;
+*/
             case "rtbf.channel_issued":
             case "rtbf.identifier.attributor":
             case "rtbf.royalty_code":
@@ -1900,17 +2449,17 @@ public class SolrServiceImpl implements SearchService, IndexingService {
 
                         /* Lan rtbf.channel_plus_date_diffusion hardcode ! ******************************************/
                         /* create role_contributor_filter solr field for prefix facetting */
-                        if (field.equals("rtbf.channel_plus_date_diffusion.segment") || field.equals("rtbf.channel_plus_date_diffusion.version")) {
-                        	/* get only channel value */
+/*                        if (field.equals("rtbf.channel_plus_date_diffusion.segment") || field.equals("rtbf.channel_plus_date_diffusion.version")) {
+                        	 get only channel value 
                         	String[] subValues = value.split("/");
                         	if (subValues.length > 0) {
                         		value = subValues[0];
                         	}
                         }
-                        /* Lan rtbf.channel_plus_date_diffusion hardcode ! ******************************************/
+*/                        /* Lan rtbf.channel_plus_date_diffusion hardcode ! ******************************************/
 
-                        /* Lan code_origine hardcode ! ******************************************/
-                        if (field.equals("rtbf.code_origine.supportseq") || field.equals("rtbf.code_origine.supportprog")) {
+                        /* Lan  extract code_origine from support hardcode ! ******************************************/
+                        if (field.equals("rtbf.support")) {
                         	/* isolate code_origine part */
                         	String value_p1 = value.replaceAll("^(((?!::).)+)::(((?!::).)+)(::)?(.*)?$", "$3").replaceAll("^(((?!\\\\\\\\).)+)(.*)$", "$1");
                             doc.addField(searchFilter.getIndexFieldName(), value_p1);

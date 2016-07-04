@@ -58,6 +58,7 @@
                <entry key="COMMUNITY" value-ref="communityConfiguration" />
             </map>
         </property>
+        <!-- ignore those database metadata fields when indexing -->
         <property name="toIgnoreMetadataFields">
             <map>
                 <entry>
@@ -111,6 +112,8 @@
             <list>
                 <ref bean="searchFilterIdAttributor" />
                 <ref bean="searchFilterSerieTitle" />
+                <ref bean="searchFilterRoyalty" />
+                <ref bean="searchFilterProductionType" />
             </list>
         </property>
         <property name="searchSortConfiguration">
@@ -121,7 +124,8 @@
                 <property name="sortFields">
                     <list>
                         <ref bean="sortTitle" />
-                        <ref bean="sortDateIssued" />
+                        <ref bean="sortRoyalty" />
+                        <ref bean="sortProductionType" />
                     </list>
                 </property>
             </bean>
@@ -157,7 +161,7 @@
                 <!-- ref bean="searchFilterAuthor" /-->
                 <ref bean="searchFilterContributor" />
                 <ref bean="searchFilterChannel" />
-                <ref bean="searchFilterDiffusion" />
+                <!-- ref bean="searchFilterDiffusion" /-->
                 <ref bean="searchFilterIssued" />
                 <ref bean="searchFilterSubject" />
                 <ref bean="searchFilterPlace" />
@@ -287,7 +291,7 @@
                 <!-- ref bean="searchFilterAuthor" /-->
                 <ref bean="searchFilterContributor" />
                 <ref bean="searchFilterChannel" />
-                <ref bean="searchFilterDiffusion" />
+                <!--ref bean="searchFilterDiffusion" /-->
                 <ref bean="searchFilterIssued" />
                 <ref bean="searchFilterSubject" />
                 <ref bean="searchFilterPlace" />
@@ -377,11 +381,7 @@
                             <property name="snippets" value="2"/>
                         </bean>
                         <bean class="org.dspace.discovery.configuration.DiscoveryHitHighlightFieldConfiguration">
-                            <property name="field" value="rtbf.code_origine.supportseq"/>
-                            <property name="snippets" value="5"/>
-                        </bean>
-                        <bean class="org.dspace.discovery.configuration.DiscoveryHitHighlightFieldConfiguration">
-                            <property name="field" value="rtbf.code_origine.supportprog"/>
+                            <property name="field" value="rtbf.support"/>
                             <property name="snippets" value="5"/>
                         </bean>
                     </list>
@@ -566,12 +566,20 @@
     </bean>
 
     <!-- Lan 12.02.2016 - add this filter to advanced search -->
-    <bean id="searchFilterCodeOrigine" class="org.dspace.discovery.configuration.DiscoverySearchFilter">
+    <!--bean id="searchFilterCodeOrigine" class="org.dspace.discovery.configuration.DiscoverySearchFilter">
         <property name="indexFieldName" value="code_origine"/>
         <property name="metadataFields">
             <list>
                 <value>rtbf.code_origine.supportseq</value>
                 <value>rtbf.code_origine.supportprog</value>
+           </list>
+        </property>
+    </bean-->
+    <bean id="searchFilterCodeOrigine" class="org.dspace.discovery.configuration.DiscoverySearchFilter">
+        <property name="indexFieldName" value="code_origine"/>
+        <property name="metadataFields">
+            <list>
+                <value>rtbf.support</value>
            </list>
         </property>
     </bean>
@@ -667,7 +675,7 @@
     </bean>
     
     <!-- Lan 25.08.2015 - add this filter to advanced search -->
-    <bean id="searchFilterChannel" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
+    <!--bean id="searchFilterChannel" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
         <property name="indexFieldName" value="channel"/>
         <property name="metadataFields">
             <list>
@@ -676,10 +684,20 @@
         </property>
         <property name="facetLimit" value="10"/>
         <property name="sortOrder" value="COUNT"/>
+    </bean-->
+    <bean id="searchFilterChannel" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
+        <property name="indexFieldName" value="channel"/>
+        <property name="metadataFields">
+            <list>
+                <value>rtbf.channel_issued</value>
+           </list>
+        </property>
+        <property name="facetLimit" value="10"/>
+        <property name="sortOrder" value="COUNT"/>
     </bean>
 
     <!-- Lan 25.08.2015 - add this filter to advanced search -->
-    <bean id="searchFilterDiffusion" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
+    <!--bean id="searchFilterDiffusion" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
         <property name="indexFieldName" value="date_diffusion"/>
         <property name="metadataFields">
             <list>
@@ -688,11 +706,11 @@
         </property>
         <property name="type" value="date"/>
         <property name="sortOrder" value="VALUE"/>
-    </bean>
+    </bean-->
 
     <!-- Lan 24.02.2016 - add set_support filter to advanced search -->
     <!-- watch out on skipFirstNodeLevel is true to index on set and not on type -->
-    <bean id="searchFilterSetSupport" class="org.dspace.discovery.configuration.HierarchicalSidebarFacetConfiguration">
+    <!--bean id="searchFilterSetSupport" class="org.dspace.discovery.configuration.HierarchicalSidebarFacetConfiguration">
         <property name="indexFieldName" value="set_support"/>
         <property name="metadataFields">
             <list>
@@ -703,6 +721,16 @@
         <property name="sortOrder" value="COUNT"/>
         <property name="splitter" value="::"/>
         <property name="skipFirstNodeLevel" value="true"/>
+    </bean-->
+    <bean id="searchFilterSetSupport" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
+        <property name="indexFieldName" value="set_support"/>
+        <property name="metadataFields">
+            <list>
+                <value>rtbf.set</value>
+           </list>
+        </property>
+        <property name="facetLimit" value="10"/>
+        <property name="sortOrder" value="COUNT"/>
     </bean>
     
     <!-- Lan 20.02.2016 - add this filter to advanced search -->

@@ -26,7 +26,7 @@ import java.util.List;
 
 @XmlRootElement(name = "episode")
 public class Episode extends RTBObject {
-	Logger log = Logger.getLogger(Episode.class);
+	private static Logger log = Logger.getLogger(Episode.class);
 
 	public Episode(){}
 	
@@ -48,9 +48,10 @@ public class Episode extends RTBObject {
     	
     	switch (viewType) {
     	case Constants.SEARCH_RESULT_VIEW:
+    		this.setDateIssued(getMetadataEntry(Constants.DATE_ISSUED,collection));
     		this.setChannelIssued(getMetadataEntries(Constants.CHANNEL_ISSUED,collection));
             // this.setCountSupports(getCountAllSupports(collection));
-            this.setCountSequences(collection.countItems());
+            // this.setCountSequences(collection.countItems());
     		innerViewType = Constants.MIN_VIEW;
             break;
         default:
