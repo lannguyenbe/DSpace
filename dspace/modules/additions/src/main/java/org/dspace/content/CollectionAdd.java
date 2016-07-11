@@ -63,6 +63,28 @@ public class CollectionAdd extends Collection {
 
         return new CollectionIterator(context, rows);
     }
+
+    public static CollectionIterator findGeId(Context context, int id) throws SQLException
+    {
+        String myQuery = "SELECT * FROM collection WHERE collection_id >= " +id
+                + " ORDER BY collection.collection_id";
+
+        TableRowIterator rows = DatabaseManager.queryTable(context, "collection", myQuery);
+
+        return new CollectionIterator(context, rows);
+    }
+    
+    public static CollectionIterator findBetweenId(Context context, int id, int idto) throws SQLException
+    {
+        String myQuery = "SELECT * FROM collection WHERE collection_id between " +id
+        		+ " and " +idto
+                + " ORDER BY collection.collection_id";
+
+        TableRowIterator rows = DatabaseManager.queryTable(context, "collection", myQuery);
+
+        return new CollectionIterator(context, rows);
+    }
+    
     
     public List<String> findChannelsIssuedById()
             throws SQLException

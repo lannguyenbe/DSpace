@@ -110,7 +110,7 @@ public class IndexClient {
         				.isRequired(false)
         				.hasArg()
         				.withArgName("item id")
-        				.withDescription("adding ordered items to index from item id")
+        				.withDescription("adding ordered items to index where item id >= the given <item_id>")
         				.create("I")
         				);
 
@@ -120,7 +120,7 @@ public class IndexClient {
         				.isRequired(false)
         				.hasArg(true)
         				.withArgName("item id")
-        				.withDescription("adding ordered items to item id")
+        				.withDescription("adding ordered items to index where item id <= the given <item_id>")
         				.create("Ito")
         				);
 
@@ -130,6 +130,33 @@ public class IndexClient {
         				.isRequired(false)
         				.withDescription("Sync the index to the database based on t_handle_log")
         				.create("S")
+        				);
+
+        /* Lan 20.11.2014 : add option -CM */        
+        options
+        		.addOption(OptionBuilder
+        				.isRequired(false)
+        				.withDescription("adding all communities")
+        				.create("CM"));        
+
+        /* Lan 11.07.2016 : add option -CL */        
+        options
+        		.addOption(OptionBuilder
+        				.isRequired(false)
+        				.hasArg()
+        				.withArgName("collection id")
+        				.withDescription("adding ordered collections to index where id >= the given <collection_id>")
+        				.create("CL")
+        				);
+
+        /* Lan 11.07.2016 : add option -CLto */        
+        options
+        		.addOption(OptionBuilder
+        				.isRequired(false)
+        				.hasArg(true)
+        				.withArgName("collection id")
+        				.withDescription("adding ordered collections to index where id <= the given <collection_id>")
+        				.create("CLto")
         				);
 
         options.addOption(OptionBuilder.isRequired(false).withDescription(
@@ -226,6 +253,26 @@ public class IndexClient {
                 	indexer2.updateIndexI(contextRO, itemId, true);        			
         			
         		}
+        	}
+            checkRebuildSpellCheck(line, indexer2);
+        } else if (line.hasOption("CM")) { /* Lan 11.07.2016 */
+        	log.info("Adding all communities");            
+        	indexer2.updateIndexCM(contextRO, true);
+            checkRebuildSpellCheck(line, indexer2);
+        } else if (line.hasOption("CL")) { /* Lan 11.07.2016 */
+        	int collectionId = Integer.parseInt(line.getOptionValue("CL"));
+        	int collectionIdto = 0; 
+        	if (line.hasOption("CLto")) { /* Lan 11.07.2016 */
+                collectionIdto = Integer.parseInt(line.getOptionValue("CLto"));
+        	}
+
+        	if (collectionIdto > 0) {
+        		log.info("Adding ordered collections from collection id " + collectionId + " to " + collectionIdto);
+        		indexer2.updateIndexCLto(contextRO, collectionId, collectionIdto, true);        			
+        	} else {
+        		log.info("Adding ordered collections from collection id " + collectionId);
+        		indexer2.updateIndexCL(contextRO, collectionId, true);        			
+
         	}
             checkRebuildSpellCheck(line, indexer2);
         } else if (line.hasOption("S")) { /* Lan 15.09.2015 */

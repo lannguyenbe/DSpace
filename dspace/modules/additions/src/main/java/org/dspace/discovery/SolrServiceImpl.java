@@ -585,6 +585,9 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
     }
 
+    /*
+     * Index items greater than <id>
+     */
     public void updateIndexI(Context contextRO, int id, boolean force)
     {
         try {
@@ -613,6 +616,9 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
     }
     
+    /*
+     * Index items greater than <itemId> for the given community <commId>
+     */
     public void updateIndexCI(Context contextRO, int commId, int itemId, boolean force)
     {
         try {
@@ -642,6 +648,9 @@ public class SolrServiceImpl implements SearchService, IndexingService {
     }
     
 
+    /*
+     * Index items greater than <itemId> for the given community <commId>
+     */
     public void updateIndexIto(Context contextRO, int id, int idto, boolean force)
     {
         try {
@@ -670,6 +679,9 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
     }
     
+    /*
+     * Index the items between <itemId> and <itemIdto> for the given community <commId>
+     */
     public void updateIndexCIto(Context contextRO, int commId, int itemId, int itemIdto, boolean force)
     {
         try {
@@ -698,6 +710,9 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
     }
     
+    /*
+     * Index all the communitites and collections (not items)
+     */
     public void updateIndexCC(Context contextRO, boolean force)
     {
         try {
@@ -740,6 +755,9 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
     }
 
+    /*
+     * Index the community and all its collections (not items)
+     */
     public void updateIndexCC(Context contextRO, int commId, boolean force)
     {
         try {
@@ -783,6 +801,80 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
     }
     
+    /*
+     * Index all communitites
+     */
+    public void updateIndexCM(Context contextRO, boolean force)
+    {
+        try {
+            CommunityIterator communities = null;
+            try {
+                for (communities = CommunityAdd.findAllCursor(contextRO); communities.hasNext();)
+                {
+                    Community community = communities.next();
+                    indexContent(contextRO, community, force);
+                }
+            } finally {
+                if (communities != null)
+                {
+                    communities.close();
+                }
+            }
+
+            if(getSolr() != null)
+            {
+                getSolr().commit();
+            }
+
+        } catch (Exception e)
+        {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    /*
+     * Index collections between <id> and <idto>
+     */
+    public void updateIndexCL(Context contextRO, int id, boolean force) {
+    	updateIndexCLto(contextRO, id, -1, force);
+    }
+
+    public void updateIndexCLto(Context contextRO, int id, int idto, boolean force)
+    {
+        try {
+            CollectionIterator collections = null;
+            try {
+            	if (idto < 0) {
+            		collections = CollectionAdd.findGeId(contextRO, id);
+            	} else {
+            		collections = CollectionAdd.findBetweenId(contextRO, id, idto);
+            	}
+                while(collections.hasNext())
+                {
+                    Collection collection = collections.next();
+                    indexContent(contextRO, collection, force);
+                }
+            } finally {
+                if (collections != null)
+                {
+                    collections.close();
+                }
+            }
+
+            if(getSolr() != null)
+            {
+                getSolr().commit();
+            }
+
+        } catch (Exception e)
+        {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    /*
+     * Index t_handle_log - synchronization
+     */
     public void updateIndexS(Context contextRO, boolean commit)
     {
         try {
@@ -941,6 +1033,9 @@ public class SolrServiceImpl implements SearchService, IndexingService {
     }    
         
     
+    /*
+     * Index the whole community top-down : the community, its collections, its items
+     */
     public void updateIndexC(Context contextRO, int id, boolean force)
     {
         try {

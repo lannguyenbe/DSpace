@@ -64,37 +64,25 @@
                 <entry>
                     <key><util:constant static-field="org.dspace.core.Constants.COMMUNITY"/></key>
                     <list>
-                        <!--Introduction text-->
-                        <!--<value>dc.description</value>-->
-                        <!--Short description-->
-                        <!--<value>dc.description.abstract</value>-->
-                        <!--News-->
-                        <!--<value>dc.description.tableofcontents</value>-->
                         <!--Copyright text-->
                         <value>dc.rights</value>
-                        <!--Community name-->
-                        <!--<value>dc.title</value>-->
+                        <!--value>rtbf.royalty_code</value-->
                     </list>
                 </entry>
                 <entry>
                     <key><util:constant static-field="org.dspace.core.Constants.COLLECTION"/></key>
                     <list>
-                        <!--Introduction text-->
-                        <!--<value>dc.description</value>-->
-                        <!--Short description-->
-                        <!--<value>dc.description.abstract</value>-->
-                        <!--News-->
-                        <!--<value>dc.description.tableofcontents</value>-->
                         <!--Copyright text-->
                         <value>dc.rights</value>
-                        <!--Collection name-->
-                        <!--<value>dc.title</value>-->
+                        <!--value>rtbf.royalty_code</value-->
                     </list>
                 </entry>
                 <entry>
                     <key><util:constant static-field="org.dspace.core.Constants.ITEM"/></key>
                     <list>
-                        <value>dc.description.provenance</value>
+                        <!--Copyright text-->
+                        <value>dc.rights</value>
+                        <!--value>rtbf.royalty_code</value-->
                     </list>
                 </entry>
             </map>
