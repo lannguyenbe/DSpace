@@ -64,6 +64,41 @@ public class CollectionAdd extends Collection {
         return new CollectionIterator(context, rows);
     }
     
+    public List<String> findChannelsIssuedById()
+            throws SQLException
+    {
+    	int id = this.getID();
+    	String myQuery = "SELECT distinct diff.channel"
+        	+ " from"
+        	+ " (SELECT d.resource_type_id, d.resource_id, d.diffusion_path"
+        	+ " FROM t_diffusion d"
+        	+ " WHERE d.resource_type_id = " + Constants.COLLECTION
+        	+ " AND d.resource_id = " + id
+        	+ " AND d.is_premdiff = 1) premdiff"
+        	+ " , t_diffusion diff"
+        	+ " WHERE diff.resource_type_id = premdiff.resource_type_id"
+        	+ " AND diff.resource_id = premdiff.resource_id"
+        	+ " ORDER BY diff.channel";
+    	
+    	        	
+    	TableRowIterator tri =  null;
+    	List<String> channels = new ArrayList<String> ();
+    	    	
+    	try {
+			tri =  DatabaseAccess.query(this.ourContext, myQuery);
+			while (tri.hasNext()) {
+				TableRow row = tri.next();
+				channels.add( row.getStringColumn("channel"));
+			}
+		} finally {
+			if (tri != null) { tri.close(); }
+		}
+    	
+    	if (channels.isEmpty()) { return null; }
+
+    	return channels;
+    }
+     
     public static class DiffusionCollection extends Diffusion {
 
     	public DiffusionCollection(String diffusion_path, int community_id, int collection_id, int item_id, String date_event, String date_diffusion, String channel) {
@@ -137,10 +172,11 @@ public class CollectionAdd extends Collection {
     				+ " , t.tc_in_string, t.tc_out_string, t.htc_in_string, t.htc_out_string, t.duration_string"
     				+ " , t.origine"
     				+ " , t.category"
+    				+ " , t.support_role"
     				+ " FROM t_support2resource t"
     				+ " WHERE resource_type_id = " + Constants.COLLECTION
     				+ " AND resource_id = " + collection_id
-        	        + " ORDER BY t.set_of_support_type";
+        	        + " ORDER BY t.support_role, t.set_of_support_type";
 
     		TableRowIterator tri =  null;
     		List<SupportCollection> supports = new ArrayList<SupportCollection> ();

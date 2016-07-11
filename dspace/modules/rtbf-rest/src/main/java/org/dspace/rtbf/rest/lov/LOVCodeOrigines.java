@@ -72,7 +72,7 @@ public class LOVCodeOrigines extends Resource {
         	return(new ArrayList<SimpleNode>());
         } else { // results are always the same list; arg pt= is ignored
     		log.info("Reading all support sets.");
-            return(getAllACNodes("set", SimpleNode.Attribute.KEY, params));
+            return(getAllACNodes("set_support", SimpleNode.Attribute.KEY, params));
         } 
     }
 

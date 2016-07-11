@@ -49,7 +49,10 @@ public class Episode extends RTBObject {
     	switch (viewType) {
     	case Constants.SEARCH_RESULT_VIEW:
     		this.setDateIssued(getMetadataEntry(Constants.DATE_ISSUED,collection));
+    		// set ALL channels issued related to the date issued whatever the owning serie
     		this.setChannelIssued(getMetadataEntries(Constants.CHANNEL_ISSUED,collection));
+    		// set channels issued related to the date issued and COHERENT with the owning episode
+    		this.setChannelIssuedList(findChannelsIssued(collection));
             // this.setCountSupports(getCountAllSupports(collection));
             // this.setCountSequences(collection.countItems());
     		innerViewType = Constants.MIN_VIEW;
@@ -67,10 +70,10 @@ public class Episode extends RTBObject {
         if(expandFields.contains("owningSerie") | expandFields.contains("all")) {
             org.dspace.content.Community parentCommunity = (org.dspace.content.Community) collection.getParentObject();
             /* 
-             * Lan 22.06.2016 : return more metadata of the owningSerie - see Constants.OWNING_SERIE_EXPAND_OPTIONS
-             * this.setOwningSerie(new Serie(innerViewType, parentCommunity, null, context));
+             * Lan 22.06.2016 : use Constants.OWNING_SERIE_EXPAND_OPTIONS to return more metadata of the owningSerie
              */
-              this.setOwningSerie(new Serie(innerViewType, parentCommunity, Constants.OWNING_SERIE_EXPAND_OPTIONS, context));
+             // this.setOwningSerie(new Serie(innerViewType, parentCommunity, null, context));
+             this.setOwningSerie(new Serie(innerViewType, parentCommunity, Constants.OWNING_SERIE_EXPAND_OPTIONS, context));
         } else {
             this.addExpand("owningSerie");
         }
@@ -109,7 +112,6 @@ public class Episode extends RTBObject {
         	List<MetadataEntry> entries = new ArrayList<MetadataEntry>();
         	Metadatum[] dcvs = collection.getMetadataByMetadataString("*.*.*");
             for (Metadatum dcv : dcvs) {
-            	if (dcv.schema.equals(Constants.OLD_SCHEMA)) { continue; } // skip old schema
                 entries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
             }
             this.setMetadataEntries(entries);
@@ -145,6 +147,13 @@ public class Episode extends RTBObject {
         if(!expandFields.contains("all")) {
             this.addExpand("all");
         }
+    }
+
+    private List<String> findChannelsIssued(org.dspace.content.Collection collection) throws SQLException {
+		org.dspace.content.CollectionAdd collectionA = new org.dspace.content.CollectionAdd(collection);
+		List<String> channels = collectionA.findChannelsIssuedById();		
+
+		return channels;    	
     }
 
     private List<RTBObject> findOwningParentList(Context context, org.dspace.content.Collection owningCollection) throws WebApplicationException, SQLException{

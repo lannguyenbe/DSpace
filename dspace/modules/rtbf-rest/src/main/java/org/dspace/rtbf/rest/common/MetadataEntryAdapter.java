@@ -21,11 +21,19 @@ public class MetadataEntryAdapter extends XmlAdapter<JAXBElement<String>, Metada
 	@Override
 	public JAXBElement<String> marshal(MetadataEntry entry) throws Exception {
 		if (entry == null) { return null; }
+		String label = MetadataEntry.getPreferredLabel(entry.getKey());
+		if (label.isEmpty()) { return null; }
 		return(new JAXBElement<String>(
+				new javax.xml.namespace.QName(label)
+				, String.class
+				, entry.getValue()
+				));			
+		
+/*		return(new JAXBElement<String>(
 				new javax.xml.namespace.QName(MetadataEntry.getPreferredLabel(entry.getKey()))
 				, String.class
 				, entry.getValue()
 		));
-	}
+*/	}
 
 }

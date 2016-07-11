@@ -35,6 +35,7 @@ public class MetadataWrapper {
 		List<JAXBElement<String>> elements = new ArrayList<JAXBElement<String>>();
 		
 		for (MetadataEntry entry : v) {
+			if (MetadataEntry.getPreferredLabel(entry.getKey()).isEmpty()) { continue; }
 			elements.add(new JAXBElement<String>(
 //					new javax.xml.namespace.QName(entry.getKey())
 					new javax.xml.namespace.QName(MetadataEntry.getPreferredLabel(entry.getKey()))

@@ -33,6 +33,10 @@ public class NMSerializerModifier extends BeanSerializerModifier {
             String propName = propWriter.getName();
             String outputName = mapper.nameMappings.getProperty(propName);
             if (outputName != null) {
+            	if (outputName.isEmpty()) { // do not serialize it
+                	log.warn("Name mapping " + propName + " is not serialized");
+            		continue; 
+            	}
                 BeanPropertyWriter modifiedWriter = new NameMappingWriter(
                         propWriter, outputName);
                 propsToWrite.add(modifiedWriter);

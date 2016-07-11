@@ -55,9 +55,11 @@ public class Sequence extends RTBObject{
     	case Constants.PLAYLIST_VIEW:
     	case Constants.SEARCH_RESULT_VIEW:
     		this.setDateIssued(getMetadataEntry(Constants.DATE_ISSUED,item));
+    		// set ALL channels issued related to the date issued whatever the owning episode
     		this.setChannelIssued(getMetadataEntries(Constants.CHANNEL_ISSUED,item));
+    		// set channels issued related to the date issued and COHERENT with the owning episode
+    		this.setChannelIssuedList(findChannelsIssued(item));
         	// this.setCountSupports(getCountAllSupports(item));
-    		org.dspace.content.ItemAdd itemA = new org.dspace.content.ItemAdd(item);
     		this.setChannelIssuedList(findChannelsIssued(item));
     		innerViewType = Constants.MIN_VIEW;
     		break;
@@ -88,9 +90,9 @@ public class Sequence extends RTBObject{
     	if(expandFields.contains("owningSerie") || expandFields.contains("all")) {
             org.dspace.content.Community parentCommunity = (org.dspace.content.Community) item.getOwningCollection().getParentObject();
             /* 
-             * Lan 22.06.2016 : return more metadata of the owningSerie - see Constants.OWNING_SERIE_EXPAND_OPTIONS
-             * this.setOwningSerie(new Serie(innerViewType, parentCommunity, null, context));
+             * Lan 22.06.2016 : use Constants.OWNING_SERIE_EXPAND_OPTIONS to return more metadata of the owningSerie
              */
+            // this.setOwningSerie(new Serie(innerViewType, parentCommunity, null, context));
             this.setOwningSerie(new Serie(innerViewType, parentCommunity, Constants.OWNING_SERIE_EXPAND_OPTIONS, context));
         } else {
             this.addExpand("owningSerie");
@@ -104,10 +106,10 @@ public class Sequence extends RTBObject{
 
         if(expandFields.contains("owningEpisode") || expandFields.contains("all")) {
             /* 
-             * Lan 22.06.2016 : return more metadata of the owningEpisode - see Constants.OWNING_EPISODE_EXPAND_OPTIONS
-        	 * this.setOwningEpisode(new Episode(innerViewType, item.getOwningCollection(), null, context));
+             * Lan 22.06.2016 : use Constants.OWNING_EPISODE_EXPAND_OPTIONSreturn to return more metadata of the owningEpisode
         	 */
-        	 this.setOwningEpisode(new Episode(innerViewType, item.getOwningCollection(), Constants.OWNING_EPISODE_EXPAND_OPTIONS, context));
+        	// this.setOwningEpisode(new Episode(innerViewType, item.getOwningCollection(), null, context));
+        	this.setOwningEpisode(new Episode(innerViewType, item.getOwningCollection(), Constants.OWNING_EPISODE_EXPAND_OPTIONS, context));
         } else {
             this.addExpand("owningEpisode");
         }
@@ -127,7 +129,6 @@ public class Sequence extends RTBObject{
         	List<MetadataEntry> entries = new ArrayList<MetadataEntry>();
             Metadatum[] dcvs = item.getMetadata(org.dspace.content.Item.ANY, org.dspace.content.Item.ANY, org.dspace.content.Item.ANY, org.dspace.content.Item.ANY);
             for (Metadatum dcv : dcvs) {
-            	if (dcv.schema.equals(Constants.OLD_SCHEMA)) { continue; } // skip old schema
             	entries.add(new MetadataEntry(dcv.getField(), dcv.value, dcv.language));
             }
             this.setMetadataEntries(entries);
@@ -247,6 +248,7 @@ public class Sequence extends RTBObject{
     		String metadataKey = fieldConfiguration.getField();
     		List<String> hlList = highlightedResults.getHighlightResults(metadataKey);
     		if (hlList == null || hlList.size() == 0) { continue; }
+    		if (MetadataEntry.getPreferredLabel(metadataKey).isEmpty()) { continue; }
     		hlEntries.put(MetadataEntry.getPreferredLabel(metadataKey), hlList);
     	}
     	this.setHlEntries(hlEntries);
@@ -302,14 +304,14 @@ public class Sequence extends RTBObject{
 		org.dspace.content.ItemAdd itemA = new org.dspace.content.ItemAdd(item);
 		List<String> channels = itemA.findChannelsIssuedById();		
 
-		if (channels == null) { // no row in SEGMENT_DIFFUSION for the sequence, look in Metadatavalue Table that has value(s) inherited from Episode
+/*		if (channels == null) { // no row in SEGMENT_DIFFUSION for the sequence, look in Metadatavalue Table that has value(s) inherited from Episode
 			channels = new ArrayList<String>();
     		List<MetadataEntry> channelsInMetadatavalueTable = getMetadataEntries(Constants.CHANNEL_ISSUED,item);
     		for (MetadataEntry ch : channelsInMetadatavalueTable) {
 				channels.add(ch.value);
 			}    		
 		}
-
+*/
 		return channels;    	
     }
     

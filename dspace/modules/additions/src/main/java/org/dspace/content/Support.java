@@ -25,6 +25,7 @@ public abstract class Support {
     protected String duration_string;
     protected String origine;
     protected String category;
+    protected String role;
     
     public Support() {}
     
@@ -46,6 +47,7 @@ public abstract class Support {
     	this.duration_string = row.getStringColumn("duration_string");
     	this.origine = row.getStringColumn("origine");
     	this.category = row.getStringColumn("category");
+    	this.role = row.getStringColumn("support_role");
     }
 
     public String getCode_origine() {
@@ -98,6 +100,10 @@ public abstract class Support {
 	}
 	public String getHtc_out_string() {
 		return htc_out_string;
+	}
+
+	public String getRole() {
+		return role;
 	}
 
 }

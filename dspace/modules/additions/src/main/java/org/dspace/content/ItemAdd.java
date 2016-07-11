@@ -304,10 +304,11 @@ public class ItemAdd extends Item {
     				+ " , t.tc_in_string, t.tc_out_string, t.htc_in_string, t.htc_out_string, t.duration_string"
     				+ " , t.origine"
     				+ " , t.category"
+    				+ " , t.support_role"
     				+ " FROM t_support2resource t"
     				+ " WHERE resource_type_id = " + Constants.ITEM
     				+ " AND resource_id = " + item_id
-        	        + " ORDER BY t.set_of_support_type";
+        	        + " ORDER BY t.support_role, t.set_of_support_type";
 
     		TableRowIterator tri =  null;
     		List<SupportItem> supports = new ArrayList<SupportItem> ();

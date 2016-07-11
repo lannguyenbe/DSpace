@@ -11,4 +11,7 @@
     <touch file="${env.DS}/webapps/rtbf-rest.xml"/>
   </target>
 
+  <target name="touch-dev4">
+    <touch file="${env.DS}/../dspace-dev4/webapps/rtbf-rest.xml"/>
+  </target>
 </project>

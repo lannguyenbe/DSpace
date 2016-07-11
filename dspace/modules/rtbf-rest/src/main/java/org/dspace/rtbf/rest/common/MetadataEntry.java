@@ -110,6 +110,7 @@ public class MetadataEntry
 		Map<String,Object> elements = new HashMap<String,Object>();
 		for (MetadataEntry entry : entries) {
 			String k = getPreferredLabel(entry.getKey());
+			if (k.isEmpty()) { continue; }
 			List<String> lov;
 			if ((lov = (List<String>) elements.get(k)) == null) { // new key
 				lov = new ArrayList<String>();

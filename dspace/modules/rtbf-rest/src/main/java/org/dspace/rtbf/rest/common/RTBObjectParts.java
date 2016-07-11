@@ -65,6 +65,7 @@ public class RTBObjectParts {
 		    private String duration;
 		    private String origine;
 		    private String category;
+		    private String role;
 		    
 		    public Support() {}
 		    
@@ -81,6 +82,7 @@ public class RTBObjectParts {
 		    	this.duration = support.getDuration_string();
 		    	this.origine = support.getOrigine();
 		    	this.category = support.getCategory();
+		    	this.role = support.getRole();
 		    }
 
 			public String getCode_origine() {
@@ -177,6 +179,14 @@ public class RTBObjectParts {
 
 			public void setHtc_out(String htc_out) {
 				this.htc_out = htc_out;
+			}
+
+			public String getRole() {
+				return role;
+			}
+
+			public void setRole(String role) {
+				this.role = role;
 			}
 
 		}
