@@ -200,6 +200,9 @@ cp dspace-api-4.2.jar $DS/lib
 ## to recompile:end
 
 -----------------------------------------  S O L R  --------------------------------------------------
+# terms SearchComponent to find DAL code_origine
+http://vm-dev4.inf.rtbf.be:8081/solr/search/terms?q=*%3A*&rows=100&wt=json&indent=true&terms.regex=DAL.*&terms.fl=code_origine_keyword&terms.limit=20
+
 # Orphelins Sonuma
 http://vm-dev4.inf.rtbf.be:8080/solr/search/selectSequence?q=*%3A*&fq=identifier_attributor%3ASonuma%5C+TV&fq=-location%3Dm2&wt=json&indent=true
 

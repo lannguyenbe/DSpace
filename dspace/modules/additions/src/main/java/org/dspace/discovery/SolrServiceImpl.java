@@ -1274,7 +1274,7 @@ public class SolrServiceImpl implements SearchService, IndexingService {
      * @return a list containing the identifiers of the communities & collections
      * @throws SQLException sql exception
      */
-    protected List<String> getItemLocations(Item myitem)
+    protected List<String> TODEL_getItemLocations(Item myitem)
             throws SQLException {
         List<String> locations = new Vector<String>();
 
@@ -1289,6 +1289,41 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         Community owningCommunity = (Community) owningCollection.getParentObject();
         locations.add("om" + owningCommunity.getID());
         locations.add("ol" + owningCollection.getID());
+
+        // now put those into strings
+        int i = 0;
+
+        for (i = 0; i < communities.length; i++)
+        {
+            locations.add("m" + communities[i].getID());
+        }
+
+        for (i = 0; i < collections.length; i++)
+        {
+            locations.add("l" + collections[i].getID());
+        }
+
+        return locations;
+    }
+
+    protected List<String> getItemLocations(Item myitem, Community owningCommunityByRef, Collection owningCollectionByRef)
+            throws SQLException {
+        List<String> locations = new Vector<String>();
+
+        // build list of community ids
+        Community[] communities = myitem.getCommunities();
+
+        // build list of collection ids
+        Collection[] collections = myitem.getCollections();
+        
+        // Lan 02.12.2015 : add owning_collection and owning_community
+        Collection owningCollection = myitem.getOwningCollection();
+        Community owningCommunity = (Community) owningCollection.getParentObject();
+        locations.add("om" + owningCommunity.getID());
+        locations.add("ol" + owningCollection.getID());
+        // Return owning records by ref
+        owningCommunityByRef = owningCommunity;
+        owningCollectionByRef = owningCollection;
 
         // now put those into strings
         int i = 0;
@@ -2315,7 +2350,9 @@ if (false) {
         }
 
         // get the location string (for searching by collection & community)
-        List<String> locations = getItemLocations(item);
+        Community owningCommunity = null;
+        Collection owningCollection = null;
+        List<String> locations = getItemLocations(item, owningCommunity, owningCollection);
 
         SolrInputDocument doc = buildDocument(Constants.ITEM, item.getID(), handle,
                 locations);
@@ -2538,18 +2575,17 @@ if (false) {
                         }
                         
 
-                        /* Lan rtbf.channel_plus_date_diffusion hardcode ! ******************************************/
-                        /* create role_contributor_filter solr field for prefix facetting */
-/*                        if (field.equals("rtbf.channel_plus_date_diffusion.segment") || field.equals("rtbf.channel_plus_date_diffusion.version")) {
-                        	 get only channel value 
-                        	String[] subValues = value.split("/");
-                        	if (subValues.length > 0) {
-                        		value = subValues[0];
-                        	}
-                        }
-*/                        /* Lan rtbf.channel_plus_date_diffusion hardcode ! ******************************************/
+//                        /* TODO remove rtbf.channel_plus_date_diffusion hardcode ! ******************************************/
+//                        /* create role_contributor_filter solr field for prefix facetting */
+//                        if (field.equals("rtbf.channel_plus_date_diffusion.segment") || field.equals("rtbf.channel_plus_date_diffusion.version")) {
+//                        	 get only channel value 
+//                        	String[] subValues = value.split("/");
+//                        	if (subValues.length > 0) {
+//                        		value = subValues[0];
+//                        	}
+//                        }
 
-                        /* Lan  extract code_origine from support hardcode ! ******************************************/
+                        /* TODO remove extract code_origine from support hardcode ! ******************************************/
                         if (field.equals("rtbf.support")) {
                         	/* isolate code_origine part */
                         	String value_p1 = value.replaceAll("^(((?!::).)+)::(((?!::).)+)(::)?(.*)?$", "$3").replaceAll("^(((?!\\\\\\\\).)+)(.*)$", "$1");
@@ -2569,9 +2605,8 @@ if (false) {
                         	
                         	continue;
                         }
-                        /* Lan code_origine hardcode ! ******************************************/
 
-                        /* Lan rtbf.contributor_plus_role hardcode ! ******************************************/
+                        /* TODO remove rtbf.contributor_plus_role hardcode ! ******************************************/
                         /* create role_contributor_filter solr field for prefix facetting */
                         if (field.equals("rtbf.contributor_plus_role")) {
                         	/* permute role before contributor */
@@ -2581,8 +2616,31 @@ if (false) {
                         	doc.addField("role_"+searchFilter.getIndexFieldName() + "_filter", value_p2 + separator + value);
 
                         }
-                        /* Lan rtbf.contributor_plus_role hardcode ! ******************************************/
 
+                        /* TODO remove ispartof_title hardcode ! ******************************************/
+                        if (field.equals("dcterms.isPartOf.title") && owningCommunity != null) {
+                        	if (! value.equals(owningCommunity.getName())) {
+                        		value = null;
+                        		continue;
+                        	}                        	
+                        }
+
+                        /* TODO remove channel hardcode ! ******************************************/
+                        if (field.equals("rtbf.channel_issued") && owningCollection != null) {
+                        	Metadatum[] channels = owningCollection.getMetadataByMetadataString(field);
+                        	int i;
+                        	for (i = 0; i < channels.length; i++) {
+								if (value.equals(channels[i].value)) {
+									break;
+								}
+							}
+                        	
+                        	if (i == channels.length) { 
+                        		value = null;
+                        		continue;
+                        	}                        	
+                        }
+                        
                         doc.addField(searchFilter.getIndexFieldName(), value);
                         doc.addField(searchFilter.getIndexFieldName() + "_keyword", value);
                         // Lan add those following solr fields
@@ -2750,6 +2808,12 @@ if (false) {
                                 }
                             }
                         }
+                    }
+                    
+                    // Value has been changed inside this block and should be ignored
+                    if (value == null)
+                    {
+                        continue;
                     }
                 }
 
@@ -2927,7 +2991,7 @@ if (false) {
         {
             solrServiceIndexPlugin.additionalIndex(context, item, doc);
         }
-
+        
         // write the index and close the inputstreamreaders
         try {
             writeDocument(doc, streams);
@@ -2941,19 +3005,53 @@ if (false) {
         ItemAdd.DiffusionItem[] dItems = ItemAdd.DiffusionItem.findDupById(context, item.getID());
         
         for (DiffusionItem dit : dItems) { /* TODO: remove hard code */
+        	String indexFieldName;
+        	String field;
+        	String value;
+
+        	Community owningCommunity = Community.find(context, dit.getCommunity_id());
+        	Collection owningCollection = Collection.find(context, dit.getCollection_id());
 
             doc.setField("search.uniqueid", dit.getDiffusion_path());
-            doc.setField("owning_community", Constants.COMMUNITY+"-"+dit.getCommunity_id());
-            doc.setField("owning_collection", Constants.COLLECTION+"-"+dit.getCollection_id());
-            doc.setField("rtbf.channel_issued", dit.getChannel());
+            doc.setField("owning_community", Constants.COMMUNITY+"-"+owningCommunity.getID());
+            doc.setField("owning_collection", Constants.COLLECTION+"-"+owningCollection.getID());
             
-            String field = "dc.date.issued";
-            String value = dit.getDate_diffusion();
+            field = "dcterms.isPartOf.title";
+            indexFieldName = "serie_title";
+            value = owningCommunity.getName();
+            doc.setField(indexFieldName + "_contain", value);
+            doc.setField(indexFieldName + "_keyword", value);
+            doc.setField(indexFieldName + "_partial", value);
+            doc.setField(indexFieldName, value);
+            doc.setField(field, value);
+
+            field = "rtbf.channel_issued";
+            indexFieldName = "channel";
+        	Metadatum[] channels = owningCollection.getMetadataByMetadataString(field);
+        	for (int i = 0; i < channels.length; i++) {
+				value = channels[i].value;
+				if (i == 0) {
+		            doc.setField(indexFieldName + "_contain", value);
+		            doc.setField(indexFieldName + "_keyword", value);
+		            doc.setField(indexFieldName + "_partial", value);
+		            doc.setField(indexFieldName, value);
+		            doc.setField(field, value);
+				} else {
+		            doc.addField(indexFieldName + "_contain", value);
+		            doc.addField(indexFieldName + "_keyword", value);
+		            doc.addField(indexFieldName + "_partial", value);
+		            doc.addField(indexFieldName, value);
+		            doc.addField(field, value);
+				}
+			}
+            
+            field = "dc.date.issued";
+            value = dit.getDate_diffusion();
             Date value_dt = MultiFormatDateParser.parse(value);
             value = DateFormatUtils.formatUTC(value_dt, "yyyy-MM-dd");
             String yearUTC = DateFormatUtils.formatUTC(value_dt, "yyyy");
             /* searchFilter of this name exists in discovery.conf */
-            String indexFieldName = "date_issued";
+            indexFieldName = "date_issued";
         	doc.setField(indexFieldName + "_dt", value_dt);
         	doc.setField(indexFieldName + "_keyword", value);
         	doc.addField(indexFieldName + "_keyword", yearUTC);
