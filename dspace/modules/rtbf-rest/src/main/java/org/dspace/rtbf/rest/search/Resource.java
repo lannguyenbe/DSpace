@@ -535,8 +535,13 @@ public abstract class Resource
 	        int facetLimit = searchRequest.getFacetLimit();
     		int facetOffset = searchRequest.getFacetOffset() * facetLimit;
     		
-    		// Facet on <f>_keyword
-            String[][] facetFields = { {"matter","subject_keyword"}, {"place","place_keyword"} };
+    		// Facets on <f>_keyword
+            String[][] facetFields = {
+            	{"matter","subject_keyword"}
+            	, {"place","place_keyword"}
+            	, {"royalty", "royalty_keyword"}
+            	, {"serie_title", "ispartof_title_keyword"}
+            };
     		for (String[] keyword : facetFields) {
     	        DiscoverFacetField dff = new DiscoverFacetField("{!key="+keyword[0]+"}"+keyword[1]
     	                , DiscoveryConfigurationParameters.TYPE_STANDARD
@@ -560,7 +565,7 @@ public abstract class Resource
 		        query.addFacetField(dff);
     		}
     		
-    		// addDateIssuedFacet("date_issued", "dc.date.issued_dt", "dateIssued.year", query, context);
+    		// facet on date_issued
     		addDateIssuedFacet("date_issued", "date_issued_dt", "date_issued.year", query, context);
     		/* 10.03.2016 Lan : call to addDateIssuedFacet(String keyName, String dateFacet, String yearFacet, DiscoverQuery query, Context context)
     		 * where <keyName>_dt matched with <dateFacet> 
@@ -898,14 +903,14 @@ public abstract class Resource
         
 	}
 	
-/*
- * 26.05.2016 Lan : filter query also on owning_collection to isolate the 
- */
+	/*
+	 * 26.05.2016 Lan : filter query on owning_community or owning_collection
+	 */
 	private void addScope(String scope, DiscoverQuery query, Context context) throws SearchServiceException, IllegalStateException, SQLException {
 
 		// a. Replace handle by m{community_id} or l{collection_id}
 		StringBuffer sb = new StringBuffer();    		
-		Pattern pattern = Pattern.compile("\\d+/\\d+");
+		Pattern pattern = Pattern.compile("\\w+/\\d+");
 		Matcher matcher = pattern.matcher(scope);
 		
 		List<String> owning_communities = new ArrayList<String>();    		
