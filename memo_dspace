@@ -1,3 +1,13 @@
+===================================== INSTALL ARCHIMED-ACC =============================================================
+-- install sur archimed-acc 19.07.2016
+-- dir_source sur $DSSRC/../archimed-acc vers dir_installation $DSACC
+-- en standard avec Mirage
+mvn clean package -Ddb.name=oracle -Denv=archimed-acc
+-- avec Mirage2
+mvn clean package -Dmirage2.on=true -Dmirage2.deps.included=false -Ddb.name=oracle -Denv=archimed-acc
+vi $DSACC/config/xmlui.xconf
+    changer Mirage en Mirage2
+
 ===================================== DID-YOU-MEAN IN METAM-5.0 =============================================================
 
 # 3. cp C:\local\metam-5.0\dspace\modules\xmlui-mirage2\target\xmlui-mirage2-5.0\themes\Mirage2

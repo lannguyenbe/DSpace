@@ -237,6 +237,13 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                         {
                             unIndexContent(context, handle);
                             buildDocument(context, (Item) dso);
+                            
+                            ItemAdd.DiffusionItem[] dItems = ItemAdd.DiffusionItem.findDupById(context, item.getID());
+                            for (int i = 0, len = dItems.length; i < len; i++) {
+                            	ItemAdd.ItemDup itemDup = ItemAdd.duplicate(item, dItems[i]);
+                                buildDocument(context, itemDup); // TODO change dso to an itemDup object
+							}
+
                         }
                     } else {
                         /**
@@ -2354,8 +2361,12 @@ if (false) {
         Collection owningCollection = null;
         List<String> locations = getItemLocations(item, owningCommunity, owningCollection);
 
-        SolrInputDocument doc = buildDocument(Constants.ITEM, item.getID(), handle,
-                locations);
+        SolrInputDocument doc = null;
+        if (item instanceof ItemAdd.ItemDup) {
+        	doc = buildDocument(Constants.ITEM, item.getID(), ((ItemAdd.ItemDup)item).getSearchUniqueID(), handle, locations);
+        } else {
+        	doc = buildDocument(Constants.ITEM, item.getID(), handle, locations);
+        }
 
         log.debug("Building Item: " + handle);
 
@@ -3002,9 +3013,9 @@ if (false) {
         }
         
         // duplicate the item as many as diffusion_path
-        ItemAdd.DiffusionItem[] dItems = ItemAdd.DiffusionItem.findDupById(context, item.getID());
+/*        ItemAdd.DiffusionItem[] dItems = ItemAdd.DiffusionItem.findDupById(context, item.getID());
         
-        for (DiffusionItem dit : dItems) { /* TODO: remove hard code */
+        for (DiffusionItem dit : dItems) {  TODO: remove hard code 
         	String indexFieldName;
         	String field;
         	String value;
@@ -3050,7 +3061,7 @@ if (false) {
             Date value_dt = MultiFormatDateParser.parse(value);
             value = DateFormatUtils.formatUTC(value_dt, "yyyy-MM-dd");
             String yearUTC = DateFormatUtils.formatUTC(value_dt, "yyyy");
-            /* searchFilter of this name exists in discovery.conf */
+             searchFilter of this name exists in discovery.conf 
             indexFieldName = "date_issued";
         	doc.setField(indexFieldName + "_dt", value_dt);
         	doc.setField(indexFieldName + "_keyword", value);
@@ -3060,9 +3071,9 @@ if (false) {
         	doc.setField(indexFieldName + ".year", yearUTC);
         	doc.setField(indexFieldName + ".year_sort", yearUTC);
         	doc.setField(indexFieldName, value);
-            /* sortFieldConfig of this name exists in discovery.conf */
+             sortFieldConfig of this name exists in discovery.conf 
         	String sort_dt = DateFormatUtils.ISO_DATETIME_FORMAT.format(value_dt);
-        	/* field index */
+        	 field index 
         	doc.setField(field + "_sort", sort_dt);
             doc.setField(field, value);
 
@@ -3073,7 +3084,7 @@ if (false) {
             {
                 log.error("Error while writing item to discovery index: " + handle + " message:"+ e.getMessage(), e);
             }
-        }
+        }*/
        
         
     }
@@ -3087,6 +3098,12 @@ if (false) {
      * @param locations @return
      */
     protected SolrInputDocument buildDocument(int type, int id, String handle,
+            List<String> locations)
+    {
+    	return buildDocument(type, id, type+"-"+id, handle, locations);    	
+    }
+
+    protected SolrInputDocument buildDocument(int type, int id, String uniqueId, String handle,
                                             List<String> locations)
     {
         SolrInputDocument doc = new SolrInputDocument();
@@ -3097,7 +3114,7 @@ if (false) {
 
         // New fields to weaken the dependence on handles, and allow for faster
         // list display
-		doc.addField("search.uniqueid", type+"-"+id);
+		doc.addField("search.uniqueid", uniqueId);
         doc.addField("search.resourcetype", Integer.toString(type));
 
         doc.addField("search.resourceid", Integer.toString(id));

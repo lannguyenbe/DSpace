@@ -93,17 +93,6 @@
             </modules>
         </profile>
         <profile>
-            <id>rtbf-rest</id>
-            <activation>
-                <file>
-                    <exists>rtbf-rest/pom.xml</exists>
-                </file>
-            </activation>
-            <modules>
-                <module>rtbf-rest</module>
-            </modules>
-        </profile>
-        <profile>
             <id>dspace-sword</id>
             <activation>
                 <file>

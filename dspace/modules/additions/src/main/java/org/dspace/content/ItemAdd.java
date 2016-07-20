@@ -24,6 +24,10 @@ public class ItemAdd extends Item {
         super(item.ourContext, item.getItemRow());
     }
     
+    public static ItemDup duplicate(Item item, DiffusionItem dit) throws SQLException {
+    	return new ItemDup(item, dit);
+    }
+    
     public static ItemIterator findAllUnfiltered(Context context) throws SQLException
     {
         String myQuery = "SELECT * FROM item WHERE in_archive='1' or withdrawn='1'"
@@ -180,6 +184,29 @@ public class ItemAdd extends Item {
     }
      
 
+    public static class ItemDup extends Item {
+    	
+    	private DiffusionItem diffusionItem;
+    	
+        public ItemDup(Item item, DiffusionItem dit) throws SQLException {
+            super(item.ourContext, item.getItemRow());
+            diffusionItem = dit;
+        }
+        
+        public String getSearchUniqueID()
+        {
+            return diffusionItem.getDiffusion_path();
+        }
+        
+
+        @Override
+        public Collection getOwningCollection() throws java.sql.SQLException
+        {
+            return(Collection.find(this.ourContext, diffusionItem.getCollection_id()));
+        }
+
+    }
+        
     public static class DiffusionItem extends Diffusion {
 
     	public DiffusionItem(String diffusion_path, int community_id, int collection_id, int item_id, String date_event, String date_diffusion, String channel) {
@@ -284,7 +311,7 @@ public class ItemAdd extends Item {
         }
         
     }
-        
+    
     public static class SupportItem extends Support {
 
     	public SupportItem(TableRow row) {
