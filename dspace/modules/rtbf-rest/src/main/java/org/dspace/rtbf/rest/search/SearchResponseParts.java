@@ -69,6 +69,8 @@ public class SearchResponseParts {
 				}
 				
 	            for (org.dspace.content.DSpaceObject result : dsoList) {
+	            	DiscoverResult.DSpaceObjectHighlightResult highlightedResults;
+	            	
 					try {
 						switch (resultType) {
 						case Constants.ITEM:
@@ -101,7 +103,7 @@ public class SearchResponseParts {
 		            		}
 		            		
 		            		// Set highlighted snippets
-		                    DiscoverResult.DSpaceObjectHighlightResult highlightedResults = queryResults.getHighlightedResults(result);
+		                    highlightedResults = queryResults.getHighlightedResults(result);
 		                    if (highlightedResults != null) {
 		                    	sequence.render(highlightedResults);
 		                    }
@@ -109,7 +111,15 @@ public class SearchResponseParts {
 							lst.add(sequence);
 							break;
 						case Constants.COLLECTION:
-							lst.add(new Episode(Constants.SEARCH_RESULT_VIEW, (Collection) result, Constants.SEARCH_SEQUENCE_EXPAND_OPTIONS, null));
+							Episode episode = new Episode(Constants.SEARCH_RESULT_VIEW, (Collection) result, Constants.SEARCH_SEQUENCE_EXPAND_OPTIONS, null);
+
+							// Set highlighted snippets
+		                    highlightedResults = queryResults.getHighlightedResults(result);
+		                    if (highlightedResults != null) {
+		                    	episode.render(highlightedResults);
+		                    }
+							
+							lst.add(episode);
 							break;
 						case Constants.COMMUNITY:
 							lst.add(new Serie(Constants.SEARCH_RESULT_VIEW, (Community) result, null, null));

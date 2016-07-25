@@ -15,6 +15,9 @@ import org.dspace.content.ItemAdd;
 import org.dspace.content.ItemIterator;
 import org.dspace.content.Metadatum;
 import org.dspace.core.Context;
+import org.dspace.discovery.DiscoverResult;
+import org.dspace.discovery.configuration.DiscoveryHitHighlightFieldConfiguration;
+import org.dspace.rtbf.rest.util.RsDiscoveryConfiguration;
 
 import javax.ws.rs.WebApplicationException;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -22,7 +25,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @XmlRootElement(name = "episode")
 public class Episode extends RTBObject {
@@ -167,6 +172,38 @@ public class Episode extends RTBObject {
         entries.add(new Serie(innerViewType, topparentCommunity, null, context));
 		return entries;   	
     }
+    
+    // copy from Sequence
+    public void render(DiscoverResult.DSpaceObjectHighlightResult highlightedResults) {
+    	// Cons highlight part for each sequence 
+    	Map<String, List<String>> hlEntries = new LinkedHashMap<String, List<String>>();
+    	for (DiscoveryHitHighlightFieldConfiguration fieldConfiguration : RsDiscoveryConfiguration.getHighlightFieldConfigurations())
+    	{
+    		String metadataKey = fieldConfiguration.getField();
+    		List<String> hlList = highlightedResults.getHighlightResults(metadataKey);
+    		if (hlList == null || hlList.size() == 0) { continue; }
+    		if (MetadataEntry.getPreferredLabel(metadataKey).isEmpty()) { continue; }
+    		hlEntries.put(MetadataEntry.getPreferredLabel(metadataKey), hlList);
+    	}
+    	this.setHlEntries(hlEntries);
+
+    	// render title
+    	List<String> hlList = highlightedResults.getHighlightResults("dc.title");
+    	if (hlList != null) {
+    		String title = this.getTitle().getValue();
+    		this.getTitle().setValue(title.replace(hlList.get(0).replaceAll("</?em>", ""), hlList.get(0)));
+    	}
+
+    	// render description_abstract
+    	hlList = highlightedResults.getHighlightResults("dc.description.abstract");
+    	if (hlList != null) {
+    		for (String hl : hlList) {
+    			String str = this.getDescriptionAbstract().getValue();
+    			this.getDescriptionAbstract().setValue(str.replace(hl.replaceAll("</?em>", ""), hl));        			
+    		}
+    	}
+    }
+    
     		                    
     
 

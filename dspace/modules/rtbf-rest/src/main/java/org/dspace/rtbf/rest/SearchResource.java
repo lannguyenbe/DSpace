@@ -191,7 +191,6 @@ public class SearchResource extends Resource {
     	Boolean isFacet = searchRequest.isFacet();
     	Integer limit = searchRequest.getLimit();
     	Integer offset = searchRequest.getOffset();
-    	// String orderBy = searchRequest.getSortField();
 
     	String expand = params.getExpand();
 

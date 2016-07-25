@@ -95,6 +95,10 @@ public class SearchUtils {
         return getConfigurationService().getToIgnoreMetadataFields().get(type);
     }
 
+    public static List<String> getCatchAllMetadataFields(int type)
+    {
+        return getConfigurationService().getToCatchAllMetadataFields().get(type);
+    }
     /**
      * Method that retrieves a list of all the configuration objects from the given item
      * A configuration object can be returned for each parent community/collection

@@ -1556,6 +1556,10 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
 
         List<String> toIgnoreMetadataFields = SearchUtils.getIgnoredMetadataFields(community.getType());
+        /*
+         * Lan 25.07.2016 : some metedata are catched for full text search, not all of them
+         */
+        List<String> toCatchAllMetadataFields = SearchUtils.getCatchAllMetadataFields(community.getType());
         Metadatum[] mydc = community.getMetadata(Item.ANY, Item.ANY, Item.ANY, Item.ANY);
         for (Metadatum meta : mydc)
         {
@@ -1723,9 +1727,17 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                 sortFieldsAdded.add(field);
             }
             
+            /*
+             * Lan 25.07.2016 : add for full text search
+             */
+            if (toCatchAllMetadataFields != null	&& (toCatchAllMetadataFields.contains(field) || toCatchAllMetadataFields.contains(unqualifiedField + "." + Item.ANY)))
+            {
+            	doc.addField("catched_" + field, value);
+            }
+            
             doc.addField(field, value);
-                       
-if (false) {
+
+if (false) { // TODO remove this
 	
             switch (field) {
             case "dc.description":
@@ -1877,6 +1889,10 @@ if (false) {
         }
 
         List<String> toIgnoreMetadataFields = SearchUtils.getIgnoredMetadataFields(collection.getType());
+        /*
+         * Lan 25.07.2016 : some metedata are catched for full text search, not all of them
+         */
+        List<String> toCatchAllMetadataFields = SearchUtils.getCatchAllMetadataFields(collection.getType());
         Metadatum[] mydc = collection.getMetadata(Item.ANY, Item.ANY, Item.ANY, Item.ANY);
         for (Metadatum meta : mydc)
         {
@@ -2078,10 +2094,18 @@ if (false) {
                 sortFieldsAdded.add(field);
             }
             
+            /*
+             * Lan 25.07.2016 : add for full text search
+             */
+            if (toCatchAllMetadataFields != null	&& (toCatchAllMetadataFields.contains(field) || toCatchAllMetadataFields.contains(unqualifiedField + "." + Item.ANY)))
+            {
+            	doc.addField("catched_" + field, value);
+            }
+            
             doc.addField(field, value);
 
             
-if (false) {
+if (false) { // TODO : remove this
 	
             
             String yearUTC;
@@ -2158,7 +2182,7 @@ if (false) {
                 log.info("Wrote CodeOrigine: " + codeOrigine.getCode() + " to Index");
 			}
 
-        	log.debug("  Index all code_origine of collection " + collection.getID());
+        	log.debug("Index all code_origine of collection " + collection.getID());
         } catch (RuntimeException e)
         {
             log.error(e.getMessage(), e);
@@ -2364,11 +2388,11 @@ if (false) {
         SolrInputDocument doc = null;
         if (item instanceof ItemAdd.ItemDup) {
         	doc = buildDocument(Constants.ITEM, item.getID(), ((ItemAdd.ItemDup)item).getSearchUniqueID(), handle, locations);
+            log.debug("Building ItemDup: " + handle + " search.uniqueid:" + ((ItemAdd.ItemDup)item).getSearchUniqueID());
         } else {
         	doc = buildDocument(Constants.ITEM, item.getID(), handle, locations);
+            log.debug("Building Item: " + handle);
         }
-
-        log.debug("Building Item: " + handle);
 
         doc.addField("withdrawn", item.isWithdrawn());
         doc.addField("discoverable", item.isDiscoverable());
@@ -2458,6 +2482,10 @@ if (false) {
             }
 
             List<String> toIgnoreMetadataFields = SearchUtils.getIgnoredMetadataFields(item.getType());
+            /*
+             * Lan 25.07.2016 : some metedata are catched for full text search, not all of them
+             */
+            List<String> toCatchAllMetadataFields = SearchUtils.getCatchAllMetadataFields(item.getType());
             Metadatum[] mydc = item.getMetadata(Item.ANY, Item.ANY, Item.ANY, Item.ANY);
             for (Metadatum meta : mydc)
             {
@@ -2586,16 +2614,6 @@ if (false) {
                         }
                         
 
-//                        /* TODO remove rtbf.channel_plus_date_diffusion hardcode ! ******************************************/
-//                        /* create role_contributor_filter solr field for prefix facetting */
-//                        if (field.equals("rtbf.channel_plus_date_diffusion.segment") || field.equals("rtbf.channel_plus_date_diffusion.version")) {
-//                        	 get only channel value 
-//                        	String[] subValues = value.split("/");
-//                        	if (subValues.length > 0) {
-//                        		value = subValues[0];
-//                        	}
-//                        }
-
                         /* TODO remove extract code_origine from support hardcode ! ******************************************/
                         if (field.equals("rtbf.support")) {
                         	/* isolate code_origine part */
@@ -2628,7 +2646,10 @@ if (false) {
 
                         }
 
-                        /* TODO remove ispartof_title hardcode ! ******************************************/
+                        /* 
+                         * Lan 25.07.2016 : as the consequence of duplicated items in Solr index, 
+                         * index only if the value is the title of owningCommunity
+                         */
                         if (field.equals("dcterms.isPartOf.title") && owningCommunity != null) {
                         	if (! value.equals(owningCommunity.getName())) {
                         		value = null;
@@ -2636,17 +2657,20 @@ if (false) {
                         	}                        	
                         }
 
-                        /* TODO remove channel hardcode ! ******************************************/
+                        /* 
+                         * Lan 25.07.2016 : as the consequence of duplicated items in Solr index, 
+                         * index only if the values are the same as of owningCollection
+                         */
                         if (field.equals("rtbf.channel_issued") && owningCollection != null) {
                         	Metadatum[] channels = owningCollection.getMetadataByMetadataString(field);
                         	int i;
                         	for (i = 0; i < channels.length; i++) {
-								if (value.equals(channels[i].value)) {
+								if (value.equals(channels[i].value)) { // break when value is found in channels
 									break;
 								}
 							}
                         	
-                        	if (i == channels.length) { 
+                        	if (i == channels.length) { // value is not found
                         		value = null;
                         		continue;
                         	}                        	
@@ -2870,6 +2894,14 @@ if (false) {
                     doc.addField(field + "_mlt", value);
                 }
 
+                /*
+                 * Lan 25.07.2016 : add for full text search
+                 */
+                if (toCatchAllMetadataFields != null	&& (toCatchAllMetadataFields.contains(field) || toCatchAllMetadataFields.contains(unqualifiedField + "." + Item.ANY)))
+                {
+                	doc.addField("catched_" + field, value);
+                }
+                
                 doc.addField(field, value);
                 
                 if (toProjectionFields.contains(field) || toProjectionFields.contains(unqualifiedField + "." + Item.ANY))
@@ -2989,7 +3021,7 @@ if (false) {
                 log.info("Wrote CodeOrigine: " + codeOrigine.getCode() + " to Index");
 			}
 
-        	log.debug("  Index all code_origine of item " + item.getID());
+        	log.debug("Index all code_origine of item " + item.getID());
         } catch (RuntimeException e)
         {
             log.error(e.getMessage(), e);
