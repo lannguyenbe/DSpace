@@ -82,7 +82,79 @@
                     <list>
                         <!--Copyright text-->
                         <value>dc.rights</value>
-                        <!--value>rtbf.royalty_code</value-->
+                    </list>
+                </entry>
+            </map>
+        </property>
+        <!-- include in catch all field those database metadata fields when indexing -->
+        <property name="toCatchAllMetadataFields">
+            <map>
+                <entry>
+                    <key><util:constant static-field="org.dspace.core.Constants.COMMUNITY"/></key>
+                    <list>
+                        <value>search.uniqueid</value>
+                        <value>handle</value>
+                        <value>rtbf.identifier.id</value>
+                        <value>dc.title</value>
+                        <value>rtbf.title.subtitle</value>
+                        <value>dc.description.abstract</value>
+                        <value>dc.description.summary</value>
+                        <value>dc.contributor.author</value>
+                        <value>rtbf.contributor_plus_role</value>
+                        <value>rtbf.royalty_remark</value>
+                        <value>rtbf.production_type</value>
+                    </list>
+                </entry>
+                <entry>
+                    <key><util:constant static-field="org.dspace.core.Constants.COLLECTION"/></key>
+                    <list>
+                        <value>search.uniqueid</value>
+                        <value>handle</value>
+                        <value>rtbf.identifier.id</value>
+                        <value>dc.title</value>
+                        <value>rtbf.title.subtitle</value>
+                        <value>dc.description.abstract</value>
+                        <value>dc.description.sumshort</value>
+                        <value>dc.description.sumpress</value>
+                        <value>dc.description.summary</value>
+                        <value>dc.description.summaryview</value>
+                        <value>dc.description.summaryitw</value>
+                        <value>dc.description.summarynrcs</value>
+                        <value>dc.description.summarycatalog</value>
+                        <value>dc.contributor.author</value>
+                        <value>rtbf.contributor_plus_role</value>
+                        <value>rtbf.royalty_remark</value>
+                        <value>rtbf.production_type</value>
+                        <value>rtbf.version_type</value>
+                        <value>rtbf.matter</value>
+                        <value>rtbf.place</value>
+                        <value>rtbf.rtbf_id</value>
+                    </list>
+                </entry>
+                <entry>
+                    <key><util:constant static-field="org.dspace.core.Constants.ITEM"/></key>
+                    <list>
+                        <value>search.uniqueid</value>
+                        <value>handle</value>
+                        <value>rtbf.identifier.id</value>
+                        <value>dc.title</value>
+                        <value>rtbf.title.subtitle</value>
+                        <value>dc.description.abstract</value>
+                        <value>dc.description.sumshort</value>
+                        <value>dc.description.sumpress</value>
+                        <value>dc.description.summary</value>
+                        <value>dc.description.summaryview</value>
+                        <value>dc.description.summaryitw</value>
+                        <value>dc.description.summarynrcs</value>
+                        <value>dc.description.summarycatalog</value>
+                        <value>dc.contributor.author</value>
+                        <value>rtbf.contributor_plus_role</value>
+                        <value>rtbf.royalty_remark</value>
+                        <value>rtbf.production_type</value>
+                        <value>rtbf.version_type</value>
+                        <value>rtbf.matter</value>
+                        <value>rtbf.place</value>
+                        <value>rtbf.rtbf_id</value>
                     </list>
                 </entry>
             </map>
@@ -154,7 +226,7 @@
                 <ref bean="searchFilterSubject" />
                 <ref bean="searchFilterPlace" />
                 <ref bean="searchFilterPlacePlusRole" />
-                <ref bean="searchFilterCodeOrigine" />
+                <!-- ref bean="searchFilterCodeOrigine" /-->
                 <ref bean="searchFilterPublisher" />
                 <ref bean="searchFilterSetSupport" />
                 <ref bean="searchFilterRoyalty" />
@@ -284,7 +356,7 @@
                 <ref bean="searchFilterSubject" />
                 <ref bean="searchFilterPlace" />
                 <ref bean="searchFilterPlacePlusRole" />
-                <ref bean="searchFilterCodeOrigine" />
+                <!-- ref bean="searchFilterCodeOrigine" /-->
                 <ref bean="searchFilterPublisher" />
                 <ref bean="searchFilterSetSupport" />
                 <ref bean="searchFilterRoyalty" />
@@ -330,7 +402,7 @@
                             <property name="snippets" value="2"/>
                         </bean>
                         <bean class="org.dspace.discovery.configuration.DiscoveryHitHighlightFieldConfiguration">
-                            <property name="field" value="dc.contributor.author"/>
+                            <property name="field" value="rtbf.contributor_plus_role"/>
                             <property name="snippets" value="5"/>
                         </bean>
                         <bean class="org.dspace.discovery.configuration.DiscoveryHitHighlightFieldConfiguration">
@@ -359,18 +431,9 @@
                             <property name="snippets" value="2"/>
                         </bean>
                         <bean class="org.dspace.discovery.configuration.DiscoveryHitHighlightFieldConfiguration">
-                            <property name="field" value="rtbf.notice"/>
-                            <property name="maxSize" value="250"/>
-                            <property name="snippets" value="2"/>
-                        </bean>
-                        <bean class="org.dspace.discovery.configuration.DiscoveryHitHighlightFieldConfiguration">
                             <property name="field" value="rtbf.royalty_remark"/>
                             <property name="maxSize" value="250"/>
                             <property name="snippets" value="2"/>
-                        </bean>
-                        <bean class="org.dspace.discovery.configuration.DiscoveryHitHighlightFieldConfiguration">
-                            <property name="field" value="rtbf.support"/>
-                            <property name="snippets" value="5"/>
                         </bean>
                     </list>
                 </property>
@@ -554,15 +617,6 @@
     </bean>
 
     <!-- Lan 12.02.2016 - add this filter to advanced search -->
-    <!--bean id="searchFilterCodeOrigine" class="org.dspace.discovery.configuration.DiscoverySearchFilter">
-        <property name="indexFieldName" value="code_origine"/>
-        <property name="metadataFields">
-            <list>
-                <value>rtbf.code_origine.supportseq</value>
-                <value>rtbf.code_origine.supportprog</value>
-           </list>
-        </property>
-    </bean-->
     <bean id="searchFilterCodeOrigine" class="org.dspace.discovery.configuration.DiscoverySearchFilter">
         <property name="indexFieldName" value="code_origine"/>
         <property name="metadataFields">
@@ -571,6 +625,20 @@
            </list>
         </property>
     </bean>
+    <!-- Lan 26.07.2016 - add this filter to use regexp as value to index -->
+    <!-- bean id="searchFilterCodeOrigine" class="org.dspace.discovery.configuration.DiscoverySearchFilterRegex">
+        <property name="indexFieldName" value="code_origine"/>
+        <property name="metadataFields">
+            <list>
+                <value>rtbf.support</value>
+           </list>
+        </property>
+        <property name="metadataValues">
+            <list>
+                <value>.*</value>
+           </list>
+        </property>
+    </bean -->
 
     <bean id="searchFilterAuthor" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
         <property name="indexFieldName" value="author"/>
@@ -663,16 +731,6 @@
     </bean>
     
     <!-- Lan 25.08.2015 - add this filter to advanced search -->
-    <!--bean id="searchFilterChannel" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
-        <property name="indexFieldName" value="channel"/>
-        <property name="metadataFields">
-            <list>
-                <value>rtbf.channel_plus_date_diffusion.*</value>
-           </list>
-        </property>
-        <property name="facetLimit" value="10"/>
-        <property name="sortOrder" value="COUNT"/>
-    </bean-->
     <bean id="searchFilterChannel" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
         <property name="indexFieldName" value="channel"/>
         <property name="metadataFields">
@@ -683,18 +741,6 @@
         <property name="facetLimit" value="10"/>
         <property name="sortOrder" value="COUNT"/>
     </bean>
-
-    <!-- Lan 25.08.2015 - add this filter to advanced search -->
-    <!--bean id="searchFilterDiffusion" class="org.dspace.discovery.configuration.DiscoverySearchFilterFacet">
-        <property name="indexFieldName" value="date_diffusion"/>
-        <property name="metadataFields">
-            <list>
-                <value>rtbf.date_diffusion.*</value>
-            </list>
-        </property>
-        <property name="type" value="date"/>
-        <property name="sortOrder" value="VALUE"/>
-    </bean-->
 
     <!-- Lan 24.02.2016 - add set_support filter to advanced search -->
     <!-- watch out on skipFirstNodeLevel is true to index on set and not on type -->

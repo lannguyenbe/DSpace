@@ -98,6 +98,7 @@ import org.dspace.discovery.configuration.DiscoveryMoreLikeThisConfiguration;
 import org.dspace.discovery.configuration.DiscoveryRecentSubmissionsConfiguration;
 import org.dspace.discovery.configuration.DiscoverySearchFilter;
 import org.dspace.discovery.configuration.DiscoverySearchFilterFacet;
+import org.dspace.discovery.configuration.DiscoverySearchFilterRegex;
 import org.dspace.discovery.configuration.DiscoverySortConfiguration;
 import org.dspace.discovery.configuration.DiscoverySortFieldConfiguration;
 import org.dspace.discovery.configuration.HierarchicalSidebarFacetConfiguration;
@@ -1459,54 +1460,6 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         }
     }
 
-    /**
-     * Build a solr document for a DSpace Community.
-     *
-     * @param community Community to be indexed
-     * @throws SQLException
-     * @throws IOException
-     */
-    protected void buildDocument_old(Context context, Community community)
-    throws SQLException, IOException {
-        // Create Document
-        SolrInputDocument doc = buildDocument(Constants.COMMUNITY, community.getID(),
-                community.getHandle(), null);
-
-        DiscoveryConfiguration discoveryConfiguration = SearchUtils.getDiscoveryConfiguration(community);
-        DiscoveryHitHighlightingConfiguration highlightingConfiguration = discoveryConfiguration.getHitHighlightingConfiguration();
-        List<String> highlightedMetadataFields = new ArrayList<String>();
-        if(highlightingConfiguration != null)
-        {
-            for (DiscoveryHitHighlightFieldConfiguration configuration : highlightingConfiguration.getMetadataFields())
-            {
-                highlightedMetadataFields.add(configuration.getField());
-            }
-        }
-
-        // and populate it
-        String description = community.getMetadata("introductory_text");
-        String description_abstract = community.getMetadata("short_description");
-        String description_table = community.getMetadata("side_bar_text");
-        String rights = community.getMetadata("copyright_text");
-        String title = community.getMetadata("name");
-
-        List<String> toIgnoreMetadataFields = SearchUtils.getIgnoredMetadataFields(community.getType());
-        addContainerMetadataField(doc, highlightedMetadataFields, toIgnoreMetadataFields, "dc.description", description);
-        addContainerMetadataField(doc, highlightedMetadataFields, toIgnoreMetadataFields, "dc.description.abstract", description_abstract);
-        addContainerMetadataField(doc, highlightedMetadataFields, toIgnoreMetadataFields, "dc.description.tableofcontents", description_table);
-        addContainerMetadataField(doc, highlightedMetadataFields, toIgnoreMetadataFields, "dc.rights", rights);
-        addContainerMetadataField(doc, highlightedMetadataFields, toIgnoreMetadataFields, "dc.title", title);
-
-        //Do any additional indexing, depends on the plugins
-        List<SolrServiceIndexPlugin> solrServiceIndexPlugins = new DSpace().getServiceManager().getServicesByType(SolrServiceIndexPlugin.class);
-        for (SolrServiceIndexPlugin solrServiceIndexPlugin : solrServiceIndexPlugins)
-        {
-            solrServiceIndexPlugin.additionalIndex(context, community, doc);
-        }
-
-        writeDocument(doc, null);
-    }
-
     protected void buildDocument(Context context, Community community)
     throws SQLException, IOException {
         List<String> locations = getCommunityLocations(community);
@@ -1779,62 +1732,6 @@ if (false) { // TODO remove this
     }
 
     /**
-     * Build a solr document for a DSpace Collection.
-     *
-     * @param collection Collection to be indexed
-     * @throws SQLException sql exception
-     * @throws IOException IO exception
-     */
-    protected void buildDocument_old(Context context, Collection collection)
-    throws SQLException, IOException {
-        List<String> locations = getCollectionLocations(collection);
-
-        // Create Lucene Document
-        SolrInputDocument doc = buildDocument(Constants.COLLECTION, collection.getID(),
-                collection.getHandle(), locations);
-
-        DiscoveryConfiguration discoveryConfiguration = SearchUtils.getDiscoveryConfiguration(collection);
-        DiscoveryHitHighlightingConfiguration highlightingConfiguration = discoveryConfiguration.getHitHighlightingConfiguration();
-        List<String> highlightedMetadataFields = new ArrayList<String>();
-        if(highlightingConfiguration != null)
-        {
-            for (DiscoveryHitHighlightFieldConfiguration configuration : highlightingConfiguration.getMetadataFields())
-            {
-                highlightedMetadataFields.add(configuration.getField());
-            }
-        }
-
-
-        // and populate it
-        String description = collection.getMetadata("introductory_text");
-        String description_abstract = collection.getMetadata("short_description");
-        String description_table = collection.getMetadata("side_bar_text");
-        String provenance = collection.getMetadata("provenance_description");
-        String rights = collection.getMetadata("copyright_text");
-        String rights_license = collection.getMetadata("license");
-        String title = collection.getMetadata("name");
-
-        List<String> toIgnoreMetadataFields = SearchUtils.getIgnoredMetadataFields(collection.getType());
-        addContainerMetadataField(doc, highlightedMetadataFields, toIgnoreMetadataFields, "dc.description", description);
-        addContainerMetadataField(doc, highlightedMetadataFields, toIgnoreMetadataFields, "dc.description.abstract", description_abstract);
-        addContainerMetadataField(doc, highlightedMetadataFields, toIgnoreMetadataFields, "dc.description.tableofcontents", description_table);
-        addContainerMetadataField(doc, highlightedMetadataFields, toIgnoreMetadataFields, "dc.provenance", provenance);
-        addContainerMetadataField(doc, highlightedMetadataFields, toIgnoreMetadataFields, "dc.rights", rights);
-        addContainerMetadataField(doc, highlightedMetadataFields, toIgnoreMetadataFields, "dc.rights.license", rights_license);
-        addContainerMetadataField(doc, highlightedMetadataFields, toIgnoreMetadataFields, "dc.title", title);
-
-
-        //Do any additional indexing, depends on the plugins
-        List<SolrServiceIndexPlugin> solrServiceIndexPlugins = new DSpace().getServiceManager().getServicesByType(SolrServiceIndexPlugin.class);
-        for (SolrServiceIndexPlugin solrServiceIndexPlugin : solrServiceIndexPlugins)
-        {
-            solrServiceIndexPlugin.additionalIndex(context, collection, doc);
-        }
-
-        writeDocument(doc, null);
-    }
-
-    /**
      * @param context
      * @param collection
      * @throws SQLException
@@ -1923,6 +1820,16 @@ if (false) { // TODO remove this
 
                 for (DiscoverySearchFilter searchFilter : searchFilterConfigs)
                 {
+                	/*
+                	 * Lan 25.07.2016 : value to be indexed might be a regex o the value of the field
+                	 */
+                    if (searchFilter.getFilterType().equals(DiscoverySearchFilterRegex.FILTER_TYPE_REGEX)) {
+                    	for (int i = 0; i < ((DiscoverySearchFilterRegex)searchFilter).getMetadataFields().size() ; i++) {
+                    		log.info("debug 200: regexp=" + ((DiscoverySearchFilterRegex)searchFilter).getMetadataValues().get(i));                    		
+                    	}
+                	}
+                	
+                    	
                     String separator = new DSpace().getConfigurationService().getProperty("discovery.solr.facets.split.char");
                     if(separator == null)
                     {
@@ -2174,7 +2081,8 @@ if (false) { // TODO : remove this
         }
 
 
-        // index related code_origine of supports
+        /* Lan 20.06.2016 : index related code_origine of supports
+         * Lan 26.07.2015 : filter removed
         try {
         	CodeOrigine[] codeOrigines = CollectionAdd.CodeOrigineCollection.findById(context, collection.getID());
         	for (CodeOrigine codeOrigine : codeOrigines) {
@@ -2187,121 +2095,7 @@ if (false) { // TODO : remove this
         {
             log.error(e.getMessage(), e);
         }
-        
-        
-        //Do any additional indexing, depends on the plugins
-        List<SolrServiceIndexPlugin> solrServiceIndexPlugins = new DSpace().getServiceManager().getServicesByType(SolrServiceIndexPlugin.class);
-        for (SolrServiceIndexPlugin solrServiceIndexPlugin : solrServiceIndexPlugins)
-        {
-            solrServiceIndexPlugin.additionalIndex(context, collection, doc);
-        }
-
-        writeDocument(doc, null);
-    }
-
-    protected void buildDocument_old2(Context context, Collection collection)
-    throws SQLException, IOException {
-        List<String> locations = getCollectionLocations(collection);
-
-        // Create Lucene Document
-        SolrInputDocument doc = buildDocument(Constants.COLLECTION, collection.getID(),
-                collection.getHandle(), locations);
-
-        List<String> toIgnoreMetadataFields = SearchUtils.getIgnoredMetadataFields(collection.getType());
-        Metadatum[] mydc = collection.getMetadata(Item.ANY, Item.ANY, Item.ANY, Item.ANY);
-        for (Metadatum meta : mydc)
-        {
-            String field = meta.schema + "." + meta.element;
-            String unqualifiedField = field;
-
-            String value = meta.value;
-            Date value_dt = null;
-            
-            String indexFieldName;
-            String yearUTC;
-            String sort_dt;
-
-            if (value == null) { continue; }
-
-            if (meta.qualifier != null && !meta.qualifier.trim().equals("")) { field += "." + meta.qualifier; }
-            
-            if (toIgnoreMetadataFields != null	&& (toIgnoreMetadataFields.contains(field) || toIgnoreMetadataFields.contains(unqualifiedField + "." + Item.ANY)))
-            {
-                continue;
-            }
-                       
-            switch (field) {
-            case "dc.description":
-            case "dc.description.abstract":
-            case "dc.description.tableofcontents":
-            case "dc.provenance":
-            case "dc.rights":
-            case "dc.rights.license":
-                doc.addField(field, value);
-                break;
-            case "dc.title":
-                doc.addField(field, value);
-                doc.addField(field + "_sort", value);
-                break;
-            case "dc.date.issued": // TODO: remove hardcode
-                value_dt = MultiFormatDateParser.parse(value);
-                value = DateFormatUtils.formatUTC(value_dt, "yyyy-MM-dd");
-                /* searchFilter of this name exists in discovery.conf */
-                indexFieldName = "date_issued";
-            	doc.addField(indexFieldName + "_dt", value_dt);
-            	doc.addField(indexFieldName + "_keyword", value);
-                yearUTC = DateFormatUtils.formatUTC(value_dt, "yyyy");
-            	doc.addField(indexFieldName + "_keyword", yearUTC);
-            	doc.addField(indexFieldName + "_contain", value);
-            	doc.addField(indexFieldName, value);
-                /* sortFieldConfig of this name exists in discovery.conf */
-            	sort_dt = DateFormatUtils.ISO_DATETIME_FORMAT.format(value_dt);
-            	/* field index */
-            	doc.addField(field + "_sort", sort_dt);
-                doc.addField(field, value);
-            	break;
-/*
-            case "rtbf.date_diffusion.version": // TODO: remove hardcode
-                value_dt = MultiFormatDateParser.parse(value);
-                value = DateFormatUtils.formatUTC(value_dt, "yyyy-MM-dd");
-                 searchFilter of this name exists in discovery.conf 
-                indexFieldName = "date_diffusion";
-            	doc.addField(indexFieldName + "_dt", value_dt);
-            	doc.addField(indexFieldName + "_keyword", value);
-                yearUTC = DateFormatUtils.formatUTC(value_dt, "yyyy");
-            	doc.addField(indexFieldName + "_keyword", yearUTC);
-            	doc.addField(indexFieldName + "_contain", value);
-            	doc.addField(indexFieldName, value);
-                 sortFieldConfig of this name exists in discovery.conf 
-            	sort_dt = DateFormatUtils.ISO_DATETIME_FORMAT.format(value_dt);
-            	 field index 
-                doc.addField(field, value);
-            	break;
-*/
-            case "rtbf.channel_issued":
-            case "rtbf.identifier.attributor":
-            case "rtbf.royalty_code":
-                doc.addField(field, value);
-                break;
-            default: 
-            	break;
-            }
-        }
-
-
-        // index related code_origine of supports
-        try {
-        	CodeOrigine[] codeOrigines = CollectionAdd.CodeOrigineCollection.findById(context, collection.getID());
-        	for (CodeOrigine codeOrigine : codeOrigines) {
-        		buildDocument(context, codeOrigine);
-                log.info("Wrote CodeOrigine: " + codeOrigine.getCode() + " to Index");
-			}
-
-        	log.debug("  Index all code_origine of collection " + collection.getID());
-        } catch (RuntimeException e)
-        {
-            log.error(e.getMessage(), e);
-        }
+        */
         
         
         //Do any additional indexing, depends on the plugins
@@ -2411,17 +2205,17 @@ if (false) { // TODO : remove this
             Set<String> moreLikeThisFields = new HashSet<String>();
             for (DiscoveryConfiguration discoveryConfiguration : discoveryConfigurations)
             {
-                for (int i = 0; i < discoveryConfiguration.getSearchFilters().size(); i++)
+                for (int i = 0, ilen = discoveryConfiguration.getSearchFilters().size(); i < ilen; i++)
                 {
                     DiscoverySearchFilter discoverySearchFilter = discoveryConfiguration.getSearchFilters().get(i);
-                    for (int j = 0; j < discoverySearchFilter.getMetadataFields().size(); j++)
+                    for (int j = 0, jlen = discoverySearchFilter.getMetadataFields().size(); j < jlen; j++)
                     {
                         String metadataField = discoverySearchFilter.getMetadataFields().get(j);
                         List<DiscoverySearchFilter> resultingList;
-                        if(searchFilters.get(metadataField) != null)
+                        if(searchFilters.get(metadataField) != null) //if id an entry already exists for this metadataField
                         {
                             resultingList = searchFilters.get(metadataField);
-                        }else{
+                        } else {
                             //New metadata field, create a new list for it
                             resultingList = new ArrayList<DiscoverySearchFilter>();
                         }
@@ -2593,6 +2387,15 @@ if (false) { // TODO : remove this
 
                     for (DiscoverySearchFilter searchFilter : searchFilterConfigs)
                     {
+                    	/*
+                    	 * Lan 25.07.2016 : value to be indexed might be a regex o the value of the field
+                    	 */
+/*                    	if (searchFilter.getMetadataValues().size() > 0) {
+                    		log.info("debug 200");
+                    	}
+                    	
+*/                    	
+                    	                    	
                         String separator = new DSpace().getConfigurationService().getProperty("discovery.solr.facets.split.char");
                         if(separator == null)
                         {
@@ -3013,7 +2816,8 @@ if (false) { // TODO : remove this
             log.error(e.getMessage(), e);
         }
         
-        // Lan 20.06.2016 : index related code_origine of supports
+        /* Lan 20.06.2016 : index related code_origine of supports
+         * Lan 26.07.2015 : filter removed
         try {
         	CodeOrigine[] codeOrigines = ItemAdd.CodeOrigineItem.findById(context, item.getID());
         	for (CodeOrigine codeOrigine : codeOrigines) {
@@ -3026,6 +2830,7 @@ if (false) { // TODO : remove this
         {
             log.error(e.getMessage(), e);
         }
+        */
 
 
         //Do any additional indexing, depends on the plugins

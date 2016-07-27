@@ -824,93 +824,6 @@
        queries across multiple shards
     -->
 
-    <!-- TODEL -->
-    <!-- 02.12.2015 Lan : same as /select but collapse on owning_community -->
-    <requestHandler name="/selectCommunityOld" class="solr.SearchHandler">
-     <lst name="defaults">
-       <str name="echoParams">explicit</str>
-       <int name="rows">10</int>
-       <str name="df">search_text</str>
-       <!-- Lan 09.02.2015 : boosting by dc.date.issued -->
-       <str name="defType">edismax</str>
-       <str name="boost">recip(ms(NOW/HOUR, date_issued_dt),3.16e-11,1,1)</str>
-       <!-- Lan 20.04.2015 : 'minimum should match' when multiple terms in the query -->
-       <!-- 3<-25% 9<-3 : if there are 1 or 2 or 3 clauses all are required, 
-        if there are 4-9 clauses all but 25% are required, 
-        and if there are more than 9 clauses, all but three are required -->
-       <str name="mm">3&lt;-25% 9&lt;-3</str>
-     </lst>
-      <arr name="last-components">
-          <str>spellcheck</str>
-      </arr>
-       <lst name="appends">
-         <!-- Lan 02.12.2015 : Impose this default filter query to collapse multiple
-              sequences of the same collection to one  -->
-         <str name="fq">{!collapse field=owning_community nullPolicy=expand}</str>
-         <str name="expand">true</str>
-       </lst>
-    </requestHandler>
-
-    <!-- TODEL -->
-    <requestHandler name="/selectCommunity" class="solr.SearchHandler">
-     <lst name="defaults">
-       <str name="echoParams">explicit</str>
-       <int name="rows">10</int>
-       <str name="df">search_text</str>
-       <!-- Lan 09.02.2015 : boosting by dc.date.issued -->
-       <str name="defType">edismax</str>
-       <str name="boost">recip(ms(NOW/HOUR, date_issued_dt),3.16e-11,1,1)</str>
-     </lst>
-       <str name="mm">3&lt;-25% 9&lt;-3</str>
-       <lst name="appends">
-         <!-- remove resourceid from 1 to 10 which are TOP serie (TV, Sonuma TV, Radio) -->
-         <!-- When testing on Lan PTG : resourceid from 1 to 10 cover regular serie too, so might be filtered out incorrectly from the returned results -->
-            <!-- str name="fq">-search.resourceid:[1 TO 10]</str-->
-            <str name="fq">-search.resourceid:[1 TO 3]</str>
-         <!--str name="fq">-search.resourceid:999</str-->
-         <!-- Lan 21.01.2016 : add filterQ -->
-            <str name="fq">{!join from=location.community to=search.uniqueid}(search.resourcetype:2 AND discoverable:true AND _query_:"{!edismax mm=\"3&lt;-25% 9&lt;-3\" v=$seqQ}" AND _query_:"{!edismax v=$filterQ}" )</str>
-            <!-- str name="fq">{!join from=location.community to=search.uniqueid}(search.resourcetype:2 AND discoverable:true AND _query_:"{!edismax mm=\"3&lt;-25% 9&lt;-3\" v=$seqQ}")</str -->
-         <!-- join + collapse does not work. Error msg:"Query  does not implement createWeight"-->
-       </lst>
-    </requestHandler>
-    
-    <!-- TODEL -->
-    <!-- Trop Lent -->
-    <requestHandler name="/selectCollectionOld" class="solr.SearchHandler">
-    <!-- default values for query parameters can be specified, these
-         will be overridden by parameters in the request
-      -->
-     <lst name="defaults">
-       <str name="echoParams">explicit</str>
-       <int name="rows">10</int>
-       <str name="df">search_text</str>
-       <!-- Lan 09.02.2015 : boosting by dc.date.issued -->
-       <str name="defType">edismax</str>
-       <str name="boost">recip(ms(NOW/HOUR, date_issued_dt),3.16e-11,1,1)</str>
-       <str name="q">_query_:"{!join from=location.collection to=search.uniqueid}(search.resourcetype:2 AND _query_:\"{!edismax mm=3&lt;-25% v=$seqQuery}\")"</str>
-     </lst>
-    </requestHandler>
-        
-    <!-- TODEL -->
-    <requestHandler name="/selectCollection" class="solr.SearchHandler">
-     <lst name="defaults">
-       <str name="echoParams">explicit</str>
-       <int name="rows">10</int>
-       <str name="df">search_text</str>
-       <!-- Lan 09.02.2015 : boosting by dc.date.issued -->
-       <str name="defType">edismax</str>
-       <str name="boost">recip(ms(NOW/HOUR, date_issued_dt),3.16e-11,1,1)</str>
-     </lst>
-       <str name="mm">3&lt;-25% 9&lt;-3</str>
-       <lst name="appends">
-         <!-- Lan 21.01.2016 : add filterQ, use edismax to allow wildchar syntax in seqQ-->
-         <str name="fq">{!join from=location.collection to=search.uniqueid}(search.resourcetype:2 AND discoverable:true AND _query_:"{!edismax mm=\"3&lt;-25% 9&lt;-3\" v=$seqQ}" AND _query_:"{!edismax v=$filterQ}" )</str>
-         <!-- str name="fq">{!join from=location.collection to=search.uniqueid}(search.resourcetype:2 AND discoverable:true AND _query_:"{!edismax mm=\"3&lt;-25% 9&lt;-3\" v=$seqQ}")</str -->
-         <!-- join + collapse does not work. Error msg:"Query  does not implement createWeight"-->
-       </lst>
-    </requestHandler>
-    
 
     <requestHandler name="/selectNoCollapse" class="solr.SearchHandler">
     <!-- default values for query parameters can be specified, these
@@ -954,28 +867,10 @@
        <str name="pf">search_text^50</str>
        <str name="ps">5</str>
      </lst>
-      <arr name="last-components">
-          <str>spellcheck</str>
-      </arr>
-    <!-- In addition to defaults, "appends" params can be specified
-         to identify values which should be appended to the list of
-         multi-val params from the query (or the existing "defaults").
-      -->
-    <!-- In this example, the param "fq=instock:true" would be appended to
-         any query time fq params the user may specify, as a mechanism for
-         partitioning the index, independent of any user selected filtering
-         that may also be desired (perhaps as a result of faceted searching).
-
-         NOTE: there is *absolutely* nothing a client can do to prevent these
-         "appends" values from being used, so don't use this mechanism
-         unless you are sure you always want it.
-      -->
-    <!--
-       <lst name="appends">
-         <str name="fq">inStock:true</str>
-       </lst>
-      -->
-       <lst name="appends">
+     <arr name="last-components">
+        <str>spellcheck</str>
+     </arr>
+     <lst name="appends">
          <!-- Lan 09.02.2015 : Impose this default filter query to collapse multiple
               sequences to one : 
               - inside Tramontane when multiple programs share the same sequence;
@@ -988,7 +883,7 @@
          <str name="expand">true</str>
          <!-- Lan 10.05.2016 : expand.rows default is 5, is not enough -->
          <str name="expand.rows">100</str>
-       </lst>
+     </lst>
     <!-- "invariants" are a way of letting the Solr maintainer lock down
          the options available to Solr clients.  Any params values
          specified here are used regardless of what values may be specified
