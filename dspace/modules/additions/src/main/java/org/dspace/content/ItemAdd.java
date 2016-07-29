@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -186,7 +187,7 @@ public class ItemAdd extends Item {
 
     public static class ItemDup extends Item {
     	
-    	private DiffusionItem diffusionItem;
+    	private DiffusionItem diffusionItem; // is null then the defaultItemDup
     	
         public ItemDup(Item item, DiffusionItem dit) throws SQLException {
             super(item.ourContext, item.getItemRow());
@@ -195,6 +196,9 @@ public class ItemAdd extends Item {
         
         public String getSearchUniqueID()
         {
+        	if (diffusionItem == null) { // return simple search.uniqueid for the defaultItemDup
+        		return(this.getType()+"-"+this.getID());
+        	}
             return diffusionItem.getDiffusion_path();
         }
         
@@ -202,8 +206,91 @@ public class ItemAdd extends Item {
         @Override
         public Collection getOwningCollection() throws java.sql.SQLException
         {
+        	if (diffusionItem == null) { // return simple search.uniqueid for the defaultItemDup
+        		return(super.getOwningCollection());
+        	}
             return(Collection.find(this.ourContext, diffusionItem.getCollection_id()));
         }
+        
+        @Override
+        public Metadatum[] getMetadata(String schema, String element, String qualifier,
+        		String lang)
+        {
+        	DiffusionItem dit = null;
+        	if (diffusionItem == null) {
+        		try {
+					dit = DiffusionItem.findFirstById(this.ourContext, this.getID());
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}       		
+        	} else {
+        		dit = diffusionItem;
+        	}
+        	
+            Metadatum[] metadata = super.getMetadata(schema, element, qualifier, lang);
+        	if (dit == null) {
+        		return (metadata); // return as in table METADATAVALUE
+        	}
+                        
+            // Patch date issued and channel issued with dit
+        	List<Metadatum> dcValues = new ArrayList(Arrays.asList(metadata));
+            
+            Iterator<Metadatum> iterator = dcValues.iterator();
+            while (iterator.hasNext()) {
+            	Metadatum dcValue = iterator.next();
+            	String field = dcValue.schema + "." + dcValue.element;
+                if (dcValue.qualifier != null && !dcValue.qualifier.trim().equals(""))
+                {
+                    field += "." + dcValue.qualifier;
+                }
+            	switch (field) {
+            		case "dcterms.isPartOf.title" :
+	            	case "dc.date.issued" :
+	            	case "rtbf.channel_issued" : 
+	            		iterator.remove();
+	            		break;
+	            	default:
+	            		break;
+            	}
+            }
+            
+            // Add serie title for dup item
+            Metadatum patch = new Metadatum();
+            patch.schema = "dcterms";
+            patch.element = "isPartOf";
+            patch.qualifier = "title";
+            try {
+				patch.value = this.getOwningCollection().getParentObject().getName();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            dcValues.add(patch);
+
+            // Add date issued for dup item
+            patch = new Metadatum();
+            patch.schema = "dc";
+            patch.element = "date";
+            patch.qualifier = "issued";
+            patch.value = dit.getDate_diffusion();
+            dcValues.add(patch);
+
+            // Add channel issued for dup item
+            patch = new Metadatum();
+            patch.schema = "rtbf";
+            patch.element = "channel_issued";
+            patch.qualifier = null;
+            patch.value = dit.getChannel();
+            dcValues.add(patch);
+
+            // Create an array of matching values
+        	Metadatum[] valueArray = new Metadatum[dcValues.size()];
+        	valueArray = (Metadatum[]) dcValues.toArray(valueArray);
+
+        	return valueArray;
+        }
+
 
     }
         
@@ -228,8 +315,8 @@ public class ItemAdd extends Item {
     	    	+ " , t.channel"
     	    	+ " FROM t_diffusion t"
     	    	+ " , community2collection c2c"
-     	    	+ " WHERE resource_type_id = " + Constants.ITEM
-    	    	+ " AND resource_id = " + item_id
+     	    	+ " WHERE t.resource_type_id = " + Constants.ITEM
+    	    	+ " AND t.resource_id = " + item_id
     	    	+ " AND c2c.collection_id = t.collection_id"    	
     	        + " ORDER BY t.diffusion_datetime";
         	
@@ -260,6 +347,47 @@ public class ItemAdd extends Item {
         	
         }
 
+        public static DiffusionItem findFirstById(Context context, int item_id)
+                throws SQLException
+        {
+        	String myQuery = "SELECT t.diffusion_path, c2c.community_id, t.collection_id, t.resource_id item_id"
+    	    	+ " , to_char(t.event_date,'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') date_event"
+    	    	+ " , to_char(t.diffusion_datetime,'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') date_diffusion"
+    	    	+ " , t.channel"
+    	    	+ " FROM t_diffusion t"
+    	    	+ " , community2collection c2c"
+     	    	+ " WHERE t.resource_type_id = " + Constants.ITEM
+    	    	+ " AND t.resource_id = " + item_id
+       	    	+ " AND t.is_premdiff = 1 "
+    	    	+ " AND c2c.collection_id = t.collection_id"    	
+    	        + " AND rownum = 1"; // to be sure to get only 1 row
+        	
+        	TableRowIterator tri =  null;
+        	DiffusionItem item = null;
+        	
+        	
+        	try {
+				tri =  DatabaseAccess.query(context, myQuery);
+				while (tri.hasNext()) {
+					TableRow row = tri.next();
+					item = new DiffusionItem(
+							row.getStringColumn("diffusion_path")
+							, row.getIntColumn("community_id")
+							, row.getIntColumn("collection_id")
+							, row.getIntColumn("item_id")
+							, row.getStringColumn("date_event")
+							, row.getStringColumn("date_diffusion")
+							, row.getStringColumn("channel")
+							);
+				}
+			} finally {
+				if (tri != null) { tri.close(); }
+			}
+        	
+        	return item;
+        	
+        }
+
         public static DiffusionItem[] findDupById(Context context, int item_id)
                 throws SQLException
         {
@@ -267,16 +395,16 @@ public class ItemAdd extends Item {
     	    	+ " , to_char(t.event_date,'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') date_event"
     	    	+ " , to_char(t.diffusion_dt,'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') date_diffusion"
     	    	+ " , t.min_channel channel"
-    	    	+ " FROM"
-    	    	+ " (SELECT diffusion_path, resource_id, collection_id, event_date"
-    	    	+ "  , min(diffusion_datetime) diffusion_dt"
-    	    	+ "  , sum(is_premdiff) premdiff"
-    	    	+ "  , min(channel) keep (dense_rank first order by diffusion_datetime) min_channel" // TODO compute all channels for this diffusion_path, not only the min
-    	    	+ " FROM t_diffusion"
-    	    	+ " WHERE resource_type_id = " + Constants.ITEM
-    	    	+ " and resource_id = " + item_id
-    	    	+ " AND diffusion_path IS NOT NULL"
-    	    	+ " GROUP BY diffusion_path, resource_id, collection_id, event_date"
+    	    	+ " FROM ("
+    	    	+ "    SELECT diffusion_path, resource_id, collection_id, event_date"
+    	    	+ "     , min(diffusion_datetime) diffusion_dt"
+    	    	+ "     , sum(is_premdiff) premdiff"
+    	    	+ "     , min(channel) keep (dense_rank first order by diffusion_datetime) min_channel" // TODO compute all channels for this diffusion_path, not only the min
+    	    	+ "    FROM t_diffusion"
+    	    	+ "    WHERE resource_type_id = " + Constants.ITEM
+    	    	+ "    and resource_id = " + item_id
+    	    	+ "    AND diffusion_path IS NOT NULL"
+    	    	+ "    GROUP BY diffusion_path, resource_id, collection_id, event_date"
     	    	+ " ) t,"
     	    	+ " community2collection c2c"
     	    	+ " WHERE t.premdiff = 0"

@@ -237,13 +237,18 @@ public class SolrServiceImpl implements SearchService, IndexingService {
                         if (force || requiresIndexing(handle, ((Item) dso).getLastModified()))
                         {
                             unIndexContent(context, handle);
-                            buildDocument(context, (Item) dso);
                             
                             ItemAdd.DiffusionItem[] dItems = ItemAdd.DiffusionItem.findDupById(context, item.getID());
-                            for (int i = 0, len = dItems.length; i < len; i++) {
-                            	ItemAdd.ItemDup itemDup = ItemAdd.duplicate(item, dItems[i]);
-                                buildDocument(context, itemDup); // TODO change dso to an itemDup object
-							}
+                            if (dItems.length == 0) { // there is no dup
+                                buildDocument(context, (Item) dso);                           	
+                            } else {
+                            	ItemAdd.ItemDup defaultItemDup = ItemAdd.duplicate(item, null);
+                                buildDocument(context, defaultItemDup);
+                                for (int i = 0, len = dItems.length; i < len; i++) {
+                                	ItemAdd.ItemDup itemDup = ItemAdd.duplicate(item, dItems[i]);
+                                    buildDocument(context, itemDup);
+    							}
+                            }
 
                         }
                     } else {
@@ -1282,39 +1287,8 @@ public class SolrServiceImpl implements SearchService, IndexingService {
      * @return a list containing the identifiers of the communities & collections
      * @throws SQLException sql exception
      */
-    protected List<String> TODEL_getItemLocations(Item myitem)
-            throws SQLException {
-        List<String> locations = new Vector<String>();
 
-        // build list of community ids
-        Community[] communities = myitem.getCommunities();
-
-        // build list of collection ids
-        Collection[] collections = myitem.getCollections();
-        
-        // Lan 02.12.2015 : add owning_collection and owning_community
-        Collection owningCollection = myitem.getOwningCollection();
-        Community owningCommunity = (Community) owningCollection.getParentObject();
-        locations.add("om" + owningCommunity.getID());
-        locations.add("ol" + owningCollection.getID());
-
-        // now put those into strings
-        int i = 0;
-
-        for (i = 0; i < communities.length; i++)
-        {
-            locations.add("m" + communities[i].getID());
-        }
-
-        for (i = 0; i < collections.length; i++)
-        {
-            locations.add("l" + collections[i].getID());
-        }
-
-        return locations;
-    }
-
-    protected List<String> getItemLocations(Item myitem, Community owningCommunityByRef, Collection owningCollectionByRef)
+    protected List<String> getItemLocations(Item myitem, DSpaceObject[] owningCCByRef)
             throws SQLException {
         List<String> locations = new Vector<String>();
 
@@ -1330,8 +1304,8 @@ public class SolrServiceImpl implements SearchService, IndexingService {
         locations.add("om" + owningCommunity.getID());
         locations.add("ol" + owningCollection.getID());
         // Return owning records by ref
-        owningCommunityByRef = owningCommunity;
-        owningCollectionByRef = owningCollection;
+        owningCCByRef[0] = owningCommunity;
+        owningCCByRef[1] = owningCollection;
 
         // now put those into strings
         int i = 0;
@@ -1820,15 +1794,6 @@ if (false) { // TODO remove this
 
                 for (DiscoverySearchFilter searchFilter : searchFilterConfigs)
                 {
-                	/*
-                	 * Lan 25.07.2016 : value to be indexed might be a regex o the value of the field
-                	 */
-                    if (searchFilter.getFilterType().equals(DiscoverySearchFilterRegex.FILTER_TYPE_REGEX)) {
-                    	for (int i = 0; i < ((DiscoverySearchFilterRegex)searchFilter).getMetadataFields().size() ; i++) {
-                    		log.info("debug 200: regexp=" + ((DiscoverySearchFilterRegex)searchFilter).getMetadataValues().get(i));                    		
-                    	}
-                	}
-                	
                     	
                     String separator = new DSpace().getConfigurationService().getProperty("discovery.solr.facets.split.char");
                     if(separator == null)
@@ -2177,12 +2142,15 @@ if (false) { // TODO : remove this
         // get the location string (for searching by collection & community)
         Community owningCommunity = null;
         Collection owningCollection = null;
-        List<String> locations = getItemLocations(item, owningCommunity, owningCollection);
+    	DSpaceObject dsoArray[] = new DSpaceObject[] { null, null };
+        List<String> locations = getItemLocations(item, dsoArray);
+        owningCommunity = (Community) dsoArray[0];
+        owningCollection = (Collection) dsoArray[1];
 
         SolrInputDocument doc = null;
         if (item instanceof ItemAdd.ItemDup) {
         	doc = buildDocument(Constants.ITEM, item.getID(), ((ItemAdd.ItemDup)item).getSearchUniqueID(), handle, locations);
-            log.debug("Building ItemDup: " + handle + " search.uniqueid:" + ((ItemAdd.ItemDup)item).getSearchUniqueID());
+            log.info("Building ItemDup: " + handle + " search.uniqueid:" + ((ItemAdd.ItemDup)item).getSearchUniqueID());
         } else {
         	doc = buildDocument(Constants.ITEM, item.getID(), handle, locations);
             log.debug("Building Item: " + handle);
@@ -2277,7 +2245,7 @@ if (false) { // TODO : remove this
 
             List<String> toIgnoreMetadataFields = SearchUtils.getIgnoredMetadataFields(item.getType());
             /*
-             * Lan 25.07.2016 : some metedata are catched for full text search, not all of them
+             * Lan 25.07.2016 : some metadata are catched for full text search, not all of them
              */
             List<String> toCatchAllMetadataFields = SearchUtils.getCatchAllMetadataFields(item.getType());
             Metadatum[] mydc = item.getMetadata(Item.ANY, Item.ANY, Item.ANY, Item.ANY);
@@ -2452,19 +2420,18 @@ if (false) { // TODO : remove this
                         /* 
                          * Lan 25.07.2016 : as the consequence of duplicated items in Solr index, 
                          * index only if the value is the title of owningCommunity
-                         */
-                        if (field.equals("dcterms.isPartOf.title") && owningCommunity != null) {
+                        if (field.equals("dcterms.isPartOf.title") && owningCommunity != null) { 
                         	if (! value.equals(owningCommunity.getName())) {
                         		value = null;
                         		continue;
-                        	}                        	
+                        	}
                         }
+                        */
 
                         /* 
                          * Lan 25.07.2016 : as the consequence of duplicated items in Solr index, 
                          * index only if the values are the same as of owningCollection
-                         */
-                        if (field.equals("rtbf.channel_issued") && owningCollection != null) {
+                            if (field.equals("rtbf.channel_issued") && owningCollection != null) {
                         	Metadatum[] channels = owningCollection.getMetadataByMetadataString(field);
                         	int i;
                         	for (i = 0; i < channels.length; i++) {
@@ -2478,6 +2445,7 @@ if (false) { // TODO : remove this
                         		continue;
                         	}                        	
                         }
+                        */
                         
                         doc.addField(searchFilter.getIndexFieldName(), value);
                         doc.addField(searchFilter.getIndexFieldName() + "_keyword", value);

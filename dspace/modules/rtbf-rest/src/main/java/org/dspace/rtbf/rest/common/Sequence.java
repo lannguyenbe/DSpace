@@ -55,11 +55,9 @@ public class Sequence extends RTBObject{
     	case Constants.PLAYLIST_VIEW:
     	case Constants.SEARCH_RESULT_VIEW:
     		this.setDateIssued(getMetadataEntry(Constants.DATE_ISSUED,item));
-    		// set ALL channels issued related to the date issued whatever the owning episode
+    		// set channels issued related to the date issued whatever the owning episode
     		this.setChannelIssued(getMetadataEntries(Constants.CHANNEL_ISSUED,item));
-    		// set channels issued related to the date issued and COHERENT with the owning episode
-    		this.setChannelIssuedList(findChannelsIssued(item));
-        	// this.setCountSupports(getCountAllSupports(item));
+    		// set channels issued related to the diffusion of the owning episode on the date issued
     		this.setChannelIssuedList(findChannelsIssued(item));
     		innerViewType = Constants.MIN_VIEW;
     		break;

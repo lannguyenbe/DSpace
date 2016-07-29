@@ -379,11 +379,11 @@ public class RTBObject {
 	}
 
 	/*
-	 * 07.042016 Lan : this list of channel_issued contains ALL channels issued on the date issued
+	 * 07.042016 Lan : this list of channel_issued contains ALL the channels issued on the date issued
 	 * whatever the owning parent is (eg for a sequence, all the channels issued from every owning episode)
 	 */
 	@JsonIgnore   // ignore on json output
-	@XmlTransient // ignore on xml ourput
+	@XmlTransient // ignore on xml output
 	// @XmlAnyElement
 	public List<MetadataEntry> getChannelIssued() {// not by Jackson, nor by Jaxb
 		return channelIssued;
@@ -400,8 +400,8 @@ public class RTBObject {
 	}
 
 	/*
-	 * 07.042016 Lan : this list of channel_issued contains ALL channels issued on the date issued
-	 * BUT ONLY from diffusion of the owning parent (eg for a sequence, all the channels issued from the owning episode)
+	 * 07.04.2016 Lan : this list of channel_issued contains ALL the channels issued on the date issued
+	 * from diffusions of the OWNING parent ONLY (eg for a sequence, all the channels issued from the owning episode)
 	 */
 	public void setChannelIssuedList(List<String> l) {
 		this.channelIssuedList = l;

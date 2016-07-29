@@ -54,11 +54,10 @@ public class Episode extends RTBObject {
     	switch (viewType) {
     	case Constants.SEARCH_RESULT_VIEW:
     		this.setDateIssued(getMetadataEntry(Constants.DATE_ISSUED,collection));
-    		// set ALL channels issued related to the date issued whatever the owning serie
+    		// set channels issued related to the date issued whatever the owning serie
     		this.setChannelIssued(getMetadataEntries(Constants.CHANNEL_ISSUED,collection));
-    		// set channels issued related to the date issued and COHERENT with the owning episode
+    		// set channels issued related to the diffusion of this episode on the date issued
     		this.setChannelIssuedList(findChannelsIssued(collection));
-            // this.setCountSupports(getCountAllSupports(collection));
             // this.setCountSequences(collection.countItems());
     		innerViewType = Constants.MIN_VIEW;
             break;
