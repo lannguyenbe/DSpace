@@ -61,21 +61,6 @@ public class Sequence extends RTBObject{
     		this.setChannelIssuedList(findChannelsIssued(item));
     		innerViewType = Constants.MIN_VIEW;
     		break;
-    	case Constants.STANDARD_VIEW:
-            // Add linked Documents 
-            // a new search will be performed on solr to retrieve ALL linked documents to this item 
-            // their id,type,handle,title, attributor will be available
-            List<RTBObject> linkedDocuments = new ArrayList<RTBObject>();	                    
-            DiscoverExpandedItems expandedItems = new DiscoverExpandedItems(context, item);
-            List<DiscoverExpandedItems.ExpandedItem> entries = expandedItems.getItems();
-    		for (DiscoverExpandedItems.ExpandedItem entry : entries) {
-    			linkedDocuments.add(new RTBObject(entry));
-    		}
-    		if (linkedDocuments.size() > 0) {
-    			this.setLinkedDocuments(linkedDocuments);
-    		}
-    		innerViewType = Constants.MIN_VIEW;
-    		break;
     	default:
     		innerViewType = viewType;
     	}
@@ -161,6 +146,23 @@ public class Sequence extends RTBObject{
      		this.addExpand("supports");
      	}
 
+        if(expandFields.contains("linkedDocuments") || expandFields.contains("all")) {
+            // Add linked Documents 
+            // a new search will be performed on solr to retrieve ALL linked documents to this item 
+            // their id,type,handle,title,attributor will be available
+            List<RTBObject> linkedDocuments = new ArrayList<RTBObject>();	                    
+            DiscoverExpandedItems expandedItems = new DiscoverExpandedItems(context, item);
+            List<DiscoverExpandedItems.ExpandedItem> entries = expandedItems.getItems();
+    		for (DiscoverExpandedItems.ExpandedItem entry : entries) {
+    			linkedDocuments.add(new RTBObject(entry));
+    		}
+    		
+    		this.setLinkedDocuments(linkedDocuments);
+        
+        } else {
+     		this.addExpand("linkedDocuments");
+     	}
+
         if(!expandFields.contains("all")) {
             this.addExpand("all");
         }
@@ -203,9 +205,6 @@ public class Sequence extends RTBObject{
         		entries.add(new MetadataEntry(Constants.CHANNEL_ISSUED, doc.getSearchFieldValues("dup_channel_issued").get(i), null));
         	}
     		this.setChannelIssued(entries);
-    		innerViewType = Constants.MIN_VIEW;
-    		break;
-    	case Constants.STANDARD_VIEW:
     		innerViewType = Constants.MIN_VIEW;
     		break;
     	default:
