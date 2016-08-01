@@ -26,6 +26,11 @@ public abstract class Support {
     protected String origine;
     protected String category;
     protected String role;
+    protected String sound_format;
+    protected String image_format;
+    protected String image_ratio;
+    protected String image_color;
+    
     
     public Support() {}
     
@@ -48,6 +53,10 @@ public abstract class Support {
     	this.origine = row.getStringColumn("origine");
     	this.category = row.getStringColumn("category");
     	this.role = row.getStringColumn("support_role");
+    	this.sound_format = row.getStringColumn("sound_format");
+    	this.image_format = row.getStringColumn("image_format");
+    	this.image_ratio = row.getStringColumn("image_ratio");
+    	this.image_color = row.getStringColumn("image_color");
     }
 
     public String getCode_origine() {
@@ -104,6 +113,22 @@ public abstract class Support {
 
 	public String getRole() {
 		return role;
+	}
+
+	public String getSound_format() {
+		return sound_format;
+	}
+
+	public String getImage_format() {
+		return image_format;
+	}
+
+	public String getImage_ratio() {
+		return image_ratio;
+	}
+
+	public String getImage_color() {
+		return image_color;
 	}
 
 }

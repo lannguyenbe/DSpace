@@ -195,6 +195,10 @@ public class CollectionAdd extends Collection {
     				+ " , t.origine"
     				+ " , t.category"
     				+ " , t.support_role"
+    				+ " , t.sound_format"
+    				+ " , t.image_format"
+    				+ " , t.image_ratio"
+    				+ " , t.image_color"
     				+ " FROM t_support2resource t"
     				+ " WHERE resource_type_id = " + Constants.COLLECTION
     				+ " AND resource_id = " + collection_id

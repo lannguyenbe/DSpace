@@ -66,6 +66,10 @@ public class RTBObjectParts {
 		    private String origine;
 		    private String category;
 		    private String role;
+		    private String sound_format;
+		    private String image_format;
+		    private String image_ratio;
+		    private String image_color;
 		    
 		    public Support() {}
 		    
@@ -83,6 +87,10 @@ public class RTBObjectParts {
 		    	this.origine = support.getOrigine();
 		    	this.category = support.getCategory();
 		    	this.role = support.getRole();
+		    	this.sound_format = support.getSound_format();
+		    	this.image_format  = support.getImage_format();
+		    	this.image_ratio = support.getImage_ratio();
+		    	this.image_color = support.getImage_color();
 		    }
 
 			public String getCode_origine() {
@@ -187,6 +195,38 @@ public class RTBObjectParts {
 
 			public void setRole(String role) {
 				this.role = role;
+			}
+
+			public String getSound_format() {
+				return sound_format;
+			}
+
+			public String getImage_format() {
+				return image_format;
+			}
+
+			public String getImage_ratio() {
+				return image_ratio;
+			}
+
+			public String getImage_color() {
+				return image_color;
+			}
+
+			public void setSound_format(String sound_format) {
+				this.sound_format = sound_format;
+			}
+
+			public void setImage_format(String image_format) {
+				this.image_format = image_format;
+			}
+
+			public void setImage_ratio(String image_ratio) {
+				this.image_ratio = image_ratio;
+			}
+
+			public void setImage_color(String image_color) {
+				this.image_color = image_color;
 			}
 
 		}
