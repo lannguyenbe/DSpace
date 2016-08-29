@@ -63,10 +63,11 @@ public class RTBObject {
     // Specialized elements
     @JsonProperty("dc.date.issued")
     private MetadataEntry dateIssued;
+    @JsonIgnore
+    private List<MetadataEntry> channelIssued; // this channel issued list is the same whatever the owning parent -- is not serialized
     @JsonProperty("rtbf.channel_issued")
-    private List<MetadataEntry> channelIssued; // TODO after REIMPORT : this channel_issued should be used in place of channelIssuedList
-    @JsonProperty("channel_issued")
-    private List<String> channelIssuedList; // channel issued get from t_diffusion in waiting for REIMPORT
+    private List<String> channelIssuedList; // this channel issued list is got from t_diffusion, depends on owning parent       
+
 	//
     // Calculated elements
     protected Integer countSubSeries;
@@ -399,8 +400,8 @@ public class RTBObject {
 	}
 
 	/*
-	 * 07.04.2016 Lan : this list of channel_issued contains ALL the channels issued on the date issued
-	 * from diffusions of the OWNING parent ONLY (eg for a sequence, all the channels issued from the owning episode)
+	 * 07.04.2016 Lan : this list of channel_issued contains the channels issued on the date issued
+	 * of the OWNING parent ONLY (eg for a sequence, all the channels issued from the date issued of the owning episode)
 	 */
 	public void setChannelIssuedList(List<String> l) {
 		this.channelIssuedList = l;
